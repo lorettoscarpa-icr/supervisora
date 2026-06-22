@@ -516,7 +516,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 <div class="tab-content active" id="tab-hoje">
   <div class="hoje-cap">
     <div class="hoje-cap-data">Bom dia, Jhennifer!</div>
-    <div class="hoje-cap-status">Quarta, 14 de Junho de 2026 · <b class="warn">2 coisas pra você olhar hoje</b></div>
+    <div class="hoje-cap-status" id="hoje-status">Quarta, 14 de Junho de 2026 · <b class="warn">2 coisas pra você olhar hoje</b></div>
   </div>
 
   <div class="hoje-grid">
@@ -539,7 +539,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
       </div>
     </div>
 
-    <div class="hoje-card">
+    <div class="hoje-card" id="card-aniv">
       <div class="hoje-card-tit">Aniversariantes <b>de Junho</b></div>
       <div class="hoje-subgrupo">Aniversário</div>
       <div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="Michelly">M</span>Michelly</span><span class="r">🎂 16/06 · dom</span></div>
@@ -561,12 +561,14 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
     <div class="hoje-card">
       <div class="hoje-card-tit">Resumo Vendas <b>do mês</b></div>
       <div class="hoje-subgrupo">Metas por categoria · projeção fim</div>
+      <div id="resumo-cats">
       <div class="hoje-linha"><span class="l">Sapatos · 61%</span><span class="r alerta">→ 92%</span></div>
       <div class="hoje-linha"><span class="l">Meias · 52%</span><span class="r alerta">→ 78%</span></div>
       <div class="hoje-linha"><span class="l">Cintos · 73%</span><span class="r ok">→ 110%</span></div>
       <div class="hoje-linha"><span class="l">Carteiras · 70%</span><span class="r ok">→ 105%</span></div>
       <div class="hoje-linha"><span class="l">Prendedor · 41%</span><span class="r alerta">→ 62%</span></div>
       <div class="hoje-linha"><span class="l">Limpeza · 27%</span><span class="r alerta">→ 41%</span></div>
+      </div>
       <div class="hoje-subgrupo">Destaques do mês</div>
       <div class="hoje-linha"><span class="l">🧩 Líder Mix Acessórios</span><span class="r">Michelly</span></div>
       <div class="hoje-linha"><span class="l">🎯 Maior Conversão de Mix</span><span class="r">Ialey · 68%</span></div>
@@ -997,8 +999,8 @@ function cobrir(sel,alvoId){
 
   <div class="rh-sec active" id="rh-calendario">
     <div class="cal">
-      <div class="cal-header"><div class="cal-mes">Junho 2026</div><div style="font-size:10px;color:var(--cr3);">🎂 Aniv · 🏖 Folga · 🌴 Férias · 📅 Reunião</div></div>
-      <div class="cal-grid">
+      <div class="cal-header"><div class="cal-mes" id="cal-mes-rh">Junho 2026</div><div style="font-size:10px;color:var(--cr3);">🎂 Aniv · 🏖 Folga · 🌴 Férias · 📅 Reunião</div></div>
+      <div class="cal-grid" id="cal-grid-rh">
         <div class="cal-wd">Dom</div><div class="cal-wd">Seg</div><div class="cal-wd">Ter</div><div class="cal-wd">Qua</div><div class="cal-wd">Qui</div><div class="cal-wd">Sex</div><div class="cal-wd">Sáb</div>
         <div class="cal-dia fim"></div><div class="cal-dia"><div class="cal-dia-n">1</div></div><div class="cal-dia"><div class="cal-dia-n">2</div></div><div class="cal-dia"><div class="cal-dia-n">3</div></div><div class="cal-dia"><div class="cal-dia-n">4</div></div><div class="cal-dia"><div class="cal-dia-n">5</div></div><div class="cal-dia"><div class="cal-dia-n">6</div></div>
         <div class="cal-dia"><div class="cal-dia-n">7</div></div><div class="cal-dia"><div class="cal-dia-n">8</div></div><div class="cal-dia"><div class="cal-dia-n">9</div></div><div class="cal-dia"><div class="cal-dia-n">10</div></div><div class="cal-dia"><div class="cal-dia-n">11</div></div><div class="cal-dia"><div class="cal-dia-n">12</div></div><div class="cal-dia"><div class="cal-dia-n">13</div></div>
@@ -1821,6 +1823,20 @@ const CATS = [
 const VENDS = ['Jhennifer','Ialey','Michelly','Natália'];
 // funcId → nome (ordem do seed de funcionarios no painel de RH; uid começa em 1)
 const FUNC_MAP = {id1:'Yuri',id2:'Edson',id3:'Ialey',id4:'Jhennifer',id5:'Michelly',id6:'Natália',id7:'Gustavo',id8:'Lorrayne'};
+// nascimento/admissão reais (lista de funcionários do RH) — aniversários e tempo de casa
+const EQUIPE_INFO = {
+  Yuri:     {nasc:'1997-10-25', adm:'2024-02-01'},
+  Edson:    {nasc:'2004-11-10', adm:'2024-07-18'},
+  Ialey:    {nasc:'1999-03-21', adm:'2023-08-03'},
+  Jhennifer:{nasc:'1995-09-20', adm:'2022-07-08'},
+  Michelly: {nasc:'1998-04-27', adm:'2025-07-02'},
+  Natália:  {nasc:'1997-11-11', adm:'2026-04-08'},
+  Gustavo:  {nasc:'1996-10-01', adm:'2026-03-06'},
+  Lorrayne: {nasc:'1997-06-14', adm:'2024-02-01'}
+};
+window._hoje = {cats:null, aus:null};
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DIAS_SEMANA = ['dom','seg','ter','qua','qui','sex','sáb'];
 const keyMes  = (a,m)   => a+'_'+String(m).padStart(2,'0');
 const keyHist = (v,a,m) => v+'_'+keyMes(a,m);
 function diasUteis(ano,mes,ate){ let n=0; const lim=ate||new Date(ano,mes,0).getDate();
@@ -1851,6 +1867,13 @@ async function carregarDadosReais(){
 
     if(metas) renderMetasCategoria(total,metas,decorridos,restantes,totalDU);
     renderPainelVendedora(cur,base,restantes);
+    if(metas){
+      renderResumoVendas(total,metas,decorridos,totalDU);
+      let atras=0; CATS.forEach(c=>{const m=Number(metas[c.id]||0); if((total[c.id]||0) < m*(decorridos/totalDU)) atras++;});
+      window._hoje.cats=atras;
+    }
+    renderAniversarios();
+    atualizarStatusHoje();
     if(typeof aplicarFotos==='function') aplicarFotos();
   }catch(e){ console.warn('carregarDadosReais',e); }
 }
@@ -1921,6 +1944,9 @@ async function carregarPresenca(){
       .filter(l=>l.inicio&&l.fim&&l.inicio<=hoje&&hoje<=l.fim)
       .map(l=>({nome:FUNC_MAP[l.funcId]||'?',mot:motivoDe(l.tipo),ate:l.fim}));
     renderPresenca(ausentes);
+    renderCalendario(items);
+    window._hoje.aus=ausentes.length;
+    atualizarStatusHoje();
     if(typeof aplicarFotos==='function') aplicarFotos();
   }catch(e){ console.warn('carregarPresenca',e); }
 }
@@ -1963,6 +1989,72 @@ function renderPresenca(ausentes){
       }).join('');
     }
   }
+}
+function renderAniversarios(){
+  const el=document.getElementById('card-aniv'); if(!el)return;
+  const d=new Date(), mes=d.getMonth()+1, ano=d.getFullYear();
+  const nomes=Object.keys(EQUIPE_INFO);
+  const anivs=nomes.filter(n=>+EQUIPE_INFO[n].nasc.slice(5,7)===mes)
+    .sort((a,b)=>+EQUIPE_INFO[a].nasc.slice(8,10)-+EQUIPE_INFO[b].nasc.slice(8,10));
+  const casa=nomes.filter(n=>+EQUIPE_INFO[n].adm.slice(5,7)===mes)
+    .map(n=>({n,anos:ano-(+EQUIPE_INFO[n].adm.slice(0,4)),dia:+EQUIPE_INFO[n].adm.slice(8,10)}))
+    .filter(x=>x.anos>0).sort((a,b)=>a.dia-b.dia);
+  const lAniv=n=>{const dd=EQUIPE_INFO[n].nasc.slice(8,10),wd=new Date(ano,mes-1,+dd).getDay();
+    return '<div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="'+n+'">'+n[0]+'</span>'+n+'</span><span class="r">🎂 '+dd+'/'+String(mes).padStart(2,'0')+' · '+DIAS_SEMANA[wd]+'</span></div>';};
+  const lCasa=x=>'<div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="'+x.n+'">'+x.n[0]+'</span>'+x.n+'</span><span class="r ok">🎉 '+x.anos+(x.anos>1?' anos':' ano')+'</span></div>';
+  const vazio=t=>'<div class="hoje-linha"><span class="l" style="color:var(--cr3);font-style:italic">'+t+'</span></div>';
+  el.innerHTML='<div class="hoje-card-tit">Aniversariantes <b>de '+MESES[mes-1]+'</b></div>'
+    +'<div class="hoje-subgrupo">Aniversário</div>'+(anivs.length?anivs.map(lAniv).join(''):vazio('Ninguém este mês'))
+    +'<div class="hoje-subgrupo">Tempo de casa</div>'+(casa.length?casa.map(lCasa).join(''):vazio('Nenhum aniversário de casa este mês'));
+}
+
+function renderResumoVendas(total,metas,decorridos,totalDU){
+  const el=document.getElementById('resumo-cats'); if(!el)return;
+  el.innerHTML=CATS.map(c=>{
+    const v=total[c.id]||0, m=Number(metas[c.id]||0);
+    const pct=m?Math.round(v/m*100):0;
+    const proj=(m&&decorridos)?Math.round((v/decorridos*totalDU)/m*100):pct;
+    return '<div class="hoje-linha"><span class="l">'+c.nome+' · '+pct+'%</span><span class="r '+(proj>=100?'ok':'alerta')+'">→ '+proj+'%</span></div>';
+  }).join('');
+}
+
+function atualizarStatusHoje(){
+  const el=document.getElementById('hoje-status'); if(!el)return;
+  const d=new Date();
+  const dias=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const data=dias[d.getDay()]+', '+d.getDate()+' de '+MESES[d.getMonth()]+' de '+d.getFullYear();
+  const c=(window._hoje.cats||0)+(window._hoje.aus||0);
+  el.innerHTML=data+' · <b class="warn">'+(c?c+(c>1?' coisas':' coisa')+' pra você olhar hoje':'tudo tranquilo por aqui')+'</b>';
+}
+
+function renderCalendario(items){
+  const grid=document.getElementById('cal-grid-rh'); if(!grid)return;
+  const d=new Date(), ano=d.getFullYear(), mes=d.getMonth()+1, hoje=d.getDate();
+  const mesEl=document.getElementById('cal-mes-rh'); if(mesEl)mesEl.textContent=MESES[mes-1]+' '+ano;
+  const totalDias=new Date(ano,mes,0).getDate();
+  const evt={};
+  const add=(dia,cls,txt)=>{ if(dia>=1&&dia<=totalDias){(evt[dia]=evt[dia]||[]).push({cls,txt});} };
+  Object.keys(EQUIPE_INFO).forEach(n=>{const nn=EQUIPE_INFO[n].nasc; if(+nn.slice(5,7)===mes) add(+nn.slice(8,10),'ani','🎂 '+n);});
+  (items||[]).forEach(l=>{
+    const nome=FUNC_MAP[l.funcId]||'?', mot=motivoDe(l.tipo);
+    const cls=mot.cls==='atestado'?'reun':mot.cls;
+    const ic=mot.cls==='ferias'?'🌴':mot.cls==='atestado'?'🩺':'🏖';
+    const ini=l.inicio||'', fim=l.fim||ini;
+    for(let day=1; day<=totalDias; day++){
+      const iso=ano+'-'+String(mes).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+      if(ini<=iso && iso<=fim) add(day,cls,ic+' '+nome);
+    }
+  });
+  const wds=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  let html=wds.map(w=>'<div class="cal-wd">'+w+'</div>').join('');
+  const primeiroWd=new Date(ano,mes-1,1).getDay();
+  for(let i=0;i<primeiroWd;i++) html+='<div class="cal-dia fim"></div>';
+  for(let day=1; day<=totalDias; day++){
+    const wd=new Date(ano,mes-1,day).getDay(), fim=(wd===0||wd===6), tod=(day===hoje);
+    const evts=(evt[day]||[]).map(e=>'<div class="cal-evt '+e.cls+'">'+e.txt+'</div>').join('');
+    html+='<div class="cal-dia'+(fim?' fim':'')+(tod?' today':'')+'"><div class="cal-dia-n">'+day+'</div>'+evts+'</div>';
+  }
+  grid.innerHTML=html;
 }
 /* ==================== fim DADOS REAIS ==================== */
 
