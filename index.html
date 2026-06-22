@@ -520,9 +520,10 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
   </div>
 
   <div class="hoje-grid">
-    <div class="hoje-card">
+    <div class="hoje-card" id="card-loja">
       <div class="hoje-card-tit">Quem está na loja <b>Hoje</b></div>
       <div class="hoje-subgrupo">Vendedoras</div>
+      <div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="Jhennifer">J</span>Jhennifer <small style="color:var(--cr3)">· gerente</small></span><span class="r presente">Presente</span></div>
       <div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="Ialey">I</span>Ialey</span><span class="r presente">Presente</span></div>
       <div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="Michelly">M</span>Michelly</span><span class="r presente">Presente</span></div>
       <div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="Natália">N</span>Natália</span><span class="r ferias">Férias · volta 17/06</span></div>
@@ -563,6 +564,8 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
       <div class="hoje-linha"><span class="l">Sapatos · 61%</span><span class="r alerta">→ 92%</span></div>
       <div class="hoje-linha"><span class="l">Meias · 52%</span><span class="r alerta">→ 78%</span></div>
       <div class="hoje-linha"><span class="l">Cintos · 73%</span><span class="r ok">→ 110%</span></div>
+      <div class="hoje-linha"><span class="l">Carteiras · 70%</span><span class="r ok">→ 105%</span></div>
+      <div class="hoje-linha"><span class="l">Prendedor · 41%</span><span class="r alerta">→ 62%</span></div>
       <div class="hoje-linha"><span class="l">Limpeza · 27%</span><span class="r alerta">→ 41%</span></div>
       <div class="hoje-subgrupo">Destaques do mês</div>
       <div class="hoje-linha"><span class="l">🧩 Líder Mix Acessórios</span><span class="r">Michelly</span></div>
@@ -583,7 +586,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
     <div class="acoes-tit">⚠ 3 ações sugeridas pra você hoje</div>
     <div class="acao-item" style="border-left-color:var(--ou);background:linear-gradient(90deg,rgba(212,180,90,.08),var(--bg2) 30%);">
       <div class="acao-texto">🌴 <b class="nome-clic" onclick="abrirFicha('Natália')">Natália</b> está de férias até 17/06 — repassar o atendimento e os clientes dela para outra vendedora</div>
-      <button class="acao-btn">Distribuir funções</button>
+      <button class="acao-btn" onclick="document.getElementById('cob-grid').scrollIntoView({behavior:'smooth',block:'center'})">Distribuir funções</button>
     </div>
     <div class="acao-item">
       <div class="acao-texto"><b class="nome-clic" onclick="abrirFicha('Edson')">Edson</b> tem 1 envio atrasado há 3 dias (Pedido #4521 · Recife)</div>
@@ -594,7 +597,55 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
       <button class="acao-btn">Organizar</button>
     </div>
   </div>
+
+  <style>
+  .cob-sec{margin-top:8px;}
+  .cob-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:12px;}
+  .cob-card{border:1px solid var(--oud);background:rgba(255,255,255,.025);padding:16px 18px;}
+  .cob-head{display:flex;align-items:center;gap:11px;margin-bottom:12px;}
+  .cob-nome{font-size:13px;font-weight:600;color:var(--cr);}
+  .cob-motivo{font-size:10px;letter-spacing:.5px;text-transform:uppercase;}
+  .cob-motivo.ferias{color:#5aa9d4;}.cob-motivo.folga{color:var(--ou);}.cob-motivo.atestado{color:var(--er);}
+  .cob-linha{font-size:12px;color:var(--cr2);margin-bottom:8px;}
+  .cob-assign{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--cr3);font-size:13px;}
+  .cob-sel{flex:1;background:var(--v1);border:1px solid var(--oud);color:var(--cr);font-family:inherit;font-size:12px;padding:7px 10px;cursor:pointer;}
+  .cob-status{font-size:12px;padding:8px 12px;border:1px solid var(--oud2);background:var(--oud2);}
+  .cob-status.ok{color:var(--ou);border-color:var(--oud);}
+  .cob-status.pend{color:var(--cr3);}
+  </style>
+  <div class="cob-sec">
+    <div class="slbl">Cobertura de Ausências</div>
+    <div class="mc-cap">Quem está fora e quem assume o <b>celular de vendas</b> + as <b>funções</b> · vale pra folga, férias ou atestado</div>
+    <div class="cob-grid" id="cob-grid">
+      <div class="cob-card">
+        <div class="cob-head"><span class="mini-av" data-foto="Natália">N</span><div><div class="cob-nome">Natália</div><div class="cob-motivo ferias">Férias · volta 17/06</div></div></div>
+        <div class="cob-linha">📱 Celular de vendas + funções da Natália</div>
+        <div class="cob-assign">Assume →
+          <select class="cob-sel" onchange="cobrir(this,'cob-st-natalia')">
+            <option value="">escolher quem cobre…</option>
+            <option value="Ialey" selected>Ialey · vendedora</option>
+            <option value="Michelly">Michelly · vendedora</option>
+            <option value="Jhennifer">Jhennifer · gerente</option>
+            <option value="Yuri">Yuri · operação</option>
+            <option value="Gustavo">Gustavo · operação</option>
+          </select>
+        </div>
+        <div class="cob-status ok" id="cob-st-natalia">📱 Celular + funções com <b>Ialey</b></div>
+      </div>
+    </div>
+    <button class="mural-novo-btn" style="width:auto;margin-top:2px;" onclick="alert('Em breve: registrar nova ausência (folga, férias ou atestado) e definir a cobertura. Vai ler o status do time direto do Firebase.')">+ Registrar ausência</button>
+  </div>
 </div>
+
+<script>
+function cobrir(sel,alvoId){
+  const el=document.getElementById(alvoId);if(!el)return;
+  const v=sel.value;
+  if(!v){el.className='cob-status pend';el.textContent='Sem cobertura definida ainda';return;}
+  el.className='cob-status ok';
+  el.innerHTML='📱 Celular + funções com <b>'+v+'</b>';
+}
+</script>
 
 <!-- VENDAS -->
 <div class="tab-content" id="tab-vendas">
@@ -608,7 +659,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
   <div class="vendas-sec active" id="vendas-geral">
     <div class="slbl">Metas por Categoria · Equipe</div>
     <div class="mc-cap">Faltam <b>8 dias úteis</b> em Junho · quanto cada categoria precisa vender <b>por dia</b> pra bater 100% da meta</div>
-    <div class="mc-grid">
+    <div class="mc-grid" id="mc-equipe">
       <div class="mc-card atras">
         <div class="mc-head"><span class="mc-cat">Sapatos</span><span class="mc-selo atras">⚠ Atrás</span></div>
         <div class="mc-sub"><b>580</b> de 950</div>
@@ -653,11 +704,64 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
           <div><div class="mc-foot-lbl">Ritmo atual</div><div class="mc-foot-val">2/d</div></div>
         </div>
       </div>
+      <div class="mc-card noritmo">
+        <div class="mc-head"><span class="mc-cat">Carteiras</span><span class="mc-selo noritmo">✓ No ritmo</span></div>
+        <div class="mc-sub"><b>84</b> de 120</div>
+        <div class="mc-bar"><div class="mc-bar-f" style="width:70%"></div></div>
+        <div class="mc-pct">70<small>%</small></div>
+        <div class="mc-foot">
+          <div><div class="mc-foot-lbl">Falta</div><div class="mc-foot-val">36</div></div>
+          <div><div class="mc-foot-lbl">Precisa/dia</div><div class="mc-foot-val nec">5</div></div>
+          <div><div class="mc-foot-lbl">Ritmo atual</div><div class="mc-foot-val">6/d</div></div>
+        </div>
+      </div>
+      <div class="mc-card atras">
+        <div class="mc-head"><span class="mc-cat">Prendedor</span><span class="mc-selo atras">⚠ Atrás</span></div>
+        <div class="mc-sub"><b>58</b> de 140</div>
+        <div class="mc-bar"><div class="mc-bar-f" style="width:41%"></div></div>
+        <div class="mc-pct">41<small>%</small></div>
+        <div class="mc-foot">
+          <div><div class="mc-foot-lbl">Falta</div><div class="mc-foot-val">82</div></div>
+          <div><div class="mc-foot-lbl">Precisa/dia</div><div class="mc-foot-val nec">11</div></div>
+          <div><div class="mc-foot-lbl">Ritmo atual</div><div class="mc-foot-val">5/d</div></div>
+        </div>
+      </div>
     </div>
 
     <div class="slbl">Painel por Vendedora</div>
     <div class="mc-cap">Meta = o mínimo pra cada uma <b>superar seu Junho de 2025</b> · faltam 8 dias úteis</div>
-    <div class="pv-grid">
+    <div class="pv-grid" id="pv-equipe">
+      <div class="pv-card">
+        <div class="pv-card-header"><div class="pv-foto" data-foto="Jhennifer">J</div><div><div class="pv-nome">Jhennifer <small style="color:var(--cr3);font-weight:400">· gerente · vende no salão</small></div><div class="pv-status"><span class="dot ok"></span>Em dia · hoje</div></div></div>
+        <div class="mi">
+          <div class="mi-cat">
+            <div class="mi-cat-nome">Sapatos</div>
+            <div class="mi-vm"><span>Atual <b>112</b></span><span class="seta">→</span><span class="meta">Meta <b>150</b></span></div>
+            <div class="pv-bar"><div class="pv-bar-f" style="width:75%"></div></div>
+            <div class="mi-line"><span class="mi-pct">75%</span><span class="mi-falta">Faltam +38</span></div>
+            <div class="mi-foot"><span>Precisa <b>4.8</b>/dia</span><span class="mi-selo ok">No ritmo</span></div>
+          </div>
+          <div class="mi-cat">
+            <div class="mi-cat-nome">Meias</div>
+            <div class="mi-vm"><span>Atual <b>64</b></span><span class="seta">→</span><span class="meta">Meta <b>80</b></span></div>
+            <div class="pv-bar"><div class="pv-bar-f" style="width:80%"></div></div>
+            <div class="mi-line"><span class="mi-pct">80%</span><span class="mi-falta">Faltam +16</span></div>
+            <div class="mi-foot"><span>Precisa <b>2.0</b>/dia</span><span class="mi-selo ok">No ritmo</span></div>
+          </div>
+          <div class="mi-cat">
+            <div class="mi-cat-nome">Cintos</div>
+            <div class="mi-vm"><span>Atual <b>41</b></span><span class="seta">→</span><span class="meta">Meta <b>40</b></span></div>
+            <div class="pv-bar"><div class="pv-bar-f" style="width:100%"></div></div>
+            <div class="mi-line"><span class="mi-pct">103%</span><span class="mi-falta sup">✓ Superou 2025</span></div>
+            <div class="mi-foot"><span>+1 acima de 2025</span><span class="mi-selo ok">No ritmo</span></div>
+          </div>
+          <div class="mi-cat sembase">
+            <div class="mi-cat-nome">Limpeza</div>
+            <div class="mi-vm"><span>Atual <b>9</b></span></div>
+            <div class="mi-sembase">sem base 2025</div>
+          </div>
+        </div>
+      </div>
       <div class="pv-card">
         <div class="pv-card-header"><div class="pv-foto" data-foto="Ialey">I</div><div><div class="pv-nome">Ialey</div><div class="pv-status"><span class="dot ok"></span>Em dia · hoje, 14h</div></div></div>
         <div class="mi">
@@ -960,6 +1064,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
       <div class="av-mensal-sub">Avalie cada colaborador no fechamento do mês · 1 a 5 estrelas por categoria + observação livre</div>
       <div class="av-grupo-lbl">Vendedoras</div>
       <div class="av-pessoa-list">
+        <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Jhennifer">J</div><div class="av-pess-info"><div class="av-pess-nome">Jhennifer <small style="color:var(--cr3)">· gerente</small></div><div class="av-pess-stt pend">Auto + diretoria</div></div><button class="av-pess-btn">Avaliar</button></div>
         <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Ialey">I</div><div class="av-pess-info"><div class="av-pess-nome">Ialey</div><div class="av-pess-stt feita">✓ Avaliação feita</div></div><button class="av-pess-btn">Ver</button></div>
         <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Michelly">M</div><div class="av-pess-info"><div class="av-pess-nome">Michelly</div><div class="av-pess-stt">Aguardando</div></div><button class="av-pess-btn">Avaliar</button></div>
         <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Natália">N</div><div class="av-pess-info"><div class="av-pess-nome">Natália</div><div class="av-pess-stt">Aguardando</div></div><button class="av-pess-btn">Avaliar</button></div>
@@ -1016,6 +1121,21 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 
 <!-- TAREFAS -->
 <div class="tab-content" id="tab-tarefas">
+  <div class="slbl">Tarefas Fixas da Semana</div>
+  <div class="mc-cap">Rotina da gerência · se repetem toda semana, sem precisar recriar</div>
+  <div class="tarefa-list" style="margin-bottom:22px;">
+    <div class="tarefa-item pend">
+      <div class="tarefa-check"></div>
+      <div class="tarefa-texto">📦 Pedido de reposição semanal<small>Toda segunda-feira · fixo</small></div>
+      <div class="tarefa-prazo">Seg</div>
+    </div>
+    <div class="tarefa-item pend">
+      <div class="tarefa-check"></div>
+      <div class="tarefa-texto">📅 Atualização de metas semanal<small>Toda terça-feira · reunião de equipe · fixo</small></div>
+      <div class="tarefa-prazo">Ter</div>
+    </div>
+  </div>
+
   <div class="slbl">Tarefas Delegadas</div>
   <button class="mural-novo-btn" style="width:auto;margin-bottom:14px;">+ Nova Tarefa</button>
   <div class="tarefa-list">
@@ -1137,7 +1257,7 @@ const PESSOAS = {
   'Ialey':    {ini:'I', funcao:'Vendedora',   aniv:'22/09', admissao:'03/2023', status:'ok',   statusTxt:'Em dia · hoje 14h', sapatos:138, metaSap:195, conv:0.68, mix:'2º',  maiorV:3120, atrasos:0, oc_at:0, oc_el:1, av:[4,5,4]},
   'Michelly': {ini:'M', funcao:'Vendedora',   aniv:'16/06', admissao:'08/2024', status:'ok',   statusTxt:'Em dia · ontem 18h', sapatos:168, metaSap:240, conv:0.56, mix:'1º',  maiorV:4280, atrasos:1, oc_at:0, oc_el:1, av:[5,5,5]},
   'Natália':  {ini:'N', funcao:'Vendedora',   aniv:'11/03', admissao:'11/2024', status:'bad',  statusTxt:'Atrasada · 2 dias',   sapatos:95,  metaSap:165, conv:0.42, mix:'3º',  maiorV:2650, atrasos:2, oc_at:2, oc_el:0, av:[3,3,2]},
-  'Jhennifer':{ini:'J', funcao:'Gerente',     aniv:'04/11', admissao:'01/2022', status:'ok',   statusTxt:'Em dia',              sapatos:null,metaSap:null,conv:null, mix:null,  maiorV:null, atrasos:0, oc_at:0, oc_el:0, av:[5,5,5]},
+  'Jhennifer':{ini:'J', funcao:'Gerente',     aniv:'04/11', admissao:'01/2022', status:'ok',   statusTxt:'Em dia · vende no salão', sapatos:112, metaSap:150, conv:0.71, mix:'1º',  maiorV:3890, atrasos:0, oc_at:0, oc_el:1, av:[5,5,5]},
   'Edson':    {ini:'E', funcao:'E-commerce',  aniv:'28/06', admissao:'06/2024', status:'warn', statusTxt:'1 envio atrasado',    sapatos:null,metaSap:null,conv:null, mix:null,  maiorV:null, atrasos:0, oc_at:1, oc_el:0, av:[4,3,3]},
   'Yuri':     {ini:'Y', funcao:'Estoquista',  aniv:'19/01', admissao:'04/2024', status:'warn', statusTxt:'2 tarefas atrasadas', sapatos:null,metaSap:null,conv:null, mix:null,  maiorV:null, atrasos:0, oc_at:0, oc_el:0, av:[4,4,4]},
   'Gustavo':  {ini:'G', funcao:'Entregador',  aniv:'07/05', admissao:'02/2025', status:'ok',   statusTxt:'Em rota',             sapatos:null,metaSap:null,conv:null, mix:null,  maiorV:null, atrasos:0, oc_at:0, oc_el:0, av:[5,4,5]}
@@ -1636,9 +1756,8 @@ try{
 const GESTOR_EMAIL  = 'lorettoscarpa@gmail.com';
 const GERENTE_EMAIL = 'jhenniferlorettoscarpa@gmail.com';
 const ACESSO = [GESTOR_EMAIL, GERENTE_EMAIL];
-// Enquanto os dados são mock, deixamos o modo demo aberto. Quando ligar o
-// Firestore de verdade, trocar para true: aí exige login pela Central.
-const EXIGIR_LOGIN = false;
+// Produção: exige login pela Central; sem login, redireciona. Dados vêm do Firestore.
+const EXIGIR_LOGIN = true;
 
 if(AUTH){
   AUTH.onAuthStateChanged(function(user){
@@ -1651,7 +1770,8 @@ if(AUTH){
     SESSION = user;
     ROLE = (email === GESTOR_EMAIL) ? 'gestor' : 'gerente';
     aplicarSessao(ROLE);
-    // TODO: carregarDadosReais() — quando os collections do Firestore estiverem definidos
+    carregarDadosReais();
+    carregarPresenca();
   });
 }
 
@@ -1684,6 +1804,168 @@ function aplicarFotos(){
     el.innerHTML='<img src="'+f+'" alt="">';
   });
 }
+
+/* ====================== DADOS REAIS (Firestore) ======================
+   Vendas: ls_metas (meta do mês) + ls_historico (vendido por vendedora).
+   Base "superar 2025": ls_historico do mesmo mês do ano anterior.
+   RH:    lancamentos/_data {items:[{funcId,tipo,inicio,fim}]} → presença/cobertura.
+   Se o Firestore estiver vazio/indisponível, mantém os dados de exemplo. */
+const CATS = [
+  {id:'sapatos',  nome:'Sapatos'},
+  {id:'meias',    nome:'Meias'},
+  {id:'cintos',   nome:'Cintos'},
+  {id:'carteiras',nome:'Carteiras'},
+  {id:'prendedor',nome:'Prendedor'},
+  {id:'limpeza',  nome:'Limpeza'}
+];
+const VENDS = ['Jhennifer','Ialey','Michelly','Natália'];
+// funcId → nome (ordem do seed de funcionarios no painel de RH; uid começa em 1)
+const FUNC_MAP = {id1:'Yuri',id2:'Edson',id3:'Ialey',id4:'Jhennifer',id5:'Michelly',id6:'Natália',id7:'Gustavo',id8:'Lorrayne'};
+const keyMes  = (a,m)   => a+'_'+String(m).padStart(2,'0');
+const keyHist = (v,a,m) => v+'_'+keyMes(a,m);
+function diasUteis(ano,mes,ate){ let n=0; const lim=ate||new Date(ano,mes,0).getDate();
+  for(let d=1;d<=lim;d++){const wd=new Date(ano,mes-1,d).getDay(); if(wd>=1&&wd<=5)n++;} return n; }
+function fmtData(iso){const p=(iso||'').split('-'); return p.length===3?p[2]+'/'+p[1]:iso;}
+
+async function carregarDadosReais(){
+  if(!DB) return;
+  try{
+    const d=new Date(), ano=d.getFullYear(), mes=d.getMonth()+1, dia=d.getDate();
+    const totalDU=diasUteis(ano,mes), decorridos=diasUteis(ano,mes,dia);
+    const restantes=Math.max(totalDU-decorridos,0)||1;
+
+    const md=await DB.collection('ls_metas').doc(keyMes(ano,mes)).get();
+    const metas=md.exists?(md.data().metas||{}):null;
+
+    const cur={}, base={}, total={}; CATS.forEach(c=>total[c.id]=0);
+    await Promise.all(VENDS.map(async v=>{
+      const [h26,h25]=await Promise.all([
+        DB.collection('ls_historico').doc(keyHist(v,ano,mes)).get(),
+        DB.collection('ls_historico').doc(keyHist(v,ano-1,mes)).get()
+      ]);
+      const somar=doc=>{const o={};CATS.forEach(c=>o[c.id]=0);
+        (doc.exists?(doc.data().registros||[]):[]).forEach(r=>CATS.forEach(c=>o[c.id]+=Number(r[c.id]||0)));return o;};
+      cur[v]=somar(h26); base[v]=somar(h25);
+      CATS.forEach(c=>total[c.id]+=cur[v][c.id]);
+    }));
+
+    if(metas) renderMetasCategoria(total,metas,decorridos,restantes,totalDU);
+    renderPainelVendedora(cur,base,restantes);
+    if(typeof aplicarFotos==='function') aplicarFotos();
+  }catch(e){ console.warn('carregarDadosReais',e); }
+}
+
+function renderMetasCategoria(total,metas,decorridos,restantes,totalDU){
+  const el=document.getElementById('mc-equipe'); if(!el)return;
+  el.innerHTML=CATS.map(c=>{
+    const v=total[c.id]||0, m=Number(metas[c.id]||0);
+    const pct=m?Math.round(v/m*100):0, falta=Math.max(m-v,0);
+    const precisa=Math.ceil(falta/restantes), ritmo=decorridos?Math.round(v/decorridos):0;
+    const esperado=m*(decorridos/totalDU);
+    let cls,lbl; if(v>=esperado){cls='noritmo';lbl='✓ No ritmo';}
+      else if(pct<30){cls='critico';lbl='⚠ Atrás';} else {cls='atras';lbl='⚠ Atrás';}
+    return '<div class="mc-card '+cls+'">'
+      +'<div class="mc-head"><span class="mc-cat">'+c.nome+'</span><span class="mc-selo '+cls+'">'+lbl+'</span></div>'
+      +'<div class="mc-sub"><b>'+v+'</b> de '+m+'</div>'
+      +'<div class="mc-bar"><div class="mc-bar-f" style="width:'+Math.min(pct,100)+'%"></div></div>'
+      +'<div class="mc-pct">'+pct+'<small>%</small></div>'
+      +'<div class="mc-foot">'
+      +'<div><div class="mc-foot-lbl">Falta</div><div class="mc-foot-val">'+falta+'</div></div>'
+      +'<div><div class="mc-foot-lbl">Precisa/dia</div><div class="mc-foot-val nec">'+precisa+'</div></div>'
+      +'<div><div class="mc-foot-lbl">Ritmo atual</div><div class="mc-foot-val">'+ritmo+'/d</div></div>'
+      +'</div></div>';
+  }).join('');
+  const cap=el.previousElementSibling;
+  if(cap&&cap.classList.contains('mc-cap'))
+    cap.innerHTML='Faltam <b>'+restantes+' dias úteis</b> · quanto cada categoria precisa vender <b>por dia</b> pra bater 100% da meta';
+}
+
+function renderPainelVendedora(cur,base,restantes){
+  const el=document.getElementById('pv-equipe'); if(!el)return;
+  el.innerHTML=VENDS.map(v=>{
+    const tag = v==='Jhennifer' ? ' <small style="color:var(--cr3);font-weight:400">· gerente · vende no salão</small>' : '';
+    const cats=CATS.map(c=>{
+      const atual=cur[v][c.id]||0, meta=base[v][c.id]||0;
+      if(!meta) return '<div class="mi-cat sembase"><div class="mi-cat-nome">'+c.nome+'</div>'
+        +'<div class="mi-vm"><span>Atual <b>'+atual+'</b></span></div><div class="mi-sembase">sem base 2025</div></div>';
+      const pct=Math.round(atual/meta*100), falta=Math.max(meta-atual,0), sup=atual>=meta;
+      const ok=sup||pct>=80;
+      return '<div class="mi-cat"><div class="mi-cat-nome">'+c.nome+'</div>'
+        +'<div class="mi-vm"><span>Atual <b>'+atual+'</b></span><span class="seta">→</span><span class="meta">Meta <b>'+meta+'</b></span></div>'
+        +'<div class="pv-bar"><div class="pv-bar-f" style="width:'+Math.min(pct,100)+'%"></div></div>'
+        +'<div class="mi-line"><span class="mi-pct">'+pct+'%</span>'
+        +(sup?'<span class="mi-falta sup">✓ Superou 2025</span>':'<span class="mi-falta">Faltam +'+falta+'</span>')+'</div>'
+        +'<div class="mi-foot">'
+        +(sup?'<span>+'+(atual-meta)+' acima de 2025</span>':'<span>Precisa <b>'+(falta/restantes).toFixed(1)+'</b>/dia</span>')
+        +'<span class="mi-selo '+(ok?'ok':'')+'">'+(ok?'No ritmo':'Atrás')+'</span></div></div>';
+    }).join('');
+    return '<div class="pv-card"><div class="pv-card-header"><div class="pv-foto" data-foto="'+v+'">'+v[0]+'</div>'
+      +'<div><div class="pv-nome">'+v+tag+'</div><div class="pv-status"><span class="dot ok"></span>Em dia</div></div></div>'
+      +'<div class="mi">'+cats+'</div></div>';
+  }).join('');
+}
+
+function motivoDe(t){ t=(t||'').toLowerCase();
+  if(t.indexOf('feria')>-1||t.indexOf('férri')>-1||t.indexOf('férias')>-1) return {cls:'ferias',txt:'Férias'};
+  if(t.indexOf('atestado')>-1) return {cls:'atestado',txt:'Atestado'};
+  return {cls:'folga',txt:'Folga'};
+}
+
+async function carregarPresenca(){
+  if(!DB) return;
+  try{
+    const hoje=new Date().toISOString().slice(0,10);
+    const doc=await DB.collection('lancamentos').doc('_data').get();
+    const items=doc.exists?(doc.data().items||[]):[];
+    const ausentes=items
+      .filter(l=>l.inicio&&l.fim&&l.inicio<=hoje&&hoje<=l.fim)
+      .map(l=>({nome:FUNC_MAP[l.funcId]||'?',mot:motivoDe(l.tipo),ate:l.fim}));
+    renderPresenca(ausentes);
+    if(typeof aplicarFotos==='function') aplicarFotos();
+  }catch(e){ console.warn('carregarPresenca',e); }
+}
+
+function renderPresenca(ausentes){
+  const map={}; ausentes.forEach(a=>{ if(a.nome!=='?') map[a.nome]=a; });
+  function linha(nome,extra){ const a=map[nome];
+    const right = a
+      ? '<span class="r '+a.mot.cls+'">'+a.mot.txt+(a.mot.cls==='ferias'?' · volta '+fmtData(a.ate):'')+'</span>'
+      : '<span class="r presente">Presente</span>';
+    return '<div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="'+nome+'">'+nome[0]+'</span>'+nome+(extra||'')+'</span>'+right+'</div>';
+  }
+  const card=document.getElementById('card-loja');
+  if(card){
+    card.innerHTML='<div class="hoje-card-tit">Quem está na loja <b>Hoje</b></div>'
+      +'<div class="hoje-subgrupo">Vendedoras</div>'
+      +linha('Jhennifer',' <small style="color:var(--cr3)">· gerente</small>')+linha('Ialey')+linha('Michelly')+linha('Natália')
+      +'<div class="hoje-subgrupo">Operação</div>'
+      +linha('Edson')+linha('Yuri')+linha('Gustavo')
+      +'<div class="st-legenda"><span><i class="presente"></i>Presente</span><span><i class="folga"></i>Folga</span>'
+      +'<span><i class="ferias"></i>Férias</span><span><i class="atestado"></i>Atestado</span></div>';
+  }
+  const cob=document.getElementById('cob-grid');
+  if(cob){
+    if(!ausentes.length){
+      cob.innerHTML='<div class="cob-card" style="grid-column:1/-1;text-align:center;color:var(--cr2)">Ninguém ausente hoje — equipe completa. 👌</div>';
+    }else{
+      cob.innerHTML=ausentes.map(a=>{
+        const cands=['Jhennifer','Ialey','Michelly','Natália','Yuri','Gustavo'].filter(n=>n!==a.nome);
+        const slug=a.nome.toLowerCase().normalize('NFD').replace(/[^a-z]/g,'');
+        return '<div class="cob-card"><div class="cob-head"><span class="mini-av" data-foto="'+a.nome+'">'+a.nome[0]+'</span>'
+          +'<div><div class="cob-nome">'+a.nome+'</div><div class="cob-motivo '+a.mot.cls+'">'+a.mot.txt
+          +(a.mot.cls==='ferias'?' · volta '+fmtData(a.ate):'')+'</div></div></div>'
+          +'<div class="cob-linha">📱 Celular de vendas + funções de '+a.nome+'</div>'
+          +'<div class="cob-assign">Assume → <select class="cob-sel" onchange="cobrir(this,\'cob-st-'+slug+'\')">'
+          +'<option value="">escolher quem cobre…</option>'
+          +cands.map(n=>'<option value="'+n+'">'+n+'</option>').join('')
+          +'</select></div>'
+          +'<div class="cob-status pend" id="cob-st-'+slug+'">Sem cobertura definida ainda</div></div>';
+      }).join('');
+    }
+  }
+}
+/* ==================== fim DADOS REAIS ==================== */
+
 if(document.readyState!=='loading')aplicarFotos();
 else document.addEventListener('DOMContentLoaded',aplicarFotos);
 </script>
