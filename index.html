@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Demo · Central da Gerente · Loretto Scarpa</title>
+<title>Central da Supervisora · Loretto Scarpa</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Playfair+Display:wght@400;500;600&family=Barlow:wght@300;400;500;600;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -477,7 +477,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 /* ─── Impressão / PDF: só a pauta, em tema claro ─── */
 @media print{
   @page{size:A4 portrait;margin:14mm;}
-  body{background:#fff !important;}
+  body{background:#fff !important;zoom:1.1;}
   body *{visibility:hidden !important;}
   #modal-pauta, #modal-pauta *{visibility:visible !important;}
   #modal-pauta{position:absolute !important;inset:0 !important;background:#fff !important;padding:0 !important;display:block !important;}
@@ -493,6 +493,22 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
   #modal-pauta .pauta-hd,#modal-pauta .pauta-sec-tit{border-bottom-color:#d8cda0 !important;}
   #modal-pauta .pauta-comb-inp,#modal-pauta .pauta-comb-data{border-color:#d8cda0 !important;color:#23310f !important;background:#fff !important;}
 }
+.pauta-status{font-family:'DM Mono',monospace;font-size:11px;color:#8a8f7a;align-self:center;margin-right:auto;}.pauta-status.ok{color:#6f8c3f;}
+.rel-load{color:#8a8f7a;font-size:13px;padding:16px;text-align:center;}
+.rel-mes{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.5px;color:#6a7256;text-transform:uppercase;margin-bottom:14px;text-align:center;}
+.rel-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px;}
+@media(max-width:640px){.rel-stats{grid-template-columns:1fr;}}
+.rel-stat{background:#f4f1e8;border:1px solid #e2dcc8;border-radius:4px;padding:12px;text-align:center;}
+.rel-stat .rl{font-family:"DM Mono",monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#8a8f7a;}
+.rel-stat .rv{font-family:"Playfair Display",serif;font-size:26px;color:#2f3325;margin:4px 0;line-height:1;}
+.rel-stat .rv small{font-size:15px;color:#9a9f8a;}
+.rel-stat .rs{font-size:11px;color:#8a8f7a;}
+.rel-tt{font-family:"Playfair Display",serif;font-size:15px;color:#4a5c2a;margin:20px 0 8px;}
+.rel-tab{width:100%;border-collapse:collapse;font-size:13px;}
+.rel-tab th{text-align:left;font-family:"DM Mono",monospace;font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:#8a8f7a;padding:6px 8px;border-bottom:1px solid #e2dcc8;}
+.rel-tab td{padding:7px 8px;border-bottom:1px solid #efeadd;color:#2f3325;}
+.rel-tab tr:last-child td{border-bottom:none;}
+.rel-note{margin-top:12px;font-size:12px;color:#b08a3a;font-style:italic;}
 </style>
 <!-- Firebase (compat) · Central Loretto Scarpa -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -505,8 +521,6 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
   <button class="tabnav-btn active" onclick="abrirTab('hoje',this)">Hoje</button>
   <button class="tabnav-btn" onclick="abrirTab('vendas',this)">Vendas</button>
   <button class="tabnav-btn" onclick="abrirTab('rh',this)">RH</button>
-  <button class="tabnav-btn" onclick="abrirTab('tarefas',this)">Tarefas</button>
-  <button class="tabnav-btn" onclick="abrirTab('comunicados',this)">Comunicados</button>
   <button class="tabnav-btn" onclick="abrirTab('relatorio',this)">Relatório</button>
 </div>
 
@@ -523,7 +537,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
     <div class="hoje-card" id="card-loja">
       <div class="hoje-card-tit">Quem está na loja <b>Hoje</b></div>
       <div class="hoje-subgrupo">Vendedoras</div>
-      <div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="Jhennifer">J</span>Jhennifer <small style="color:var(--cr3)">· gerente</small></span><span class="r presente">Presente</span></div>
+      <div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="Jhennifer">J</span>Jhennifer <small style="color:var(--cr3)">· supervisora</small></span><span class="r presente">Presente</span></div>
       <div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="Ialey">I</span>Ialey</span><span class="r presente">Presente</span></div>
       <div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="Michelly">M</span>Michelly</span><span class="r presente">Presente</span></div>
       <div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="Natália">N</span>Natália</span><span class="r ferias">Férias · volta 17/06</span></div>
@@ -627,7 +641,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
             <option value="">escolher quem cobre…</option>
             <option value="Ialey" selected>Ialey · vendedora</option>
             <option value="Michelly">Michelly · vendedora</option>
-            <option value="Jhennifer">Jhennifer · gerente</option>
+            <option value="Jhennifer">Jhennifer · supervisora</option>
             <option value="Yuri">Yuri · operação</option>
             <option value="Gustavo">Gustavo · operação</option>
           </select>
@@ -734,7 +748,7 @@ function cobrir(sel,alvoId){
     <div class="mc-cap">Meta = o mínimo pra cada uma <b>superar seu Junho de 2025</b> · faltam 8 dias úteis</div>
     <div class="pv-grid" id="pv-equipe">
       <div class="pv-card">
-        <div class="pv-card-header"><div class="pv-foto" data-foto="Jhennifer">J</div><div><div class="pv-nome">Jhennifer <small style="color:var(--cr3);font-weight:400">· gerente · vende no salão</small></div><div class="pv-status"><span class="dot ok"></span>Em dia · hoje</div></div></div>
+        <div class="pv-card-header"><div class="pv-foto" data-foto="Jhennifer">J</div><div><div class="pv-nome">Jhennifer <small style="color:var(--cr3);font-weight:400">· supervisora · vende no salão</small></div><div class="pv-status"><span class="dot ok"></span>Em dia · hoje</div></div></div>
         <div class="mi">
           <div class="mi-cat">
             <div class="mi-cat-nome">Sapatos</div>
@@ -1066,7 +1080,7 @@ function cobrir(sel,alvoId){
       <div class="av-mensal-sub">Avalie cada colaborador no fechamento do mês · 1 a 5 estrelas por categoria + observação livre</div>
       <div class="av-grupo-lbl">Vendedoras</div>
       <div class="av-pessoa-list">
-        <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Jhennifer">J</div><div class="av-pess-info"><div class="av-pess-nome">Jhennifer <small style="color:var(--cr3)">· gerente</small></div><div class="av-pess-stt pend">Auto + diretoria</div></div><button class="av-pess-btn">Avaliar</button></div>
+        <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Jhennifer">J</div><div class="av-pess-info"><div class="av-pess-nome">Jhennifer <small style="color:var(--cr3)">· supervisora</small></div><div class="av-pess-stt pend">Auto + diretoria</div></div><button class="av-pess-btn">Avaliar</button></div>
         <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Ialey">I</div><div class="av-pess-info"><div class="av-pess-nome">Ialey</div><div class="av-pess-stt feita">✓ Avaliação feita</div></div><button class="av-pess-btn">Ver</button></div>
         <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Michelly">M</div><div class="av-pess-info"><div class="av-pess-nome">Michelly</div><div class="av-pess-stt">Aguardando</div></div><button class="av-pess-btn">Avaliar</button></div>
         <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Natália">N</div><div class="av-pess-info"><div class="av-pess-nome">Natália</div><div class="av-pess-stt">Aguardando</div></div><button class="av-pess-btn">Avaliar</button></div>
@@ -1100,96 +1114,12 @@ function cobrir(sel,alvoId){
   </div>
 </div>
 
-<!-- COMUNICADOS -->
-<div class="tab-content" id="tab-comunicados">
-  <div class="slbl">Mural de Avisos</div>
-  <button class="mural-novo-btn">+ Novo Comunicado</button>
-  <div class="mural-card">
-    <div class="mural-hd"><div class="mural-autor">Jhennifer · gerente</div><div class="mural-data">14/06 · 09:15</div></div>
-    <div class="mural-texto">Pessoal, a partir da próxima semana vamos receber uma nova coleção da Cravo & Canela. Vamos organizar reunião na quinta às 14h pra apresentação dos modelos. Quem não puder estar presente, me avisa.</div>
-    <div class="mural-stats">Visto por <b>3 de 5</b> · Ialey ✓ · Michelly ✓ · Edson ✓ · Natália — · Yuri —</div>
-  </div>
-  <div class="mural-card">
-    <div class="mural-hd"><div class="mural-autor">Gregory · diretor</div><div class="mural-data">10/06 · 18:30</div></div>
-    <div class="mural-texto">A campanha de Dia dos Namorados foi extraordinária. Parabéns ao time! Vamos manter o foco até o fim do mês.</div>
-    <div class="mural-stats">Visto por <b>5 de 5</b> ✓</div>
-  </div>
-  <div class="mural-card">
-    <div class="mural-hd"><div class="mural-autor">Jhennifer · gerente</div><div class="mural-data">05/06 · 11:00</div></div>
-    <div class="mural-texto">Lembrete: aniversário da Michelly dia 16. Quem topa contribuir pra lembrança? Avisa até quinta.</div>
-    <div class="mural-stats">Visto por <b>5 de 5</b> · 4 confirmaram</div>
-  </div>
-</div>
-
-<!-- TAREFAS -->
-<div class="tab-content" id="tab-tarefas">
-  <div class="slbl">Tarefas Fixas da Semana</div>
-  <div class="mc-cap">Rotina da gerência · se repetem toda semana, sem precisar recriar</div>
-  <div class="tarefa-list" style="margin-bottom:22px;">
-    <div class="tarefa-item pend">
-      <div class="tarefa-check"></div>
-      <div class="tarefa-texto">📦 Pedido de reposição semanal<small>Toda segunda-feira · fixo</small></div>
-      <div class="tarefa-prazo">Seg</div>
-    </div>
-    <div class="tarefa-item pend">
-      <div class="tarefa-check"></div>
-      <div class="tarefa-texto">📅 Atualização de metas semanal<small>Toda terça-feira · reunião de equipe · fixo</small></div>
-      <div class="tarefa-prazo">Ter</div>
-    </div>
-  </div>
-
-  <div class="slbl">Tarefas Delegadas</div>
-  <button class="mural-novo-btn" style="width:auto;margin-bottom:14px;">+ Nova Tarefa</button>
-  <div class="tarefa-list">
-    <div class="tarefa-item atrasada">
-      <div class="tarefa-check"></div>
-      <div class="tarefa-texto">Yuri · Conferência estoque feminino<small>Programada pra 10/06 · 4 dias de atraso</small></div>
-      <div class="tarefa-prazo bad">+4 dias</div>
-    </div>
-    <div class="tarefa-item pend">
-      <div class="tarefa-check"></div>
-      <div class="tarefa-texto">Edson · Atualizar fotos do site (botinas Cravo)<small>Até sexta 20/06</small></div>
-      <div class="tarefa-prazo">Sex</div>
-    </div>
-    <div class="tarefa-item pend">
-      <div class="tarefa-check"></div>
-      <div class="tarefa-texto">Ialey · Treinar Natália no fechamento de caixa<small>Esta semana</small></div>
-      <div class="tarefa-prazo">Esta sem.</div>
-    </div>
-    <div class="tarefa-item pend">
-      <div class="tarefa-check"></div>
-      <div class="tarefa-texto">Edson · Enviar pedido #4521 Recife<small>Atrasado 3 dias · cobrar hoje</small></div>
-      <div class="tarefa-prazo bad">+3 dias</div>
-    </div>
-    <div class="tarefa-item feita">
-      <div class="tarefa-check ok">✓</div>
-      <div class="tarefa-texto">Michelly · Organizar vitrine de inverno<small>Feito em 08/06</small></div>
-      <div class="tarefa-prazo">Feito</div>
-    </div>
-    <div class="tarefa-item feita">
-      <div class="tarefa-check ok">✓</div>
-      <div class="tarefa-texto">Edson · Conferir pedidos pendentes Mercado Livre<small>Feito em 12/06</small></div>
-      <div class="tarefa-prazo">Feito</div>
-    </div>
-  </div>
-</div>
-
 <!-- RELATÓRIO -->
 <div class="tab-content" id="tab-relatorio">
   <div class="rel-card">
     <div class="rel-tit">Relatório Mensal · Junho 2026</div>
     <div class="rel-sub">Análise completa do mês: performance da equipe, ocorrências, avaliações, comparativos YoY, insights gerados automaticamente. Pra apresentar pra direção ou guardar como registro.</div>
-    <div class="rel-slides">
-      <div class="rel-slide"><b>Slide 1</b>Capa · Loretto Scarpa</div>
-      <div class="rel-slide"><b>Slide 2</b>Resumo executivo + YoY</div>
-      <div class="rel-slide"><b>Slide 3</b>Performance Vendas</div>
-      <div class="rel-slide"><b>Slides 4-6</b>Análise por vendedora</div>
-      <div class="rel-slide"><b>Slide 7</b>Operacional (Edson, Yuri, Gustavo)</div>
-      <div class="rel-slide"><b>Slide 8</b>RH: ocorrências do mês</div>
-      <div class="rel-slide"><b>Slide 9</b>RH: avaliações mensais</div>
-      <div class="rel-slide"><b>Slide 10</b>Insights & Recomendações</div>
-      <div class="rel-slide"><b>Slide 11</b>Próximos passos · julho</div>
-    </div>
+    <div id="rel-real"><div class="rel-load">Carregando dados reais do mês…</div></div>
     <button class="rel-btn">📊 Gerar Análise do Mês (PPTX)</button>
   </div>
 
@@ -1259,7 +1189,7 @@ const PESSOAS = {
   'Ialey':    {ini:'I', funcao:'Vendedora',   aniv:'22/09', admissao:'03/2023', status:'ok',   statusTxt:'Em dia · hoje 14h', sapatos:138, metaSap:195, conv:0.68, mix:'2º',  maiorV:3120, atrasos:0, oc_at:0, oc_el:1, av:[4,5,4]},
   'Michelly': {ini:'M', funcao:'Vendedora',   aniv:'16/06', admissao:'08/2024', status:'ok',   statusTxt:'Em dia · ontem 18h', sapatos:168, metaSap:240, conv:0.56, mix:'1º',  maiorV:4280, atrasos:1, oc_at:0, oc_el:1, av:[5,5,5]},
   'Natália':  {ini:'N', funcao:'Vendedora',   aniv:'11/03', admissao:'11/2024', status:'bad',  statusTxt:'Atrasada · 2 dias',   sapatos:95,  metaSap:165, conv:0.42, mix:'3º',  maiorV:2650, atrasos:2, oc_at:2, oc_el:0, av:[3,3,2]},
-  'Jhennifer':{ini:'J', funcao:'Gerente',     aniv:'04/11', admissao:'01/2022', status:'ok',   statusTxt:'Em dia · vende no salão', sapatos:112, metaSap:150, conv:0.71, mix:'1º',  maiorV:3890, atrasos:0, oc_at:0, oc_el:1, av:[5,5,5]},
+  'Jhennifer':{ini:'J', funcao:'Supervisora',     aniv:'04/11', admissao:'01/2022', status:'ok',   statusTxt:'Em dia · vende no salão', sapatos:112, metaSap:150, conv:0.71, mix:'1º',  maiorV:3890, atrasos:0, oc_at:0, oc_el:1, av:[5,5,5]},
   'Edson':    {ini:'E', funcao:'E-commerce',  aniv:'28/06', admissao:'06/2024', status:'warn', statusTxt:'1 envio atrasado',    sapatos:null,metaSap:null,conv:null, mix:null,  maiorV:null, atrasos:0, oc_at:1, oc_el:0, av:[4,3,3]},
   'Yuri':     {ini:'Y', funcao:'Estoquista',  aniv:'19/01', admissao:'04/2024', status:'warn', statusTxt:'2 tarefas atrasadas', sapatos:null,metaSap:null,conv:null, mix:null,  maiorV:null, atrasos:0, oc_at:0, oc_el:0, av:[4,4,4]},
   'Gustavo':  {ini:'G', funcao:'Entregador',  aniv:'07/05', admissao:'02/2025', status:'ok',   statusTxt:'Em rota',             sapatos:null,metaSap:null,conv:null, mix:null,  maiorV:null, atrasos:0, oc_at:0, oc_el:0, av:[5,4,5]}
@@ -1526,17 +1456,43 @@ function abrirPauta(nome){
     <div class="pauta-sec">
       <div class="pauta-sec-tit">Combinados desta conversa</div>
       <div class="pauta-comb-lbl">O que foi acordado</div>
-      <textarea class="pauta-comb-inp" placeholder="Anote aqui o que vocês combinaram..."></textarea>
+      <textarea class="pauta-comb-inp" id="pauta-comb-inp" placeholder="Anote aqui o que vocês combinaram..."></textarea>
       <div class="pauta-comb-lbl">Acompanhar em</div>
-      <input type="date" class="pauta-comb-data">
+      <input type="date" class="pauta-comb-data" id="pauta-comb-data">
     </div>
     <div class="pauta-acoes">
+      <button class="pauta-btn" onclick="salvarPauta('${nome}')">💾 Salvar combinados</button>
+      <span id="pauta-status" class="pauta-status"></span>
       <button class="pauta-btn" onclick="window.print()">⬇ Baixar PDF / Imprimir</button>
       <button class="pauta-btn sec" onclick="fecharModal('modal-pauta')">Fechar</button>
     </div>`;
 
   document.getElementById('pauta-content').innerHTML = html;
   abrirModal('modal-pauta');
+  carregarPauta(nome);
+}
+
+async function carregarPauta(nome){
+  const inp=document.getElementById('pauta-comb-inp'), dt=document.getElementById('pauta-comb-data');
+  const st=document.getElementById('pauta-status');
+  if(!DB||!inp) return;
+  try{
+    const doc=await DB.collection('ls_pautas').doc(nome).get();
+    if(doc.exists){ const d=doc.data(); inp.value=d.combinado||''; if(dt)dt.value=d.acompanhar||'';
+      if(st&&d.atualizadoEm)st.textContent='Salvo em '+new Date(d.atualizadoEm).toLocaleDateString('pt-BR'); }
+  }catch(e){ console.warn('carregarPauta',e); }
+}
+
+async function salvarPauta(nome){
+  const inp=document.getElementById('pauta-comb-inp'), dt=document.getElementById('pauta-comb-data');
+  const st=document.getElementById('pauta-status');
+  if(!DB){ if(st)st.textContent='Sem conexão'; return; }
+  try{
+    await DB.collection('ls_pautas').doc(nome).set({
+      combinado:inp?inp.value:'', acompanhar:dt?dt.value:'', atualizadoEm:Date.now()
+    },{merge:true});
+    if(st){ st.textContent='✓ Salvo'; st.classList.add('ok'); setTimeout(()=>st.classList.remove('ok'),2000); }
+  }catch(e){ console.warn('salvarPauta',e); if(st)st.textContent='Erro ao salvar'; }
 }
 
 function abrirFichaSec(s, btn){
@@ -1756,8 +1712,8 @@ try{
 
 // Quem pode abrir este painel de gestão
 const GESTOR_EMAIL  = 'lorettoscarpa@gmail.com';
-const GERENTE_EMAIL = 'jhenniferlorettoscarpa@gmail.com';
-const ACESSO = [GESTOR_EMAIL, GERENTE_EMAIL];
+const SUPERVISORA_EMAIL = 'jhenniferlorettoscarpa@gmail.com';
+const ACESSO = [GESTOR_EMAIL, SUPERVISORA_EMAIL];
 // Produção: exige login pela Central; sem login, redireciona. Dados vêm do Firestore.
 const EXIGIR_LOGIN = true;
 
@@ -1770,10 +1726,9 @@ if(AUTH){
     const email = (user.email||'').toLowerCase();
     if(ACESSO.indexOf(email) === -1){ semAcesso(email); return; }
     SESSION = user;
-    ROLE = (email === GESTOR_EMAIL) ? 'gestor' : 'gerente';
+    ROLE = (email === GESTOR_EMAIL) ? 'gestor' : 'supervisora';
     aplicarSessao(ROLE);
-    carregarDadosReais();
-    carregarPresenca();
+    carregarCadastroRH().then(function(){ carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); });
   });
 }
 
@@ -1843,6 +1798,45 @@ function diasUteis(ano,mes,ate){ let n=0; const lim=ate||new Date(ano,mes,0).get
   for(let d=1;d<=lim;d++){const wd=new Date(ano,mes-1,d).getDay(); if(wd>=1&&wd<=5)n++;} return n; }
 function fmtData(iso){const p=(iso||'').split('-'); return p.length===3?p[2]+'/'+p[1]:iso;}
 
+const MESES_PT=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+function relYoy(cur,base){
+  if(!base) return cur>0?'<span style="color:#4a5c2a">novo</span>':'<span style="color:#9a9f8a">—</span>';
+  const p=Math.round((cur-base)/base*100), c=p>=0?'#4a5c2a':'#c0603a', sn=p>=0?'+':'';
+  return '<span style="color:'+c+';font-weight:600">'+sn+p+'%</span>';
+}
+function renderRelatorio(){
+  const box=document.getElementById('rel-real'); if(!box) return;
+  const R=window._rel; if(!R){ box.innerHTML='<div class="rel-load">Sem dados do mês ainda.</div>'; return; }
+  const total=R.total, metas=R.metas, cur=R.cur, base=R.base, decorridos=R.decorridos, totalDU=R.totalDU, restantes=R.restantes, ano=R.ano, mes=R.mes;
+  const teamCur=CATS.reduce((a,c)=>a+(total[c.id]||0),0);
+  const teamMeta=metas?CATS.reduce((a,c)=>a+Number(metas[c.id]||0),0):0;
+  const teamBase=VENDS.reduce((a,v)=>a+CATS.reduce((b,c)=>b+((base[v]&&base[v][c.id])||0),0),0);
+  const pctTeam=teamMeta?Math.round(teamCur/teamMeta*100):0;
+  const noRitmo=metas?CATS.filter(c=>(total[c.id]||0)>=Number(metas[c.id]||0)*(decorridos/totalDU)).length:0;
+
+  let h='<div class="rel-mes">'+MESES_PT[mes]+' '+ano+' · '+decorridos+' de '+totalDU+' dias úteis · faltam '+restantes+'</div>';
+  h+='<div class="rel-stats">';
+  h+='<div class="rel-stat"><div class="rl">Vendido no mês</div><div class="rv">'+teamCur+'</div><div class="rs">meta '+teamMeta+' · '+pctTeam+'%</div></div>';
+  h+='<div class="rel-stat"><div class="rl">vs. '+(ano-1)+'</div><div class="rv">'+relYoy(teamCur,teamBase)+'</div><div class="rs">'+teamBase+' no ano passado</div></div>';
+  h+='<div class="rel-stat"><div class="rl">Categorias no ritmo</div><div class="rv">'+noRitmo+'<small>/'+CATS.length+'</small></div><div class="rs">pra bater 100%</div></div>';
+  h+='</div>';
+
+  h+='<div class="rel-tt">Por categoria</div><table class="rel-tab"><tr><th>Categoria</th><th>Vendido</th><th>Meta</th><th>%</th><th>vs '+(ano-1)+'</th></tr>';
+  CATS.forEach(c=>{ const v=total[c.id]||0, m=metas?Number(metas[c.id]||0):0, pct=m?Math.round(v/m*100):0;
+    const bcat=VENDS.reduce((a,vv)=>a+((base[vv]&&base[vv][c.id])||0),0);
+    h+='<tr><td>'+c.nome+'</td><td>'+v+'</td><td>'+m+'</td><td>'+pct+'%</td><td>'+relYoy(v,bcat)+'</td></tr>'; });
+  h+='</table>';
+
+  h+='<div class="rel-tt">Por vendedora</div><table class="rel-tab"><tr><th>Vendedora</th><th>Vendido</th><th>vs '+(ano-1)+'</th><th>Ritmo</th></tr>';
+  VENDS.forEach(v=>{ const cv=CATS.reduce((a,c)=>a+((cur[v]&&cur[v][c.id])||0),0);
+    const bv=CATS.reduce((a,c)=>a+((base[v]&&base[v][c.id])||0),0);
+    const ritmo=decorridos?Math.round(cv/decorridos*10)/10:0;
+    h+='<tr><td>'+v+'</td><td>'+cv+'</td><td>'+relYoy(cv,bv)+'</td><td>'+ritmo+'/d</td></tr>'; });
+  h+='</table>';
+  if(!metas) h+='<div class="rel-note">Meta do mês ainda não cadastrada — mostrando só o realizado.</div>';
+  box.innerHTML=h;
+}
+
 async function carregarDadosReais(){
   if(!DB) return;
   try{
@@ -1853,7 +1847,7 @@ async function carregarDadosReais(){
     const md=await DB.collection('ls_metas').doc(keyMes(ano,mes)).get();
     const metas=md.exists?(md.data().metas||{}):null;
 
-    const cur={}, base={}, total={}; CATS.forEach(c=>total[c.id]=0);
+    const cur={}, base={}, total={}, lastSale={}; CATS.forEach(c=>total[c.id]=0);
     await Promise.all(VENDS.map(async v=>{
       const [h26,h25]=await Promise.all([
         DB.collection('ls_historico').doc(keyHist(v,ano,mes)).get(),
@@ -1862,6 +1856,7 @@ async function carregarDadosReais(){
       const somar=doc=>{const o={};CATS.forEach(c=>o[c.id]=0);
         (doc.exists?(doc.data().registros||[]):[]).forEach(r=>CATS.forEach(c=>o[c.id]+=Number(r[c.id]||0)));return o;};
       cur[v]=somar(h26); base[v]=somar(h25);
+      const _rg=h26.exists?(h26.data().registros||[]):[]; const _ds=_rg.map(r=>r.data).filter(Boolean).sort(); lastSale[v]=_ds.length?_ds[_ds.length-1]:null;
       CATS.forEach(c=>total[c.id]+=cur[v][c.id]);
     }));
 
@@ -1872,6 +1867,16 @@ async function carregarDadosReais(){
       let atras=0; CATS.forEach(c=>{const m=Number(metas[c.id]||0); if((total[c.id]||0) < m*(decorridos/totalDU)) atras++;});
       window._hoje.cats=atras;
     }
+    window._rel={total:total,metas:metas,cur:cur,base:base,decorridos:decorridos,totalDU:totalDU,restantes:restantes,ano:ano,mes:mes};
+    renderRelatorio();
+    const _tm=metas?CATS.reduce((a,c)=>a+Number(metas[c.id]||0),0):0, _hj=new Date();
+    VENDS.forEach(v=>{ const p=PESSOAS[v]; if(!p) return;
+      let dias=null; if(lastSale[v]){ dias=Math.floor((_hj-new Date(lastSale[v]+'T00:00:00'))/86400000); }
+      const _ct=CATS.reduce((a,c)=>a+(cur[v][c.id]||0),0), _esp=_tm?(_tm/VENDS.length)*(decorridos/totalDU):null;
+      if(dias!=null&&dias>=2){ p.status='bad'; p.statusTxt='Sem lançar há '+dias+'d'; }
+      else if(_esp!=null&&_ct<_esp){ p.status='warn'; p.statusTxt='Atrás da meta'; }
+      else { p.status='ok'; p.statusTxt='Em dia'; }
+    });
     renderAniversarios();
     atualizarStatusHoje();
     if(typeof aplicarFotos==='function') aplicarFotos();
@@ -1906,7 +1911,7 @@ function renderMetasCategoria(total,metas,decorridos,restantes,totalDU){
 function renderPainelVendedora(cur,base,restantes){
   const el=document.getElementById('pv-equipe'); if(!el)return;
   el.innerHTML=VENDS.map(v=>{
-    const tag = v==='Jhennifer' ? ' <small style="color:var(--cr3);font-weight:400">· gerente · vende no salão</small>' : '';
+    const tag = v==='Jhennifer' ? ' <small style="color:var(--cr3);font-weight:400">· supervisora · vende no salão</small>' : '';
     const cats=CATS.map(c=>{
       const atual=cur[v][c.id]||0, meta=base[v][c.id]||0;
       if(!meta) return '<div class="mi-cat sembase"><div class="mi-cat-nome">'+c.nome+'</div>'
@@ -1932,6 +1937,47 @@ function motivoDe(t){ t=(t||'').toLowerCase();
   if(t.indexOf('feria')>-1||t.indexOf('férri')>-1||t.indexOf('férias')>-1) return {cls:'ferias',txt:'Férias'};
   if(t.indexOf('atestado')>-1) return {cls:'atestado',txt:'Atestado'};
   return {cls:'folga',txt:'Folga'};
+}
+
+// Puxa o cadastro (nome/função/nascimento/admissão) publicado pelo RH.
+// Se ainda não houver dado publicado, mantém o cadastro atual (fallback, não quebra).
+async function carregarCadastroRH(){
+  if(!DB) return;
+  try{
+    const doc=await DB.collection('rh_cadastro').doc('_funcionarios').get();
+    if(!doc.exists) return;
+    const lista=(doc.data().lista)||[];
+    if(!lista.length) return;
+    Object.keys(FUNC_MAP).forEach(function(k){ delete FUNC_MAP[k]; });
+    lista.forEach(function(f){ if(f.id&&f.nome) FUNC_MAP[f.id]=f.nome; });
+    lista.forEach(function(f){ if(f.nome) EQUIPE_INFO[f.nome]={nasc:f.nascimento||'',adm:f.admissao||''}; });
+    lista.forEach(function(f){ var p=PESSOAS[f.nome]; if(!p) return;
+      if(f.funcao) p.funcao=f.funcao;
+      if(f.nascimento){ var x=String(f.nascimento).split('-'); if(x.length===3) p.aniv=x[2]+'/'+x[1]; }
+      if(f.admissao){ var y=String(f.admissao).split('-'); if(y.length>=2) p.admissao=y[1]+'/'+y[0]; }
+    });
+  }catch(e){ console.warn('carregarCadastroRH',e); }
+}
+
+async function carregarStatusEquipe(){
+  if(!DB) return;
+  try{
+    const now=Date.now(), atras={};
+    const ts=await DB.collection('ls_tarefas').get();
+    ts.forEach(d=>{const t=d.data(); if(t.prazo&&t.prazo<now){ (t.paraEmails||[]).forEach(e=>{ if((t.feitosPor||[]).indexOf(e)<0) atras[e]=(atras[e]||0)+1; }); }});
+    const yt=atras['yurilorettoscarpa@gmail.com']||0;
+    if(PESSOAS['Yuri']){ if(yt>0){PESSOAS['Yuri'].status='warn';PESSOAS['Yuri'].statusTxt=yt+(yt>1?' tarefas atrasadas':' tarefa atrasada');} else {PESSOAS['Yuri'].status='ok';PESSOAS['Yuri'].statusTxt='Tarefas em dia';} }
+    const hojeStr=new Date().toISOString().slice(0,10);
+    let rota=0, env=0;
+    const es=await DB.collection('entregas').get();
+    es.forEach(d=>{const e=d.data();
+      const entg=((e.entregador||'')+' '+(e.entregadorNome||'')+' '+(e.entregadorId||''));
+      if(e.status==='em_rota' && /gustavo/i.test(entg)) rota++;
+      if(e.status==='aguardando'){ const dt=String(e.dataEntrega||e.agendada||e.data||'').slice(0,10); if(dt && dt<hojeStr) env++; }
+    });
+    if(PESSOAS['Gustavo']){ if(rota>0){PESSOAS['Gustavo'].status='ok';PESSOAS['Gustavo'].statusTxt='Em rota · '+rota+(rota>1?' entregas':' entrega');} else {PESSOAS['Gustavo'].status='ok';PESSOAS['Gustavo'].statusTxt='Sem entrega ativa';} }
+    if(PESSOAS['Edson']){ if(env>0){PESSOAS['Edson'].status='warn';PESSOAS['Edson'].statusTxt=env+(env>1?' envios atrasados':' envio atrasado');} else {PESSOAS['Edson'].status='ok';PESSOAS['Edson'].statusTxt='Envios em dia';} }
+  }catch(e){ console.warn('carregarStatusEquipe',e); }
 }
 
 async function carregarPresenca(){
@@ -1963,7 +2009,7 @@ function renderPresenca(ausentes){
   if(card){
     card.innerHTML='<div class="hoje-card-tit">Quem está na loja <b>Hoje</b></div>'
       +'<div class="hoje-subgrupo">Vendedoras</div>'
-      +linha('Jhennifer',' <small style="color:var(--cr3)">· gerente</small>')+linha('Ialey')+linha('Michelly')+linha('Natália')
+      +linha('Jhennifer',' <small style="color:var(--cr3)">· supervisora</small>')+linha('Ialey')+linha('Michelly')+linha('Natália')
       +'<div class="hoje-subgrupo">Operação</div>'
       +linha('Edson')+linha('Yuri')+linha('Gustavo')
       +'<div class="st-legenda"><span><i class="presente"></i>Presente</span><span><i class="folga"></i>Folga</span>'
