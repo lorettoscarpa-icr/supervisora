@@ -154,7 +154,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 /* METAS POR CATEGORIA · EQUIPE */
 .mc-cap{font-size:11px;color:var(--cr3);margin:-6px 0 14px;}
 .mc-cap b{color:var(--ou2);font-weight:500;}
-.mc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.mc-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
 .mc-card{background:var(--bg2);border:1px solid var(--oud2);padding:16px;}
 .mc-card.atras{border-left:3px solid var(--vermelho-c);}
 .mc-card.critico{border-left:3px solid var(--vermelho-c);}
@@ -587,6 +587,8 @@ body{zoom:1.1;}
 .pend-txt{flex:1;color:var(--cr2);font-size:13.5px;line-height:1.4;}
 .pend-btn{background:transparent;border:1px solid var(--ou);color:var(--ou2);border-radius:2px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;cursor:pointer;white-space:nowrap;}
 .pend-btn:hover{background:var(--ou);color:var(--bg);}
+.mi-precisa{font-size:11px;color:var(--cr3);}
+.mi-precisa b{color:var(--cr2);}
 </style>
 <!-- Firebase (compat) · Central Loretto Scarpa -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -1900,7 +1902,7 @@ async function carregarDadosReais(){
     }));
 
     renderMetasCategoria(total,metas,decorridos,restMeta,duMeta);
-    renderPainelVendedora(cur,metas,restMeta);
+    renderPainelVendedora(cur,base,restMeta);
     if(metas){
       renderResumoVendas(total,metas,decorridos,totalDU);
       let atras=0; CATS.forEach(c=>{const m=Number(metas[c.id]||0); if((total[c.id]||0) < m*(decorridos/totalDU)) atras++;});
@@ -1971,13 +1973,15 @@ function renderAtualizacoes(lastSale){
   const el=document.getElementById('atu-equipe'); if(!el)return;
   const hoje=new Date();
   el.innerHTML=VENDS.map(v=>{
-    const ls=lastSale[v]; let dias=null;
-    if(ls) dias=Math.floor((hoje-new Date(ls+'T00:00:00'))/86400000);
+    const ls=lastSale[v]; let dias=null, dataFmt='—';
+    if(ls){ const m=String(ls).match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if(m){ dataFmt=String(m[3]).padStart(2,'0')+'/'+String(m[2]).padStart(2,'0');
+        const dt=new Date(+m[1],(+m[2])-1,+m[3]), h0=new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate());
+        const dd=Math.round((h0-dt)/86400000); if(!isNaN(dd)) dias=dd; } }
     let pcls,pill;
-    if(ls==null){ pcls='atu-bad'; pill='Sem registros'; }
+    if(dias==null){ pcls='atu-bad'; pill='Sem registros'; }
     else if(dias<=0){ pcls='atu-ok'; pill='Em dia'; }
     else { pcls=dias>=3?'atu-bad':'atu-warn'; pill=dias+(dias>1?' dias atrasada':' dia atrasada'); }
-    const dataFmt=ls?ls.split('-').reverse().slice(0,2).join('/'):'—';
     return '<div class="atu-card"><div class="atu-foto" data-foto="'+v+'">'+v[0]+'</div>'
       +'<div class="atu-nome">'+v.toUpperCase()+'</div><div class="atu-data">'+dataFmt+'</div>'
       +'<div class="atu-pill '+pcls+'">'+pill+'</div></div>';
@@ -2060,23 +2064,23 @@ function renderAusenciasMes(items){
   el.innerHTML=h; if(typeof aplicarFotos==='function') aplicarFotos();
 }
 
-function renderPainelVendedora(cur,metaCfg,restantes){
+function renderPainelVendedora(cur,base,restantes){
   const el=document.getElementById('pv-equipe'); if(!el)return;
   el.innerHTML=VENDS.filter(v=>v!=='Jhennifer').map(v=>{
     const tag = v==='Jhennifer' ? ' <small style="color:var(--cr3);font-weight:400">· supervisora · vende no salão</small>' : '';
     const cats=CATS.map(c=>{
-      const atual=cur[v][c.id]||0, meta=Math.round((Number(metaCfg[c.id]||0))/VENDS.length);
+      const atual=cur[v][c.id]||0, meta=base[v][c.id]||0;
       if(!meta) return '<div class="mi-cat sembase"><div class="mi-cat-nome">'+c.nome+'</div>'
-        +'<div class="mi-vm"><span>Atual <b>'+atual+'</b></span></div><div class="mi-sembase">sem meta</div></div>';
+        +'<div class="mi-vm"><span>Atual <b>'+atual+'</b></span></div><div class="mi-sembase">sem base 2025</div></div>';
       const pct=Math.round(atual/meta*100), falta=Math.max(meta-atual,0), sup=atual>=meta;
       const ok=sup||pct>=80;
       return '<div class="mi-cat"><div class="mi-cat-nome">'+c.nome+'</div>'
         +'<div class="mi-vm"><span>Atual <b>'+atual+'</b></span><span class="seta">→</span><span class="meta">Meta <b>'+meta+'</b></span></div>'
         +'<div class="pv-bar"><div class="pv-bar-f" style="width:'+Math.min(pct,100)+'%"></div></div>'
         +'<div class="mi-line"><span class="mi-pct">'+pct+'%</span>'
-        +(sup?'<span class="mi-falta sup">✓ Bateu a meta</span>':'<span class="mi-falta">Faltam +'+falta+'</span>')+'</div>'
+        +(sup?'<span class="mi-precisa">✓ Meta batida</span>':'<span class="mi-precisa">Precisa <b>'+(falta/restantes).toFixed(1)+'</b>/dia</span>')+'</div>'
         +'<div class="mi-foot">'
-        +(sup?'<span>+'+(atual-meta)+' acima da meta</span>':'<span>Precisa <b>'+(falta/restantes).toFixed(1)+'</b>/dia</span>')
+        +(sup?'<span class="mi-falta sup">✓ Superou 2025 · +'+(atual-meta)+'</span>':'<span class="mi-falta">Faltam +'+falta+'</span>')
         +'<span class="mi-selo '+(ok?'ok':'')+'">'+(ok?'No ritmo':'Atrás')+'</span></div></div>';
     }).join('');
     return '<div class="pv-card"><div class="pv-card-header"><div class="pv-foto" data-foto="'+v+'">'+v[0]+'</div>'
