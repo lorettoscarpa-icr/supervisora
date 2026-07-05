@@ -154,7 +154,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 /* METAS POR CATEGORIA · EQUIPE */
 .mc-cap{font-size:11px;color:var(--cr3);margin:-6px 0 14px;}
 .mc-cap b{color:var(--ou2);font-weight:500;}
-.mc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.mc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 .mc-card{background:var(--bg2);border:1px solid var(--oud2);padding:16px;}
 .mc-card.atras{border-left:3px solid var(--vermelho-c);}
 .mc-card.critico{border-left:3px solid var(--vermelho-c);}
@@ -474,10 +474,11 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .pauta-btn.sec{background:transparent;color:var(--cr3);border:1px solid var(--oud2);}
 .pauta-print-only{display:none;}
 
+body{zoom:1.1;}
 /* ─── Impressão / PDF: só a pauta, em tema claro ─── */
 @media print{
   @page{size:A4 portrait;margin:14mm;}
-  body{background:#fff !important;zoom:1.1;}
+  body{background:#fff !important;}
   body *{visibility:hidden !important;}
   #modal-pauta, #modal-pauta *{visibility:visible !important;}
   #modal-pauta{position:absolute !important;inset:0 !important;background:#fff !important;padding:0 !important;display:block !important;}
@@ -494,20 +495,37 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
   #modal-pauta .pauta-comb-inp,#modal-pauta .pauta-comb-data{border-color:#d8cda0 !important;color:#23310f !important;background:#fff !important;}
 }
 .pauta-status{font-family:'DM Mono',monospace;font-size:11px;color:#8a8f7a;align-self:center;margin-right:auto;}.pauta-status.ok{color:#6f8c3f;}
-.rel-load{color:#8a8f7a;font-size:13px;padding:16px;text-align:center;}
-.rel-mes{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.5px;color:#6a7256;text-transform:uppercase;margin-bottom:14px;text-align:center;}
+.rel-load{color:var(--cr3);font-size:13px;padding:16px;text-align:center;}
+.rel-mes{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:14px;text-align:center;}
 .rel-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px;}
 @media(max-width:640px){.rel-stats{grid-template-columns:1fr;}}
-.rel-stat{background:#f4f1e8;border:1px solid #e2dcc8;border-radius:4px;padding:12px;text-align:center;}
-.rel-stat .rl{font-family:"DM Mono",monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#8a8f7a;}
-.rel-stat .rv{font-family:"Playfair Display",serif;font-size:26px;color:#2f3325;margin:4px 0;line-height:1;}
-.rel-stat .rv small{font-size:15px;color:#9a9f8a;}
-.rel-stat .rs{font-size:11px;color:#8a8f7a;}
-.rel-tt{font-family:"Playfair Display",serif;font-size:15px;color:#4a5c2a;margin:20px 0 8px;}
+.rel-stat{background:var(--bg2);border:1px solid var(--oud2);border-radius:2px;padding:12px;text-align:center;}
+.rel-stat .rl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--cr3);}
+.rel-stat .rv{font-family:'Playfair Display',serif;font-size:26px;color:var(--cr);margin:4px 0;line-height:1;}
+.rel-stat .rv small{font-size:15px;color:var(--cr3);}
+.rel-stat .rs{font-size:11px;color:var(--cr3);}
+.rel-tt{font-family:'Playfair Display',serif;font-size:15px;color:var(--ou2);margin:20px 0 8px;}
 .rel-tab{width:100%;border-collapse:collapse;font-size:13px;}
-.rel-tab th{text-align:left;font-family:"DM Mono",monospace;font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:#8a8f7a;padding:6px 8px;border-bottom:1px solid #e2dcc8;}
-.rel-tab td{padding:7px 8px;border-bottom:1px solid #efeadd;color:#2f3325;}
+.rel-tab th{text-align:left;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--cr3);padding:6px 8px;border-bottom:1px solid var(--oud2);}
+.rel-tab td{padding:7px 8px;border-bottom:1px solid var(--oud2);color:var(--cr2);}
 .rel-tab tr:last-child td{border-bottom:none;}
+.atu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px;}
+@media(max-width:640px){.atu-grid{grid-template-columns:repeat(2,1fr);}}
+.atu-card{display:flex;gap:10px;align-items:center;background:var(--bg2);border:1px solid var(--oud2);border-left:3px solid var(--oud);padding:11px 13px;}
+.atu-card.atu-ok{border-left-color:#6dbf6d;}
+.atu-card.atu-warn{border-left-color:var(--ou);}
+.atu-card.atu-bad{border-left-color:#e07070;}
+.atu-card.atu-vazio{border-left-color:var(--cr3);opacity:.75;}
+.atu-foto{width:34px;height:34px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:var(--v2);color:var(--cr);font-family:'Playfair Display',serif;font-size:15px;overflow:hidden;}
+.atu-foto img{width:100%;height:100%;object-fit:cover;}
+.atu-info{min-width:0;}
+.atu-nome{color:var(--cr);font-size:13px;font-weight:600;}
+.atu-quando{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.5px;text-transform:uppercase;margin-top:2px;}
+.atu-card.atu-ok .atu-quando{color:#6dbf6d;}
+.atu-card.atu-warn .atu-quando{color:var(--ou2);}
+.atu-card.atu-bad .atu-quando{color:#e07070;}
+.atu-card.atu-vazio .atu-quando{color:var(--cr3);}
+.atu-data{font-size:10px;color:var(--cr3);margin-top:1px;}
 .rel-note{margin-top:12px;font-size:12px;color:#b08a3a;font-style:italic;}
 </style>
 <!-- Firebase (compat) · Central Loretto Scarpa -->
@@ -673,6 +691,9 @@ function cobrir(sel,alvoId){
 
   <!-- VISÃO GERAL: Metas por Categoria + Painel Vendedoras -->
   <div class="vendas-sec active" id="vendas-geral">
+    <div class="slbl">Atualizações da Equipe</div>
+    <div class="mc-cap">Quem lançou vendas por último — de olho em quem está dias sem atualizar</div>
+    <div class="atu-grid" id="atu-equipe"></div>
     <div class="slbl">Metas por Categoria · Equipe</div>
     <div class="mc-cap">Faltam <b>8 dias úteis</b> em Junho · quanto cada categoria precisa vender <b>por dia</b> pra bater 100% da meta</div>
     <div class="mc-grid" id="mc-equipe">
@@ -1800,8 +1821,8 @@ function fmtData(iso){const p=(iso||'').split('-'); return p.length===3?p[2]+'/'
 
 const MESES_PT=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 function relYoy(cur,base){
-  if(!base) return cur>0?'<span style="color:#4a5c2a">novo</span>':'<span style="color:#9a9f8a">—</span>';
-  const p=Math.round((cur-base)/base*100), c=p>=0?'#4a5c2a':'#c0603a', sn=p>=0?'+':'';
+  if(!base) return cur>0?'<span style="color:#6dbf6d">novo</span>':'<span style="color:#8a8f7a">—</span>';
+  const p=Math.round((cur-base)/base*100), c=p>=0?'#6dbf6d':'#e07070', sn=p>=0?'+':'';
   return '<span style="color:'+c+';font-weight:600">'+sn+p+'%</span>';
 }
 function renderRelatorio(){
@@ -1869,6 +1890,7 @@ async function carregarDadosReais(){
     }
     window._rel={total:total,metas:metas,cur:cur,base:base,decorridos:decorridos,totalDU:totalDU,restantes:restantes,ano:ano,mes:mes};
     renderRelatorio();
+    renderAtualizacoes(lastSale);
     const _tm=metas?CATS.reduce((a,c)=>a+Number(metas[c.id]||0),0):0, _hj=new Date();
     VENDS.forEach(v=>{ const p=PESSOAS[v]; if(!p) return;
       let dias=null; if(lastSale[v]){ dias=Math.floor((_hj-new Date(lastSale[v]+'T00:00:00'))/86400000); }
@@ -1908,9 +1930,29 @@ function renderMetasCategoria(total,metas,decorridos,restantes,totalDU){
     cap.innerHTML='Faltam <b>'+restantes+' dias úteis</b> · quanto cada categoria precisa vender <b>por dia</b> pra bater 100% da meta';
 }
 
+function renderAtualizacoes(lastSale){
+  const el=document.getElementById('atu-equipe'); if(!el)return;
+  const hoje=new Date();
+  el.innerHTML=VENDS.map(v=>{
+    const ls=lastSale[v]; let dias=null;
+    if(ls) dias=Math.floor((hoje-new Date(ls+'T00:00:00'))/86400000);
+    let cls,txt;
+    if(ls==null){ cls='atu-vazio'; txt='Nunca lançou'; }
+    else if(dias<=0){ cls='atu-ok'; txt='Atualizou hoje'; }
+    else if(dias===1){ cls='atu-ok'; txt='Ontem'; }
+    else if(dias<=2){ cls='atu-warn'; txt='Há '+dias+' dias'; }
+    else { cls='atu-bad'; txt='Há '+dias+' dias'; }
+    const dataFmt=ls?('último: '+ls.split('-').reverse().slice(0,2).join('/')):'sem registro';
+    return '<div class="atu-card '+cls+'"><div class="atu-foto" data-foto="'+v+'">'+v[0]+'</div>'
+      +'<div class="atu-info"><div class="atu-nome">'+v+'</div><div class="atu-quando">'+txt+'</div>'
+      +'<div class="atu-data">'+dataFmt+'</div></div></div>';
+  }).join('');
+  if(typeof aplicarFotos==='function') aplicarFotos();
+}
+
 function renderPainelVendedora(cur,base,restantes){
   const el=document.getElementById('pv-equipe'); if(!el)return;
-  el.innerHTML=VENDS.map(v=>{
+  el.innerHTML=VENDS.filter(v=>v!=='Jhennifer').map(v=>{
     const tag = v==='Jhennifer' ? ' <small style="color:var(--cr3);font-weight:400">· supervisora · vende no salão</small>' : '';
     const cats=CATS.map(c=>{
       const atual=cur[v][c.id]||0, meta=base[v][c.id]||0;
