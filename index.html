@@ -1801,6 +1801,41 @@ const CATS = [
 ];
 const VENDS = ['Jhennifer','Ialey','Michelly','Natália'];
 const ACESS=['meias','cintos','carteiras','prendedor','limpeza'];
+/* Histórico 2025 por vendedora (igual ao painel de Metas) — sap/ace/mei/lim; carteiras/prendedor sem 2025 */
+const HIST_2025 = {
+  Michelly: {
+    2:{sap:206,ace:29,mei:53,lim:24}, 3:{sap:218,ace:27,mei:42,lim:17},
+    4:{sap:195,ace:43,mei:64,lim:27}, 5:{sap:279,ace:51,mei:89,lim:35},
+    6:{sap:328,ace:70,mei:100,lim:0}, 7:{sap:284,ace:52,mei:63,lim:0},
+    8:{sap:444,ace:101,mei:133,lim:52}, 9:{sap:266,ace:54,mei:64,lim:40},
+    10:{sap:224,ace:33,mei:63,lim:37}, 11:{sap:442,ace:56,mei:90,lim:36},
+    12:{sap:526,ace:77,mei:156,lim:55}
+  },
+  Ialey: {
+    2:{sap:282,ace:56,mei:75,lim:19}, 3:{sap:216,ace:34,mei:63,lim:15},
+    4:{sap:227,ace:21,mei:63,lim:0}, 5:{sap:287,ace:61,mei:0,lim:26},
+    6:{sap:330,ace:91,mei:123,lim:0}, 7:{sap:271,ace:68,mei:82,lim:0},
+    8:{sap:307,ace:42,mei:108,lim:22}, 9:{sap:262,ace:45,mei:86,lim:38},
+    10:{sap:232,ace:46,mei:78,lim:28}, 11:{sap:334,ace:36,mei:90,lim:14},
+    12:{sap:457,ace:74,mei:156,lim:48}
+  },
+  'Natália': {
+    2:{sap:131,ace:29,mei:19,lim:12}, 3:{sap:90,ace:20,mei:23,lim:12},
+    4:{sap:139,ace:18,mei:33,lim:13}, 5:{sap:153,ace:31,mei:47,lim:21},
+    6:{sap:219,ace:58,mei:70,lim:0}, 7:{sap:221,ace:30,mei:56,lim:0},
+    8:{sap:253,ace:86,mei:74,lim:33}, 9:{sap:187,ace:39,mei:56,lim:33},
+    10:{sap:154,ace:22,mei:46,lim:23}, 11:{sap:230,ace:24,mei:51,lim:22},
+    12:{sap:353,ace:53,mei:96,lim:36}
+  },
+  Jhennifer: {
+    2:{sap:76,ace:9,mei:22,lim:2}, 3:{sap:324,ace:26,mei:48,lim:19},
+    4:{sap:361,ace:54,mei:78,lim:13}, 5:{sap:417,ace:53,mei:124,lim:25},
+    6:{sap:521,ace:90,mei:123,lim:0}, 7:{sap:457,ace:71,mei:117,lim:0},
+    8:{sap:555,ace:82,mei:118,lim:30}, 9:{sap:389,ace:46,mei:84,lim:29},
+    10:{sap:266,ace:42,mei:55,lim:18}, 11:{sap:571,ace:67,mei:123,lim:30},
+    12:{sap:759,ace:91,mei:167,lim:43}
+  }
+};
 const CAT_ICONS={sapatos:'<svg viewBox="0 0 24 24"><path d="M2 14s1-1 4-1 4.5 2 7 2 5-2 5-2v3s-1 1-5 1-4.5-2-7-2-4 1-4 1v-2z"/><path d="M2 14V9l4-3h4l4 3h2l3 1"/></svg>',meias:'<svg viewBox="0 0 24 24"><path d="M7 2v11m0 0c0 2 1 3 3 4l4 2c2 1 3 3 1 4s-3 1-4 0l-4-2"/><path d="M7 2h4"/></svg>',cintos:'<svg viewBox="0 0 24 24"><rect x="2" y="10" width="20" height="4" rx="1"/><rect x="10" y="9" width="4" height="6" rx=".5"/></svg>',carteiras:'<svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M16 13h.01"/><path d="M2 10h20"/></svg>',prendedor:'<svg viewBox="0 0 24 24"><path d="M12 2L8 6h8l-4-4z"/><path d="M8 6v12l4 4 4-4V6"/><line x1="12" y1="6" x2="12" y2="22"/></svg>',limpeza:'<svg viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-5 0v-15A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 8H17a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/></svg>'};
 
 // funcId → nome (ordem do seed de funcionarios no painel de RH; uid começa em 1)
@@ -1888,13 +1923,12 @@ async function carregarDadosReais(){
 
     const cur={}, base={}, total={}, lastSale={}; CATS.forEach(c=>total[c.id]=0);
     await Promise.all(VENDS.map(async v=>{
-      const [h26,h25]=await Promise.all([
-        DB.collection('ls_historico').doc(keyHist(v,ano,mes)).get(),
-        DB.collection('ls_historico').doc(keyHist(v,ano-1,mes)).get()
-      ]);
+      const h26=await DB.collection('ls_historico').doc(keyHist(v,ano,mes)).get();
       const somar=doc=>{const o={};CATS.forEach(c=>o[c.id]=0);
         (doc.exists?(doc.data().registros||[]):[]).forEach(r=>CATS.forEach(c=>o[c.id]+=Number(r[c.id]||0)));return o;};
-      cur[v]=somar(h26); base[v]=somar(h25);
+      cur[v]=somar(h26);
+      const _h25=(HIST_2025[v]&&HIST_2025[v][mes])||null;
+      base[v]={sapatos:_h25?_h25.sap:0,meias:_h25?_h25.mei:0,cintos:_h25?_h25.ace:0,limpeza:_h25?_h25.lim:0,carteiras:0,prendedor:0};
       const _rg=h26.exists?(h26.data().registros||[]):[]; const _ds=_rg.map(r=>r.data).filter(Boolean).sort(); lastSale[v]=_ds.length?_ds[_ds.length-1]:null;
       CATS.forEach(c=>total[c.id]+=cur[v][c.id]);
     }));
