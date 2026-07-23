@@ -1043,6 +1043,7 @@ async function cobrir(sel,id,nome){
 <!-- CALENDÁRIO -->
 <!-- RH -->
 <div class="tab-content" id="tab-rh">
+  <div class="nav-mes" id="nav-rh"></div>
   <div class="rh-subnav">
     <button class="rh-subnav-btn active" onclick="abrirRh('calendario',this)">Calendário do mês</button>
     <button class="rh-subnav-btn" onclick="abrirRh('ocorrencias',this)">Ocorrências</button>
@@ -1053,7 +1054,6 @@ async function cobrir(sel,id,nome){
     <div class="slbl">Ausências do Mês</div>
     <div class="aus-box" id="aus-mes"></div>
     <div class="cal">
-      <div class="nav-mes" id="nav-cal"></div>
       <div class="cal-header"><div class="cal-mes" id="cal-mes-rh">—</div><div style="font-size:10px;color:var(--cr3);">🎂 Aniv · 🏖 Folga · 🌴 Férias · 📅 Reunião</div></div>
       <div class="cal-grid" id="cal-grid-rh">
         <div class="cal-wd">Dom</div><div class="cal-wd">Seg</div><div class="cal-wd">Ter</div><div class="cal-wd">Qua</div><div class="cal-wd">Qui</div><div class="cal-wd">Sex</div><div class="cal-wd">Sáb</div>
@@ -1083,11 +1083,11 @@ async function cobrir(sel,id,nome){
 
 <!-- RELATÓRIO -->
 <div class="tab-content" id="tab-relatorio">
+  <div class="nav-mes" id="nav-rel"></div>
   <div class="rel-card">
     <div class="rel-tit">Relatório Individual · Reunião 1:1</div>
     <div class="rel-sub">Pra Jhennifer chegar na conversa com o colaborador embasada — pontos pra <b style="color:var(--verde);">reconhecer</b> e pontos pra <b style="color:var(--ou2);">desenvolver</b>, com roteiro sugerido pra dar o feedback de forma construtiva. Sai na tela e em PDF de 1 página pra levar impressa.</div>
     <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;max-width:520px;margin:0 auto;">
-      <select id="sel-pauta-mes" class="rapido-inp" style="flex:0 0 auto;min-width:150px;"></select>
       <select id="sel-pauta" class="rapido-inp" style="flex:1;min-width:200px;">
         <option value="Ialey">Ialey · Vendedora</option>
         <option value="Michelly">Michelly · Vendedora</option>
@@ -1352,10 +1352,8 @@ async function abrirPauta(nome){
   const p = PESSOAS[nome];
   if(!p) return;
   // mês escolhido no seletor da pauta
-  const _selM=document.getElementById('sel-pauta-mes');
-  let _pa, _pm;
-  if(_selM && _selM.value){ const _pp=_selM.value.split('_'); _pa=+_pp[0]; _pm=+_pp[1]; }
-  else { const _h=mesHoje(); _pa=_h.a; _pm=_h.m; }
+  const _alvoP = window._pMes || mesSoma(mesHoje(),-1);
+  const _pa=_alvoP.a, _pm=_alvoP.m;
   const _ymP=_pa+'-'+String(_pm).padStart(2,'0');
   const oc = (typeof ocorrenciasDe==='function'?ocorrenciasDe(nome):[])
     .filter(o=>String(o.data||'').slice(0,7)===_ymP)
@@ -1691,7 +1689,7 @@ function abrirModalRapido(tipo, pessoaPrev){
       <div class="rapido-campo" style="margin-bottom:14px;"><div class="rapido-lbl">Colaborador</div>
         <select class="rapido-inp" id="av-f-pessoa">${AV_COLABS.map(n=>`<option ${n===pessoaPrev?'selected':''}>${n}</option>`).join('')}</select>
       </div>
-      <div class="modal-sub" style="margin:-6px 0 10px;">Referente a <b>${window._avalMesLabel||'mês anterior'}</b></div>
+      <div class="modal-sub" style="margin:-6px 0 10px;">Referente a <b>${mesLbl((window._cMes||mesHoje()).a,(window._cMes||mesHoje()).m)}</b></div>
       ${linha('Desempenho',0)}${linha('Comportamento',1)}${linha('Pró-atividade / Cultura',2)}
       <div class="rapido-campo"><div class="rapido-lbl">Observação</div>
         <textarea class="rapido-textarea" id="av-f-obs" placeholder="Pontos altos e baixos do mês...">${prev?esc(prev.obs||''):''}</textarea>
@@ -1753,12 +1751,32 @@ const ACESSO = [GESTOR_EMAIL, SUPERVISORA_EMAIL];
 // Produção: exige login pela Central; sem login, redireciona. Dados vêm do Firestore.
 const EXIGIR_LOGIN = true;
 
+// Dentro da Central o painel roda num <iframe>. Nesse caso NUNCA redirecionar:
+// location.href trocaria o endereço do próprio iframe e carregaria a Central
+// dentro dela mesma (dois cabeçalhos, dois menus). Quem cuida do login é a Central.
+const EM_IFRAME = (function(){ try{ return window.self !== window.top; }catch(e){ return true; } })();
+let _authOk = false;
+function aguardandoLogin(){
+  if(_authOk) return;
+  const cap = document.querySelector('.hoje-cap-data');
+  if(cap) cap.textContent = 'Carregando…';
+  const st = document.getElementById('hoje-status');
+  if(st) st.innerHTML = 'Conectando com a sua conta…';
+}
 if(AUTH){
   AUTH.onAuthStateChanged(function(user){
     if(!user){
-      if(EXIGIR_LOGIN){ location.href = 'https://lorettoscarpa-icr.github.io/central/'; }
-      return; // sem login → segue em modo demonstração (não quebra o preview)
+      // Primeira chamada costuma vir sem usuário enquanto o Firebase restaura a
+      // sessão — só decide depois que ela realmente não veio.
+      if(EM_IFRAME){ aguardandoLogin(); return; }
+      if(EXIGIR_LOGIN){
+        setTimeout(function(){
+          if(!_authOk && !AUTH.currentUser){ location.href = 'https://lorettoscarpa-icr.github.io/central/'; }
+        }, 2500);
+      }
+      return;
     }
+    _authOk = true;
     const email = (user.email||'').toLowerCase();
     if(ACESSO.indexOf(email) === -1){ semAcesso(email); return; }
     SESSION = user;
@@ -1767,6 +1785,13 @@ if(AUTH){
     carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); montarSeletorMesPauta(); });
   });
 }
+
+setTimeout(function(){
+  if(_authOk || !EM_IFRAME) return;
+  const st = document.getElementById('hoje-status');
+  if(st) st.innerHTML = 'Não consegui ler a sua sessão aqui dentro. '
+    + '<a href="https://lorettoscarpa-icr.github.io/supervisora/" target="_top" style="color:var(--ou2);text-decoration:underline;">Abrir o painel em tela cheia</a>';
+}, 8000);
 
 function saudacaoHora(){ const h=new Date().getHours(); return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite'; }
 
@@ -2229,7 +2254,10 @@ function ocorrenciasDe(nome){ return (window._ocorrencias||[]).filter(o=>o.pesso
 function filtrarOc(f){ window._ocFiltro=f; renderOcorrencias(); }
 function renderOcorrencias(){
   const lista=document.getElementById('oc-lista'); if(!lista)return;
-  const arr=window._ocorrencias||[], f=window._ocFiltro||'todas';
+  const alvo=window._cMes||mesHoje();
+  const ym=alvo.a+'-'+String(alvo.m).padStart(2,'0');
+  const arr=(window._ocorrencias||[]).filter(o=>String(o.data||'').slice(0,7)===ym);
+  const f=window._ocFiltro||'todas';
   const fl=document.getElementById('oc-filtros');
   if(fl){
     const nAt=arr.filter(o=>o.tipo==='atencao').length, nEl=arr.filter(o=>o.tipo==='elogio').length;
@@ -2238,7 +2266,7 @@ function renderOcorrencias(){
       +'<button class="oc-filtro '+(f==='elogio'?'ativo':'')+'" onclick="filtrarOc(\'elogio\')">Elogios · '+nEl+'</button>';
   }
   const vis=f==='todas'?arr:arr.filter(o=>o.tipo===f);
-  if(!vis.length){ lista.innerHTML='<div class="mel-vazio">'+(arr.length?'Nenhuma ocorrência neste filtro.':'Nenhuma ocorrência registrada ainda. Use <b>+ Nova Ocorrência</b>.')+'</div>'; return; }
+  if(!vis.length){ lista.innerHTML='<div class="mel-vazio">'+(arr.length?'Nenhuma ocorrência neste filtro.':'Nenhuma ocorrência em '+mesLbl(alvo.a,alvo.m)+'.')+'</div>'; return; }
   lista.innerHTML=vis.map(o=>{
     const dt=o.data?(o.data.slice(8,10)+'/'+o.data.slice(5,7)):'';
     const catCls=(o.cat||'').toLowerCase().replace(/[^a-z]/g,'');
@@ -2282,17 +2310,17 @@ function keyAvalMesAnterior(){ const d=new Date(); const pm=new Date(d.getFullYe
 async function carregarAvaliacoes(){
   const mk=keyAvalMesAnterior();
   window._avalMesKey=mk.key; window._avalMesLabel=mk.lbl;
-  if(!DB){ window._avaliacoes={}; renderAvaliacoes(); return; }
-  try{
-    const doc=await DB.collection('ls_avaliacoes').doc(mk.key).get();
-    window._avaliacoes=doc.exists?(doc.data().dados||{}):{};
-  }catch(e){ console.warn('carregarAvaliacoes',e); window._avaliacoes={}; }
-  window._avalPend=AV_COLABS.filter(n=>!window._avaliacoes[n]).length;
-  renderAvaliacoes(); if(typeof renderPendencias==='function') renderPendencias();
+  // pendência da Home é sempre sobre o mês anterior (é a ação em aberto)
+  const pm=mesSoma(mesHoje(),-1);
+  const doAnterior=await avaliacoesDoMes(pm.a,pm.m);
+  window._avalPend=AV_COLABS.filter(n=>!doAnterior[n]).length;
+  if(typeof renderPendencias==='function') renderPendencias();
+  await atualizarRh();
 }
 function renderAvaliacoes(){
   const el=document.getElementById('av-lista'); if(!el)return;
-  const tit=document.getElementById('av-mes-tit'); if(tit) tit.textContent='Avaliações de '+(window._avalMesLabel||'');
+  const alvo=window._cMes||mesHoje();
+  const tit=document.getElementById('av-mes-tit'); if(tit) tit.textContent='Avaliações de '+mesLbl(alvo.a,alvo.m);
   const dados=window._avaliacoes||{};
   const grupo=(lbl,nomes)=>'<div class="av-grupo-lbl">'+lbl+'</div><div class="av-pessoa-list">'
     +nomes.map(n=>{ const a=dados[n];
@@ -2314,10 +2342,13 @@ async function salvarAvaliacao(){
   const av=window._avSel||[0,0,0];
   if(av.some(x=>!x)){ alert('Dê uma nota de 1 a 5 nas três categorias.'); return; }
   const obs=(document.getElementById('av-f-obs').value||'').trim();
-  const key=window._avalMesKey||keyAvalMesAnterior().key;
+  const alvo=window._cMes||mesHoje();
+  const key=alvo.a+'_'+String(alvo.m).padStart(2,'0');
   window._avaliacoes=window._avaliacoes||{};
   window._avaliacoes[nome]={av:av.slice(),obs:obs,autor:(window._usuario||'Jhennifer'),criadoEm:new Date().toISOString()};
-  window._avalPend=AV_COLABS.filter(n=>!window._avaliacoes[n]).length;
+  window._avCache[key]=window._avaliacoes;
+  const _pm=mesSoma(mesHoje(),-1), _pk=_pm.a+'_'+String(_pm.m).padStart(2,'0');
+  if(key===_pk) window._avalPend=AV_COLABS.filter(n=>!window._avaliacoes[n]).length;
   renderAvaliacoes(); if(typeof renderPendencias==='function') renderPendencias();
   fecharModal('modal-rapido');
   if(!DB) return;
@@ -2389,21 +2420,31 @@ function navMes(hostId,a,m,fn,extra){
     +(extra||'');
 }
 function montarSeletorMesPauta(){
-  const sel=document.getElementById('sel-pauta-mes'); if(!sel)return;
-  const h=mesHoje(); let html='';
-  for(let i=0;i<13;i++){ const o=mesSoma(h,-i);
-    html+='<option value="'+o.a+'_'+o.m+'"'+(i===1?' selected':'')+'>'+mesLbl(o.a,o.m)+(i===0?' (atual)':'')+'</option>'; }
-  sel.innerHTML=html;
+  // a 1:1 normalmente é sobre o mês que fechou
+  window._pMes = window._pMes || mesSoma(mesHoje(),-1);
+  navMes('nav-rel', window._pMes.a, window._pMes.m, 'navRel');
 }
 function navVendas(d){ const h=mesHoje();
   window._vMes = d===0 ? h : mesSoma(window._vMes||h, d);
   if(ehMesFuturo(window._vMes.a,window._vMes.m)) window._vMes=h;
   carregarDadosReais();
 }
-function navCal(d){ const h=mesHoje();
+function navRh(d){ const h=mesHoje();
   window._cMes = d===0 ? h : mesSoma(window._cMes||h, d);
+  atualizarRh();
+}
+async function atualizarRh(){
+  const alvo = window._cMes || mesHoje(); window._cMes = alvo;
+  navMes('nav-rh', alvo.a, alvo.m, 'navRh');
   renderCalendario(window._lancItems||[]);
   renderAusenciasMes(window._lancItems||[]);
+  renderOcorrencias();
+  window._avaliacoes = await avaliacoesDoMes(alvo.a, alvo.m);
+  renderAvaliacoes();
+}
+function navRel(d){ const h=mesHoje();
+  window._pMes = d===0 ? h : mesSoma(window._pMes||h, d);
+  navMes('nav-rel', window._pMes.a, window._pMes.m, 'navRel');
 }
 
 function renderAlertas(){
@@ -2746,7 +2787,6 @@ function renderCalendario(items){
   const ano=alvo.a, mes=alvo.m;
   const _h=new Date();
   const hoje = ehMesAtual(ano,mes) ? _h.getDate() : -1;
-  navMes('nav-cal', ano, mes, 'navCal');
   const mesEl=document.getElementById('cal-mes-rh'); if(mesEl)mesEl.textContent=MESES[mes-1]+' '+ano;
   const totalDias=new Date(ano,mes,0).getDate();
   const evt={};
