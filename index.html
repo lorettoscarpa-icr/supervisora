@@ -52,6 +52,9 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 /* HOJE */
 .hoje-cap{background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.02));border:1px solid var(--oud);border-left:3px solid var(--ou);padding:20px 24px;margin-bottom:20px;}
 .hoje-cap-data{font-family:'Playfair Display',serif;font-size:24px;color:var(--ou2);}
+.hoje-cap{display:flex;align-items:center;gap:14px;}
+.cap-av{width:54px;height:54px;border-radius:50%;overflow:hidden;border:2px solid var(--ou);flex:none;display:flex;align-items:center;justify-content:center;background:var(--v2);color:var(--cr);font-family:'Playfair Display',serif;font-size:22px;}
+.cap-av img{width:100%;height:100%;object-fit:cover;}
 .hoje-cap-status{font-size:12px;color:var(--cr3);margin-top:6px;}
 .hoje-cap-status b.warn{color:var(--amarelo);}
 .hoje-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px;}
@@ -589,6 +592,14 @@ body{zoom:1.1;}
 .pend-btn:hover{background:var(--ou);color:var(--bg);}
 .mi-precisa{font-size:11px;color:var(--cr3);}
 .mi-precisa b{color:var(--cr2);}
+.atu-card{padding:14px 10px;}
+.atu-foto{width:40px;height:40px;font-size:16px;margin-bottom:8px;border-width:2px;}
+.atu-nome{font-size:10px;letter-spacing:1.5px;margin-bottom:4px;}
+.atu-data{font-size:12px;margin-bottom:8px;}
+.atu-pill{font-size:8px;padding:4px 9px;}
+.conf-item{cursor:pointer;user-select:none;}
+.conf-item .conf-stat.pend{color:var(--cr3);}
+.conf-item.pend .conf-titulo{color:var(--cr3);}
 </style>
 <!-- Firebase (compat) · Central Loretto Scarpa -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -609,8 +620,11 @@ body{zoom:1.1;}
 <!-- HOJE -->
 <div class="tab-content active" id="tab-hoje">
   <div class="hoje-cap">
-    <div class="hoje-cap-data">Bom dia, Jhennifer!</div>
-    <div class="hoje-cap-status" id="hoje-status">Quarta, 14 de Junho de 2026 · <b class="warn">2 coisas pra você olhar hoje</b></div>
+    <div class="cap-av" id="cap-av">J</div>
+    <div>
+      <div class="hoje-cap-data">Bom dia, Jhennifer!</div>
+      <div class="hoje-cap-status" id="hoje-status">Carregando…</div>
+    </div>
   </div>
 
   <div id="pendencias" class="pend-card" style="display:none"></div>
@@ -666,13 +680,8 @@ body{zoom:1.1;}
     </div>
   </div>
 
-  <div class="slbl"><span>Conferências Diárias · 14/06</span></div>
-  <div class="conf-grid" style="margin-bottom:18px;">
-    <div class="conf-item ok"><div class="conf-titulo">Caixa fechado ontem</div><div class="conf-stat">✓</div><div class="conf-quem">Jhennifer · 19:30</div></div>
-    <div class="conf-item ok"><div class="conf-titulo">Loja organizada</div><div class="conf-stat">✓</div><div class="conf-quem">Michelly · 09:00</div></div>
-    <div class="conf-item ok"><div class="conf-titulo">Vitrine alinhada</div><div class="conf-stat">✓</div><div class="conf-quem">Michelly · 09:30</div></div>
-    <div class="conf-item ok"><div class="conf-titulo">Estoque · Reposição Semanal</div><div class="conf-stat">✓</div><div class="conf-quem">Yuri · toda segunda</div></div>
-  </div>
+  <div class="slbl"><span id="conf-data">Conferências Diárias</span></div>
+  <div class="conf-grid" id="conf-grid" style="margin-bottom:18px;"></div>
 
   <div class="acoes-card">
     <div class="acoes-tit">⚠ 3 ações sugeridas pra você hoje</div>
@@ -697,34 +706,57 @@ body{zoom:1.1;}
   <div class="cob-sec">
     <div class="slbl">Cobertura de Ausências</div>
     <div class="mc-cap">Quem está fora e quem assume o <b>celular de vendas</b> + as <b>funções</b> · vale pra folga, férias ou atestado</div>
-    <div class="cob-grid" id="cob-grid">
-      <div class="cob-card">
-        <div class="cob-head"><span class="mini-av" data-foto="Natália">N</span><div><div class="cob-nome">Natália</div><div class="cob-motivo ferias">Férias · volta 17/06</div></div></div>
-        <div class="cob-linha">📱 Celular de vendas + funções da Natália</div>
-        <div class="cob-assign">Assume →
-          <select class="cob-sel" onchange="cobrir(this,'cob-st-natalia')">
-            <option value="">escolher quem cobre…</option>
-            <option value="Ialey" selected>Ialey · vendedora</option>
-            <option value="Michelly">Michelly · vendedora</option>
-            <option value="Jhennifer">Jhennifer · supervisora</option>
-            <option value="Yuri">Yuri · operação</option>
-            <option value="Gustavo">Gustavo · operação</option>
-          </select>
-        </div>
-        <div class="cob-status ok" id="cob-st-natalia">📱 Celular + funções com <b>Ialey</b></div>
-      </div>
-    </div>
+    <div class="cob-grid" id="cob-grid"><div class="cob-status pend" style="border:none;background:transparent;">Ninguém ausente hoje.</div></div>
     <button class="mural-novo-btn" style="width:auto;margin-top:2px;" onclick="alert('Em breve: registrar nova ausência (folga, férias ou atestado) e definir a cobertura. Vai ler o status do time direto do Firebase.')">+ Registrar ausência</button>
   </div>
 </div>
 
 <script>
-function cobrir(sel,alvoId){
-  const el=document.getElementById(alvoId);if(!el)return;
-  const v=sel.value;
-  if(!v){el.className='cob-status pend';el.textContent='Sem cobertura definida ainda';return;}
-  el.className='cob-status ok';
-  el.innerHTML='📱 Celular + funções com <b>'+v+'</b>';
+const GRUPO={'Ialey':'vendas','Michelly':'vendas','Natália':'vendas','Jhennifer':'supervisao','Yuri':'operacao','Edson':'operacao','Gustavo':'operacao','Lorrayne':'marketing'};
+function _cobId(nome,inicio){ return 'cb_'+String(nome).normalize('NFD').replace(/[^a-zA-Z]/g,'').toLowerCase()+'_'+String(inicio||'').replace(/[^0-9]/g,''); }
+function ausentesAgora(){
+  const d=new Date(); const hj=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  return (window._lancItems||[]).filter(l=>l.inicio&&l.fim&&l.inicio<=hj&&l.fim>=hj)
+    .map(l=>({nome:FUNC_MAP[l.funcId]||'?',mot:motivoDe(l.tipo),inicio:l.inicio,fim:l.fim})).filter(a=>a.nome!=='?');
+}
+function renderCobertura(){
+  const grid=document.getElementById('cob-grid'); if(!grid)return;
+  const aus=ausentesAgora(); const cob=window._cob||{};
+  if(!aus.length){ grid.innerHTML='<div class="cob-status pend" style="border:none;background:transparent;">Ninguém ausente hoje.</div>'; return; }
+  const foraNomes=aus.map(a=>a.nome);
+  grid.innerHTML=aus.map(a=>{
+    const id=_cobId(a.nome,a.inicio); const escolhido=cob[id]||'';
+    const opcoes=Object.keys(GRUPO).filter(n=>n!==a.nome&&GRUPO[n]===GRUPO[a.nome]&&foraNomes.indexOf(n)<0);
+    const motCls=/f[ée]rias/i.test(a.mot.txt)?'ferias':(/atestado/i.test(a.mot.txt)?'atestado':'folga');
+    const sel=opcoes.length?('<select class="cob-sel" onchange="cobrir(this,\''+id+'\',\''+a.nome+'\')">'
+      +'<option value="">escolher quem cobre…</option>'
+      +opcoes.map(n=>'<option value="'+n+'"'+(n===escolhido?' selected':'')+'>'+n+' · '+GRUPO[n]+'</option>').join('')
+      +'</select>'):'<span style="font-size:12px;color:var(--cr3);">sem colega do mesmo grupo disponível</span>';
+    return '<div class="cob-card">'
+      +'<div class="cob-head"><span class="mini-av" data-foto="'+a.nome+'">'+a.nome[0]+'</span><div><div class="cob-nome">'+a.nome+'</div><div class="cob-motivo '+motCls+'">'+a.mot.txt+' · até '+fmtData(a.fim)+'</div></div></div>'
+      +'<div class="cob-linha">📱 Celular de vendas + funções de '+a.nome+'</div>'
+      +'<div class="cob-assign">Assume → '+sel+'</div>'
+      +'<div class="cob-status '+(escolhido?'ok':'pend')+'" id="st-'+id+'">'+(escolhido?('📱 Celular + funções com <b>'+escolhido+'</b>'):'Sem cobertura definida ainda')+'</div></div>';
+  }).join('');
+  if(typeof aplicarFotos==='function') aplicarFotos();
+}
+async function carregarCoberturas(){
+  if(!DB){ renderCobertura(); return; }
+  try{
+    window._cob={};
+    await Promise.all(ausentesAgora().map(async a=>{
+      const id=_cobId(a.nome,a.inicio);
+      try{ const doc=await DB.collection('ls_coberturas').doc(id).get(); if(doc.exists) window._cob[id]=doc.data().cobre||''; }catch(_){}}));
+  }catch(e){ console.warn('carregarCoberturas',e); }
+  renderCobertura();
+}
+async function cobrir(sel,id,nome){
+  const v=sel.value; window._cob=window._cob||{}; window._cob[id]=v;
+  const el=document.getElementById('st-'+id);
+  if(el){ el.className='cob-status '+(v?'ok':'pend'); el.innerHTML=v?('📱 Celular + funções com <b>'+v+'</b>'):'Sem cobertura definida ainda'; }
+  if(!DB) return;
+  try{ await DB.collection('ls_coberturas').doc(id).set({cobre:v,ausente:nome,por:'Jhennifer',atualizadoEm:new Date().toISOString()},{merge:true}); }
+  catch(e){ console.warn('cobrir',e); }
 }
 </script>
 
@@ -951,69 +983,7 @@ function cobrir(sel,alvoId){
 
   <!-- COMPARATIVOS: YoY + Destaques -->
   <div class="vendas-sec" id="vendas-comparativos">
-    <div class="slbl">Junho 2025 vs Junho 2026 · Sapatos</div>
-    <div style="background:var(--bg2);border:1px solid var(--oud2);padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:30px;">
-      <div>
-        <div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">Ano contra Ano</div>
-        <div style="display:flex;gap:14px;align-items:flex-end;height:140px;border-bottom:1px solid var(--oud2);padding:10px 0;">
-          <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
-            <div style="width:55%;height:95%;background:rgba(201,168,76,.35);"></div>
-            <div style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--ou2);margin-top:6px;">1398</div>
-            <div style="font-size:9px;letter-spacing:1px;color:var(--cr3);text-transform:uppercase;">Jun 2025</div>
-          </div>
-          <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
-            <div style="width:55%;height:40%;background:linear-gradient(180deg,var(--ou2),var(--ou));"></div>
-            <div style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--ou2);margin-top:6px;">580*</div>
-            <div style="font-size:9px;letter-spacing:1px;color:var(--cr3);text-transform:uppercase;">Jun 2026</div>
-          </div>
-        </div>
-        <div style="font-size:11px;color:var(--cr3);margin-top:10px;">* Junho ainda em andamento (14/30 dias úteis)</div>
-        <div style="font-size:11px;color:var(--cr3);">Projeção fim de mês: ~1280 (-8% vs 2025)</div>
-      </div>
-      <div>
-        <div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">Destaques vs ano passado</div>
-        <div style="background:rgba(127,191,127,.05);border-left:2px solid var(--verde);padding:12px 14px;margin-bottom:8px;">
-          <div style="font-size:9px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;">Quem cresceu mais</div>
-          <div style="font-size:15px;color:var(--cr);margin:4px 0;">Michelly</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--verde);">⬆ +18% vs Jun 2025</div>
-        </div>
-        <div style="background:rgba(217,117,96,.05);border-left:2px solid var(--vermelho);padding:12px 14px;">
-          <div style="font-size:9px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;">Quem caiu mais</div>
-          <div style="font-size:15px;color:var(--cr);margin:4px 0;">Natália</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--vermelho);">⬇ -15% vs Jun 2025</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="slbl">Comparativo por Categoria · Junho 25 vs 26</div>
-    <div style="background:var(--bg2);border:1px solid var(--oud2);padding:16px;">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;text-align:center;">
-        <div>
-          <div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">Sapatos</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--cr3);">1398 → 580*</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--vermelho);margin-top:6px;">⬇ -58%</div>
-          <div style="font-size:10px;color:var(--cr3);margin-top:4px;">projeção: -8%</div>
-        </div>
-        <div>
-          <div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">Meias</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--cr3);">512 → 218*</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--vermelho);margin-top:6px;">⬇ -57%</div>
-          <div style="font-size:10px;color:var(--cr3);margin-top:4px;">projeção: -2%</div>
-        </div>
-        <div>
-          <div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">Cintos</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--cr3);">309 → 158*</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--verde);margin-top:6px;">⬆ +10%</div>
-          <div style="font-size:10px;color:var(--cr3);margin-top:4px;">projeção: +10%</div>
-        </div>
-        <div>
-          <div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">Limpeza</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--cr3);">128 → 26*</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--vermelho);margin-top:6px;">⬇ -80%</div>
-          <div style="font-size:10px;color:var(--cr3);margin-top:4px;">projeção: -58%</div>
-        </div>
-      </div>
-    </div>
+    <div id="comp-real"><div class="rel-load">Carregando comparativo…</div></div>
   </div>
 </div>
 
@@ -1040,10 +1010,6 @@ function cobrir(sel,alvoId){
         <div class="cal-dia"><div class="cal-dia-n">28</div><div class="cal-evt ani">🎂 Edson</div></div><div class="cal-dia"><div class="cal-dia-n">29</div></div><div class="cal-dia"><div class="cal-dia-n">30</div></div><div class="cal-dia fim"><div class="cal-dia-n">1/jul</div><div class="cal-evt ferias">🌴 Gustavo</div></div><div class="cal-dia fim"><div class="cal-dia-n">2</div><div class="cal-evt ferias">🌴 Gustavo</div></div><div class="cal-dia fim"></div><div class="cal-dia fim"></div>
       </div>
     </div>
-    <div style="background:var(--bg2);border:1px solid var(--oud2);padding:14px 16px;margin-top:10px;display:flex;gap:18px;flex-wrap:wrap;font-size:11px;">
-      <div><b style="color:var(--ou2);">Escala de abertura:</b> Ialey (seg-qua), Michelly (qui-sáb)</div>
-      <div><b style="color:var(--ou2);">Celular da loja:</b> Ialey nesta semana</div>
-      <div><b style="color:var(--ou2);">Cobertura folga Natália:</b> Michelly cobre 16 e 23</div>
     </div>
   </div>
 
@@ -1228,10 +1194,11 @@ function abrirTab(t, btn){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function abrirRh(s, btn){
-  document.querySelectorAll('.rh-subnav-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.rh-sec').forEach(c=>c.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('rh-'+s).classList.add('active');
+  if(!btn){ document.querySelectorAll('.rh-subnav-btn').forEach(b=>{ const oc=b.getAttribute('onclick')||''; if(oc.indexOf("'"+s+"'")>=0) btn=b; }); }
+  document.querySelectorAll('.rh-subnav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const sec=document.getElementById('rh-'+s); if(sec) sec.classList.add('active');
 }
 function abrirVendas(s, btn){
   const wrap = btn.parentElement;
@@ -1752,7 +1719,7 @@ if(AUTH){
     SESSION = user;
     ROLE = (email === GESTOR_EMAIL) ? 'gestor' : 'supervisora';
     aplicarSessao(ROLE);
-    carregarCadastroRH().then(function(){ carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); });
+    carregarCadastroRH().then(function(){ carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); });
   });
 }
 
@@ -1764,6 +1731,7 @@ function aplicarSessao(role){
   const ub = document.querySelector('.h-user b'); if(ub) ub.textContent = nome.toUpperCase();
   const hs = document.querySelector('.h-sub');    if(hs) hs.textContent = sub;
   const cap= document.querySelector('.hoje-cap-data'); if(cap) cap.textContent = saudacaoHora()+', '+nome+'!';
+  const av=document.getElementById('cap-av'); if(av){ av.setAttribute('data-foto',nome); av.textContent=nome[0]; if(typeof aplicarFotos==='function') aplicarFotos(); }
 }
 
 function semAcesso(email){
@@ -1857,7 +1825,7 @@ const DIAS_SEMANA = ['dom','seg','ter','qua','qui','sex','sáb'];
 const keyMes  = (a,m)   => a+'_'+String(m).padStart(2,'0');
 const keyHist = (v,a,m) => v+'_'+keyMes(a,m);
 function diasUteis(ano,mes,ate){ let n=0; const lim=ate||new Date(ano,mes,0).getDate();
-  for(let d=1;d<=lim;d++){const wd=new Date(ano,mes-1,d).getDay(); if(wd>=1&&wd<=5)n++;} return n; }
+  for(let d=1;d<=lim;d++){const wd=new Date(ano,mes-1,d).getDay(); if(wd>=1&&wd<=6)n++;} return n; }
 function fmtData(iso){const p=(iso||'').split('-'); return p.length===3?p[2]+'/'+p[1]:iso;}
 
 const MESES_PT=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -1866,9 +1834,29 @@ function relYoy(cur,base){
   const p=Math.round((cur-base)/base*100), c=p>=0?'#6dbf6d':'#e07070', sn=p>=0?'+':'';
   return '<span style="color:'+c+';font-weight:600">'+sn+p+'%</span>';
 }
+async function carregarRelatorioAnterior(){
+  if(!DB) return;
+  try{
+    const now=new Date(), pm=new Date(now.getFullYear(), now.getMonth()-1, 1);
+    const ano=pm.getFullYear(), mes=pm.getMonth()+1;
+    const cur={}, base={}, total={}; CATS.forEach(c=>total[c.id]=0);
+    await Promise.all(VENDS.map(async v=>{
+      const doc=await DB.collection('ls_historico').doc(keyHist(v,ano,mes)).get();
+      const o={}; CATS.forEach(c=>o[c.id]=0);
+      (doc.exists?(doc.data().registros||[]):[]).forEach(r=>CATS.forEach(c=>o[c.id]+=Number(r[c.id]||0)));
+      cur[v]=o; CATS.forEach(c=>total[c.id]+=o[c.id]);
+      const h=(HIST_2025[v]&&HIST_2025[v][mes])||null;
+      base[v]={sapatos:h?h.sap:0,meias:h?h.mei:0,cintos:h?h.ace:0,limpeza:h?h.lim:0,carteiras:0,prendedor:0};
+    }));
+    const cfg=await getCfgMesSup(ano,mes); const du=cfg.diasUteis||26;
+    window._relAnt={total,metas:metaAlvoDe(cfg),cur,base,decorridos:du,totalDU:du,restantes:0,ano,mes};
+    renderRelatorio();
+  }catch(e){ console.warn('carregarRelatorioAnterior',e); }
+}
+
 function renderRelatorio(){
   const box=document.getElementById('rel-real'); if(!box) return;
-  const R=window._rel; if(!R){ box.innerHTML='<div class="rel-load">Sem dados do mês ainda.</div>'; return; }
+  const R=window._relAnt; if(!R){ box.innerHTML='<div class="rel-load">Carregando o mês anterior…</div>'; return; }
   const total=R.total, metas=R.metas, cur=R.cur, base=R.base, decorridos=R.decorridos, totalDU=R.totalDU, restantes=R.restantes, ano=R.ano, mes=R.mes;
   const teamCur=CATS.reduce((a,c)=>a+(total[c.id]||0),0);
   const teamMeta=metas?CATS.reduce((a,c)=>a+Number(metas[c.id]||0),0):0;
@@ -1876,7 +1864,7 @@ function renderRelatorio(){
   const pctTeam=teamMeta?Math.round(teamCur/teamMeta*100):0;
   const noRitmo=metas?CATS.filter(c=>(total[c.id]||0)>=Number(metas[c.id]||0)*(decorridos/totalDU)).length:0;
 
-  let h='<div class="rel-mes">'+MESES_PT[mes]+' '+ano+' · '+decorridos+' de '+totalDU+' dias úteis · faltam '+restantes+'</div>';
+  let h='<div class="rel-mes">'+MESES_PT[mes]+' '+ano+' · mês fechado</div>';
   h+='<div class="rel-stats">';
   h+='<div class="rel-stat"><div class="rl">Vendido no mês</div><div class="rv">'+teamCur+'</div><div class="rs">meta '+teamMeta+' · '+pctTeam+'%</div></div>';
   h+='<div class="rel-stat"><div class="rl">vs. '+(ano-1)+'</div><div class="rv">'+relYoy(teamCur,teamBase)+'</div><div class="rs">'+teamBase+' no ano passado</div></div>';
@@ -1903,11 +1891,26 @@ async function getCfgMesSup(ano,mes){
   const DEF={sapatos:950,meias:275,cintos:185,carteiras:20,limpeza:90,prendedor:30};
   try{
     const doc=await DB.collection('ls_metas').doc(keyMes(ano,mes)).get();
-    if(doc.exists){ const d=doc.data(); return {metas:d.metas||Object.assign({},DEF), diasUteis:d.diasUteis||26}; }
+    if(doc.exists){ const d=doc.data(); return {metas:d.metas||Object.assign({},DEF), diasUteis:d.diasUteis||26, hipermetas:d.hipermetas||null, ultrametas:d.ultrametas||null, ultraAtiva:!!d.ultraAtiva}; }
     if(mes>1){ const prev=await DB.collection('ls_metas').doc(keyMes(ano,mes-1)).get();
       if(prev.exists){ const p=prev.data(); return {metas:Object.assign({},(p.metas||DEF)), diasUteis:p.diasUteis||26}; } }
   }catch(e){ console.warn('getCfgMesSup',e); }
   return {metas:Object.assign({},DEF), diasUteis:26};
+}
+
+/* Alvo real que as vendedoras seguem no painel de Metas:
+   ultra ativa+ultrameta > (sapatos) hipermeta > meta base */
+function metaAlvoDe(cfg){
+  const out={};
+  CATS.forEach(c=>{
+    const m=Number((cfg.metas&&cfg.metas[c.id])||0);
+    const um=Number((cfg.ultrametas&&cfg.ultrametas[c.id])||0);
+    const hip=(c.id==='sapatos')?Number((cfg.hipermetas&&cfg.hipermetas.sapatos)||0):0;
+    if(cfg.ultraAtiva&&um>0) out[c.id]=um;
+    else if(hip>0) out[c.id]=hip;
+    else out[c.id]=m;
+  });
+  return out;
 }
 
 async function carregarDadosReais(){
@@ -1918,7 +1921,7 @@ async function carregarDadosReais(){
     const restantes=Math.max(totalDU-decorridos,0)||1;
 
     const cfg=await getCfgMesSup(ano,mes);
-    const metas=cfg.metas;
+    const metas=metaAlvoDe(cfg);
     const duMeta=cfg.diasUteis||totalDU, restMeta=Math.max(duMeta-decorridos,0)||1;
 
     const cur={}, base={}, total={}, lastSale={}; CATS.forEach(c=>total[c.id]=0);
@@ -1929,7 +1932,13 @@ async function carregarDadosReais(){
       cur[v]=somar(h26);
       const _h25=(HIST_2025[v]&&HIST_2025[v][mes])||null;
       base[v]={sapatos:_h25?_h25.sap:0,meias:_h25?_h25.mei:0,cintos:_h25?_h25.ace:0,limpeza:_h25?_h25.lim:0,carteiras:0,prendedor:0};
-      const _rg=h26.exists?(h26.data().registros||[]):[]; const _ds=_rg.map(r=>r.data).filter(Boolean).sort(); lastSale[v]=_ds.length?_ds[_ds.length-1]:null;
+      const _rg=h26.exists?(h26.data().registros||[]):[]; let _last=null;
+      _rg.forEach(r=>{ if(!r.data)return; let iso=null; const _s=String(r.data);
+        const _m=_s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if(_m){ iso=_m[1]+'-'+String(+_m[2]).padStart(2,'0')+'-'+String(+_m[3]).padStart(2,'0'); }
+        else { const _p=_s.split('/'); if(_p.length>=2){ const _dd=+_p[0],_mm=+_p[1]; if(_dd&&_mm) iso=ano+'-'+String(_mm).padStart(2,'0')+'-'+String(_dd).padStart(2,'0'); } }
+        if(iso&&(!_last||iso>_last)) _last=iso; });
+      lastSale[v]=_last;
       CATS.forEach(c=>total[c.id]+=cur[v][c.id]);
     }));
 
@@ -1943,7 +1952,7 @@ async function carregarDadosReais(){
     window._rel={total:total,metas:metas,cur:cur,base:base,decorridos:decorridos,totalDU:totalDU,restantes:restantes,ano:ano,mes:mes};
     renderRelatorio();
     renderAtualizacoes(lastSale);
-    window._lastSale=lastSale; window._cur=cur; renderDestaques(); renderAlertas(); renderAcoes();
+    window._lastSale=lastSale; window._cur=cur; renderDestaques(); renderAlertas(); renderAcoes(); renderComparativos();
     const _tm=metas?CATS.reduce((a,c)=>a+Number(metas[c.id]||0),0):0, _hj=new Date();
     VENDS.forEach(v=>{ const p=PESSOAS[v]; if(!p) return;
       let dias=null; if(lastSale[v]){ dias=Math.floor((_hj-new Date(lastSale[v]+'T00:00:00'))/86400000); }
@@ -1974,6 +1983,46 @@ function renderMetasCategoria(total,metas,decorridos,restantes,totalDU){
   }).join('');
   const cap=el.previousElementSibling;
   if(cap&&cap.classList.contains('mc-cap')){ cap.innerHTML='Faltam <b>'+restantes+' dias úteis</b> · quanto cada categoria precisa vender por dia pra bater a meta do mês'; }
+}
+
+const CONF_DIA=[{id:'caixa',t:'Caixa fechado ontem'},{id:'loja',t:'Loja organizada'},{id:'vitrine',t:'Vitrine alinhada'}];
+const CONF_SEM=[{id:'reposicao',t:'Estoque · Reposição Semanal'}];
+function _isoWeek(d){ const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); const dn=t.getUTCDay()||7; t.setUTCDate(t.getUTCDate()+4-dn); const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1)); return {y:t.getUTCFullYear(), w:Math.ceil(((t-y0)/86400000+1)/7)}; }
+function confKeyDia(){ const d=new Date(); return 'conf_'+d.getFullYear()+'_'+String(d.getMonth()+1).padStart(2,'0')+'_'+String(d.getDate()).padStart(2,'0'); }
+function confKeySem(){ const w=_isoWeek(new Date()); return 'confsem_'+w.y+'_'+String(w.w).padStart(2,'0'); }
+async function carregarConf(){
+  if(!DB){ renderConf(); return; }
+  try{
+    const [dd,ss]=await Promise.all([
+      DB.collection('ls_conferencias').doc(confKeyDia()).get(),
+      DB.collection('ls_conferencias').doc(confKeySem()).get()
+    ]);
+    window._confDia=dd.exists?dd.data():{}; window._confSem=ss.exists?ss.data():{};
+  }catch(e){ console.warn('carregarConf',e); window._confDia={}; window._confSem={}; }
+  renderConf();
+}
+async function toggleConf(tipo,id){
+  const store=tipo==='sem'?(window._confSem=window._confSem||{}):(window._confDia=window._confDia||{});
+  const atual=store[id]&&store[id].feito;
+  const d=new Date(), hora=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  store[id]=atual?{feito:false}:{feito:true,por:'Jhennifer',hora:hora};
+  renderConf();
+  if(!DB) return;
+  try{ const key=tipo==='sem'?confKeySem():confKeyDia();
+    await DB.collection('ls_conferencias').doc(key).set(store,{merge:true});
+  }catch(e){ console.warn('toggleConf',e); }
+}
+function renderConf(){
+  const grid=document.getElementById('conf-grid'); if(!grid)return;
+  const d=new Date(); const lbl=document.getElementById('conf-data');
+  if(lbl) lbl.textContent='Conferências Diárias · '+String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
+  const dia=window._confDia||{}, sem=window._confSem||{};
+  const mk=(it,tipo,st)=>{ const f=st[it.id]&&st[it.id].feito;
+    const quem=f?((st[it.id].por||'Jhennifer')+' · '+(st[it.id].hora||'')):(tipo==='sem'?'toque ao repor · vale a semana':'toque para marcar');
+    return '<div class="conf-item '+(f?'ok':'pend')+'" onclick="toggleConf(\''+tipo+'\',\''+it.id+'\')">'
+      +'<div class="conf-titulo">'+it.t+'</div><div class="conf-stat'+(f?'':' pend')+'">'+(f?'✓':'○')+'</div>'
+      +'<div class="conf-quem">'+quem+'</div></div>'; };
+  grid.innerHTML=CONF_DIA.map(it=>mk(it,'dia',dia)).join('')+CONF_SEM.map(it=>mk(it,'sem',sem)).join('');
 }
 
 function renderAcoes(){
@@ -2042,6 +2091,48 @@ function renderAlertas(){
   function bloco(tit,cor,arr){ if(!arr.length)return''; return '<div style="margin-bottom:14px;"><div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;color:'+cor+';font-weight:600;">'+tit+'</div>'+arr.map(t=>'<div class="acao-item" style="border-left:3px solid '+cor+';"><div class="acao-texto">'+t+'</div></div>').join('')+'</div>'; }
   const html=bloco('🔴 Crítico','#ff6b50',crit)+bloco('🟡 Atenção','#d4b86a',aten);
   el.innerHTML=html||'<div class="acao-item"><div class="acao-texto">✓ Nenhum alerta no momento — equipe no ritmo.</div></div>';
+}
+
+function renderComparativos(){
+  const el=document.getElementById('comp-real'); if(!el)return;
+  const R=window._rel; if(!R){ el.innerHTML='<div class="rel-load">Carregando comparativo…</div>'; return; }
+  const mes=R.mes, ano=R.ano, mNome=MESES_PT[mes], dec=R.decorridos||1, du=R.totalDU||26;
+  const F={sapatos:'sap',meias:'mei',cintos:'ace',limpeza:'lim'};
+  const b25={}, cats=['sapatos','meias','cintos','limpeza'];
+  cats.forEach(c=>{ b25[c]=0; VENDS.forEach(v=>{ const h=HIST_2025[v]&&HIST_2025[v][mes]; if(h) b25[c]+=Number(h[F[c]]||0); }); });
+  const cur=R.total||{};
+  const proj=c=>dec?Math.round((cur[c]||0)/dec*du):0;
+  const pj=proj('sapatos'), pjPct=b25.sapatos?Math.round((pj-b25.sapatos)/b25.sapatos*100):0;
+  const h25=Math.max(b25.sapatos,1), hAlt=Math.round(Math.min((cur.sapatos||0)/h25,1)*95);
+  // quem cresceu/caiu (projeção sapatos vs 2025 individual)
+  const rank=VENDS.map(v=>{ const h=HIST_2025[v]&&HIST_2025[v][mes]; const base=h?Number(h.sap||0):0; if(!base) return null;
+    const pv=dec?Math.round(((R.cur[v]&&R.cur[v].sapatos)||0)/dec*du):0;
+    return {v, pct: Math.round((pv-base)/base*100)}; }).filter(Boolean).sort((a,b)=>b.pct-a.pct);
+  const up=rank[0]||null, down=rank.length>1?rank[rank.length-1]:null;
+  const cell=(nome,c)=>{ const b=b25[c], a2=cur[c]||0, pP=b?Math.round((proj(c)-b)/b*100):0, pD=b?Math.round((a2-b)/b*100):0;
+    const cor=pP>=0?'var(--verde)':'var(--vermelho)', seta=pP>=0?'⬆ +':'⬇ ';
+    return '<div><div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">'+nome+'</div>'
+      +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:14px;color:var(--cr3);">'+b+' → '+a2+'*</div>'
+      +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:22px;color:'+cor+';margin-top:6px;">'+seta+pP+'%</div>'
+      +'<div style="font-size:10px;color:var(--cr3);margin-top:4px;">parcial: '+(pD>=0?'+':'')+pD+'%</div></div>'; };
+  el.innerHTML=
+    '<div class="slbl">'+mNome+' 2025 vs '+mNome+' '+ano+' · Sapatos</div>'
+    +'<div style="background:var(--bg2);border:1px solid var(--oud2);padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:30px;">'
+    +'<div><div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">Ano contra Ano</div>'
+    +'<div style="display:flex;gap:14px;align-items:flex-end;height:140px;border-bottom:1px solid var(--oud2);padding:10px 0;">'
+    +'<div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;"><div style="width:55%;height:95%;background:rgba(201,168,76,.35);"></div><div style="font-family:\'Cormorant Garamond\',serif;font-size:16px;color:var(--ou2);margin-top:6px;">'+b25.sapatos+'</div><div style="font-size:9px;letter-spacing:1px;color:var(--cr3);text-transform:uppercase;">'+mNome.slice(0,3)+' 2025</div></div>'
+    +'<div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;"><div style="width:55%;height:'+Math.max(hAlt,4)+'%;background:linear-gradient(180deg,var(--ou2),var(--ou));"></div><div style="font-family:\'Cormorant Garamond\',serif;font-size:16px;color:var(--ou2);margin-top:6px;">'+(cur.sapatos||0)+'*</div><div style="font-size:9px;letter-spacing:1px;color:var(--cr3);text-transform:uppercase;">'+mNome.slice(0,3)+' '+ano+'</div></div>'
+    +'</div>'
+    +'<div style="font-size:11px;color:var(--cr3);margin-top:8px;">* '+mNome+' ainda em andamento ('+dec+'/'+du+' dias úteis)<br>Projeção fim de mês: ~'+pj+' ('+(pjPct>=0?'+':'')+pjPct+'% vs 2025)</div></div>'
+    +'<div><div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">Destaques vs Ano Passado</div>'
+    +(up?('<div style="border-left:2px solid var(--verde);background:rgba(255,255,255,.02);padding:12px 14px;margin-bottom:10px;"><div style="font-size:9px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;">Quem cresceu mais</div><div style="color:var(--cr);font-size:15px;margin:3px 0;">'+up.v+'</div><div style="font-family:\'Cormorant Garamond\',serif;font-size:18px;color:var(--verde);">⬆ '+(up.pct>=0?'+':'')+up.pct+'% vs '+mNome.slice(0,3)+' 2025</div></div>'):'')
+    +(down?('<div style="border-left:2px solid var(--vermelho);background:rgba(255,255,255,.02);padding:12px 14px;"><div style="font-size:9px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;">Quem caiu mais</div><div style="color:var(--cr);font-size:15px;margin:3px 0;">'+down.v+'</div><div style="font-family:\'Cormorant Garamond\',serif;font-size:18px;color:var(--vermelho);">⬇ '+down.pct+'% vs '+mNome.slice(0,3)+' 2025</div></div>'):'')
+    +'</div></div>'
+    +'<div class="slbl" style="margin-top:22px;">Comparativo por Categoria · '+mNome+' 25 vs '+String(ano).slice(2)+'</div>'
+    +'<div style="background:var(--bg2);border:1px solid var(--oud2);padding:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center;">'
+    +cell('Sapatos','sapatos')+cell('Meias','meias')+cell('Cintos','cintos')+cell('Limpeza','limpeza')
+    +'</div>'
+    +'<div style="font-size:10px;color:var(--cr3);margin-top:8px;">Projeção mantém o ritmo atual até o fim do mês · "parcial" compara o vendido até hoje com o mês cheio de 2025 · Cintos concentra os acessórios de 2025 (regra do painel de Metas)</div>';
 }
 
 function renderDestaques(){
@@ -2183,6 +2274,7 @@ async function carregarPresenca(){
     renderAusenciasMes(items);
     renderEventos();
     renderPendencias();
+    carregarCoberturas();
     renderAcoes();
     window._hoje.aus=ausentes.length;
     atualizarStatusHoje();
