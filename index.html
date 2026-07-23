@@ -649,6 +649,14 @@ body{zoom:1.1;}
 .mel-del{background:transparent;border:none;color:var(--cr3);cursor:pointer;font-size:11px;padding:2px 6px;}
 .mel-del:hover{color:#e07070;}
 .mel-vazio{background:var(--bg2);border:1px dashed var(--oud2);padding:26px;text-align:center;color:var(--cr3);font-size:13px;}
+.nav-mes{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.nm-bt{background:transparent;border:1px solid var(--oud2);color:var(--ou2);width:30px;height:30px;font-size:17px;line-height:1;cursor:pointer;border-radius:2px;}
+.nm-bt:hover:not([disabled]){border-color:var(--ou);background:rgba(201,168,76,.1);}
+.nm-bt[disabled]{opacity:.3;cursor:default;}
+.nm-lbl{font-family:'Playfair Display',serif;font-size:17px;color:var(--ou2);min-width:130px;}
+.nm-hoje{background:transparent;border:1px solid var(--oud2);color:var(--cr3);padding:5px 11px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:2px;}
+.nm-hoje:hover{border-color:var(--ou);color:var(--ou2);}
+.nm-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--cr3);border:1px solid var(--oud2);padding:5px 10px;border-radius:2px;}
 </style>
 <!-- Firebase (compat) · Central Loretto Scarpa -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -806,6 +814,7 @@ async function cobrir(sel,id,nome){
 
 <!-- VENDAS -->
 <div class="tab-content" id="tab-vendas">
+  <div class="nav-mes" id="nav-vendas"></div>
   <div class="rh-subnav">
     <button class="rh-subnav-btn active" onclick="abrirVendas('geral',this)">Visão Geral</button>
     <button class="rh-subnav-btn" onclick="abrirVendas('alertas',this)">Alertas</button>
@@ -1044,6 +1053,7 @@ async function cobrir(sel,id,nome){
     <div class="slbl">Ausências do Mês</div>
     <div class="aus-box" id="aus-mes"></div>
     <div class="cal">
+      <div class="nav-mes" id="nav-cal"></div>
       <div class="cal-header"><div class="cal-mes" id="cal-mes-rh">—</div><div style="font-size:10px;color:var(--cr3);">🎂 Aniv · 🏖 Folga · 🌴 Férias · 📅 Reunião</div></div>
       <div class="cal-grid" id="cal-grid-rh">
         <div class="cal-wd">Dom</div><div class="cal-wd">Seg</div><div class="cal-wd">Ter</div><div class="cal-wd">Qua</div><div class="cal-wd">Qui</div><div class="cal-wd">Sex</div><div class="cal-wd">Sáb</div>
@@ -1077,6 +1087,7 @@ async function cobrir(sel,id,nome){
     <div class="rel-tit">Relatório Individual · Reunião 1:1</div>
     <div class="rel-sub">Pra Jhennifer chegar na conversa com o colaborador embasada — pontos pra <b style="color:var(--verde);">reconhecer</b> e pontos pra <b style="color:var(--ou2);">desenvolver</b>, com roteiro sugerido pra dar o feedback de forma construtiva. Sai na tela e em PDF de 1 página pra levar impressa.</div>
     <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;max-width:520px;margin:0 auto;">
+      <select id="sel-pauta-mes" class="rapido-inp" style="flex:0 0 auto;min-width:150px;"></select>
       <select id="sel-pauta" class="rapido-inp" style="flex:1;min-width:200px;">
         <option value="Ialey">Ialey · Vendedora</option>
         <option value="Michelly">Michelly · Vendedora</option>
@@ -1337,15 +1348,24 @@ function abrirFicha(nome){
 }
 
 // ════════ Pauta de Reunião 1:1 ════════
-function abrirPauta(nome){
+async function abrirPauta(nome){
   const p = PESSOAS[nome];
   if(!p) return;
-  const oc = (typeof ocorrenciasDe==='function'?ocorrenciasDe(nome):[]).map(o=>({
-    data:(o.data?o.data.slice(8,10)+'/'+o.data.slice(5,7):''), tipo:o.tipo, cat:o.cat, obs:o.obs }));
-  const AV = (window._avaliacoes||{})[nome] || null;
+  // mês escolhido no seletor da pauta
+  const _selM=document.getElementById('sel-pauta-mes');
+  let _pa, _pm;
+  if(_selM && _selM.value){ const _pp=_selM.value.split('_'); _pa=+_pp[0]; _pm=+_pp[1]; }
+  else { const _h=mesHoje(); _pa=_h.a; _pm=_h.m; }
+  const _ymP=_pa+'-'+String(_pm).padStart(2,'0');
+  const oc = (typeof ocorrenciasDe==='function'?ocorrenciasDe(nome):[])
+    .filter(o=>String(o.data||'').slice(0,7)===_ymP)
+    .map(o=>({ data:(o.data?o.data.slice(8,10)+'/'+o.data.slice(5,7):''), tipo:o.tipo, cat:o.cat, obs:o.obs }));
+  const _avMes = await avaliacoesDoMes(_pa,_pm);
+  const AV = _avMes[nome] || null;
+  const _relP = await montarRel(_pa,_pm);
   // ===== PERFORMANCE REAL (Firestore) — sobrescreve o mock; ocorrências/avaliações seguem demo =====
-  if(window._rel && window._rel.cur && window._rel.cur[nome] && VENDS.indexOf(nome)>=0){
-    const R=window._rel, curV=R.cur[nome]||{}, baseV=(R.base&&R.base[nome])||{};
+  if(_relP && _relP.cur && _relP.cur[nome] && VENDS.indexOf(nome)>=0){
+    const R=_relP, curV=R.cur[nome]||{}, baseV=(R.base&&R.base[nome])||{};
     const ACC=['meias','cintos','carteiras','prendedor','limpeza'];
     const sap=curV.sapatos||0, acc=ACC.reduce((a,c)=>a+(curV[c]||0),0);
     p.sapatos=sap;
@@ -1359,7 +1379,7 @@ function abrirPauta(nome){
   const pct = p.conv!=null ? Math.round(p.conv*100) : null;
 
   // tempo de casa (admissão MM/AAAA -> jun/2026)
-  const _ag=new Date(), _agA=_ag.getFullYear(), _agM=_ag.getMonth()+1;
+  const _ag=new Date(), _agA=_pa, _agM=_pm;
   const [am,aa] = p.admissao.split('/').map(Number);
   let meses = (_agA-aa)*12 + (_agM-am); if(meses<0)meses=0;
   const anos = Math.floor(meses/12), rm = meses%12;
@@ -1415,16 +1435,16 @@ function abrirPauta(nome){
   }
 
   const stars = i => AV ? ('★'.repeat(AV.av[i])+'☆'.repeat(5-AV.av[i])) : '—';
-  const _mesRef = MESES[_agM-1]+' '+_agA;
+  const _mesRef = MESES[_pm-1]+' '+_pa;
   const avBloco = AV ? `<div class="pauta-sec">
-      <div class="pauta-sec-tit">Avaliação de ${window._avalMesLabel||'mês anterior'}</div>
+      <div class="pauta-sec-tit">Avaliação de ${_mesRef}</div>
       <div class="pauta-perf">
         <div class="cel"><div class="l">Desempenho</div><div class="v" style="font-size:14px;">${stars(0)}</div></div>
         <div class="cel"><div class="l">Comportamento</div><div class="v" style="font-size:14px;">${stars(1)}</div></div>
         <div class="cel"><div class="l">Pró-ativ./Cultura</div><div class="v" style="font-size:14px;">${stars(2)}</div></div>
       </div>${AV.obs?`<div class="pauta-li" style="margin-top:8px;"><span>${esc(AV.obs)}</span></div>`:''}
     </div>` : `<div class="pauta-sec">
-      <div class="pauta-sec-tit">Avaliação de ${window._avalMesLabel||'mês anterior'}</div>
+      <div class="pauta-sec-tit">Avaliação de ${_mesRef}</div>
       <div class="pauta-li vazio">Ainda não avaliado — registre em RH › Avaliações Mensais.</div>
     </div>`;
 
@@ -1744,7 +1764,7 @@ if(AUTH){
     SESSION = user;
     ROLE = (email === GESTOR_EMAIL) ? 'gestor' : 'supervisora';
     aplicarSessao(ROLE);
-    carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); });
+    carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); montarSeletorMesPauta(); });
   });
 }
 
@@ -1916,6 +1936,7 @@ function _renderRelatorioAntigo(){
 }
 
 async function getCfgMesSup(ano,mes){
+  if(!DB) return {metas:{sapatos:950,meias:275,cintos:185,carteiras:20,limpeza:90,prendedor:30}, diasUteis:26};
   const DEF={sapatos:950,meias:275,cintos:185,carteiras:20,limpeza:90,prendedor:30};
   try{
     const doc=await DB.collection('ls_metas').doc(keyMes(ano,mes)).get();
@@ -1944,49 +1965,29 @@ function metaAlvoDe(cfg){
 async function carregarDadosReais(){
   if(!DB) return;
   try{
-    const d=new Date(), ano=d.getFullYear(), mes=d.getMonth()+1, dia=d.getDate();
-    const totalDU=diasUteis(ano,mes), decorridos=diasUteis(ano,mes,dia);
-    const restantes=Math.max(totalDU-decorridos,0)||1;
+    const alvo = window._vMes || mesHoje();
+    window._vMes = alvo;
+    const ano=alvo.a, mes=alvo.m;
+    const R = await montarRel(ano,mes);
+    navMes('nav-vendas', ano, mes, 'navVendas', R.fechado?'<span class="nm-tag">mês fechado</span>':'');
+    const {total,metas,cur,base,decorridos,totalDU,duMeta,restMeta,lastSale} = R;
 
-    const cfg=await getCfgMesSup(ano,mes);
-    const metas=metaAlvoDe(cfg);
-    const duMeta=cfg.diasUteis||totalDU, restMeta=Math.max(duMeta-decorridos,0)||1;
-
-    const cur={}, base={}, total={}, lastSale={}; CATS.forEach(c=>total[c.id]=0);
-    await Promise.all(VENDS.map(async v=>{
-      const h26=await DB.collection('ls_historico').doc(keyHist(v,ano,mes)).get();
-      const somar=doc=>{const o={};CATS.forEach(c=>o[c.id]=0);
-        (doc.exists?(doc.data().registros||[]):[]).forEach(r=>CATS.forEach(c=>o[c.id]+=Number(r[c.id]||0)));return o;};
-      cur[v]=somar(h26);
-      const _h25=(HIST_2025[v]&&HIST_2025[v][mes])||null;
-      base[v]={sapatos:_h25?_h25.sap:0,meias:_h25?_h25.mei:0,cintos:_h25?_h25.ace:0,limpeza:_h25?_h25.lim:0,carteiras:0,prendedor:0};
-      const _rg=h26.exists?(h26.data().registros||[]):[]; let _last=null;
-      _rg.forEach(r=>{ if(!r.data)return; let iso=null; const _s=String(r.data);
-        const _m=_s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
-        if(_m){ iso=_m[1]+'-'+String(+_m[2]).padStart(2,'0')+'-'+String(+_m[3]).padStart(2,'0'); }
-        else { const _p=_s.split('/'); if(_p.length>=2){ const _dd=+_p[0],_mm=+_p[1]; if(_dd&&_mm) iso=ano+'-'+String(_mm).padStart(2,'0')+'-'+String(_dd).padStart(2,'0'); } }
-        if(iso&&(!_last||iso>_last)) _last=iso; });
-      lastSale[v]=_last;
-      CATS.forEach(c=>total[c.id]+=cur[v][c.id]);
-    }));
-
-    renderMetasCategoria(total,metas,decorridos,restMeta,duMeta);
-    renderPainelVendedora(cur,base,restMeta);
+    renderMetasCategoria(total,metas,decorridos,restMeta,duMeta,R.fechado);
+    renderPainelVendedora(cur,base,restMeta,R.fechado);
     if(metas){
       renderResumoVendas(total,metas,decorridos,totalDU);
       let atras=0; CATS.forEach(c=>{const m=Number(metas[c.id]||0); if((total[c.id]||0) < m*(decorridos/totalDU)) atras++;});
       window._hoje.cats=atras;
     }
-    window._rel={total:total,metas:metas,cur:cur,base:base,decorridos:decorridos,totalDU:totalDU,restantes:restantes,ano:ano,mes:mes};
-    renderRelatorio();
+    window._rel=R;
     renderAtualizacoes(lastSale);
     window._lastSale=lastSale; window._cur=cur;
     _safe('destaques',renderDestaques); _safe('alertas',renderAlertas); _safe('acoes',renderAcoes); _safe('comparativos',renderComparativos);
-    const _tm=metas?CATS.reduce((a,c)=>a+Number(metas[c.id]||0),0):0, _hj=new Date();
+    const _tm=metas?CATS.reduce((a,c)=>a+Number(metas[c.id]||0),0):0;
     VENDS.forEach(v=>{ const p=PESSOAS[v]; if(!p) return;
-      let dias=null; if(lastSale[v]){ dias=Math.floor((_hj-new Date(lastSale[v]+'T00:00:00'))/86400000); }
+      const d=atrasoDias(lastSale[v]);
       const _ct=CATS.reduce((a,c)=>a+(cur[v][c.id]||0),0), _esp=_tm?(_tm/VENDS.length)*(decorridos/totalDU):null;
-      if(dias!=null&&dias>=2){ p.status='bad'; p.statusTxt='Sem lançar há '+dias+'d'; }
+      if(d!=null&&d>=2){ p.status='bad'; p.statusTxt='Sem lançar há '+d+'d'; }
       else if(_esp!=null&&_ct<_esp){ p.status='warn'; p.statusTxt='Atrás da meta'; }
       else { p.status='ok'; p.statusTxt='Em dia'; }
     });
@@ -1995,7 +1996,7 @@ async function carregarDadosReais(){
   }catch(e){ console.warn('carregarDadosReais',e); }
 }
 
-function renderMetasCategoria(total,metas,decorridos,restantes,totalDU){
+function renderMetasCategoria(total,metas,decorridos,restantes,totalDU,fechado){
   const el=document.getElementById('mc-equipe'); if(!el)return;
   el.innerHTML=CATS.map(c=>{
     const voce=total[c.id]||0, meta=Number(metas[c.id]||0), ic=CAT_ICONS[c.id]||'';
@@ -2010,7 +2011,9 @@ function renderMetasCategoria(total,metas,decorridos,restantes,totalDU){
       +'<span class="mcx-selo '+(noRitmo?'ok':'')+'">'+(noRitmo?'✓ No ritmo':'⚠ Atrás')+'</span></div></div>';
   }).join('');
   const cap=el.previousElementSibling;
-  if(cap&&cap.classList.contains('mc-cap')){ cap.innerHTML='Faltam <b>'+restantes+' dias úteis</b> · quanto cada categoria precisa vender por dia pra bater a meta do mês'; }
+  if(cap&&cap.classList.contains('mc-cap')){ cap.innerHTML = fechado
+    ? 'Mês fechado · resultado final por categoria contra a meta'
+    : 'Faltam <b>'+restantes+' dias úteis</b> · quanto cada categoria precisa vender por dia pra bater a meta do mês'; }
 }
 
 const CONF_DIA=[{id:'caixa',t:'Caixa fechado ontem'},{id:'loja',t:'Loja organizada'},{id:'vitrine',t:'Vitrine alinhada'}];
@@ -2323,6 +2326,86 @@ async function salvarAvaliacao(){
   catch(e){ console.warn('salvarAvaliacao',e); }
 }
 
+/* ═════════ NAVEGAÇÃO POR MÊS ═════════ */
+window._vMes=null; window._cMes=null; window._relCache={}; window._avCache={};
+function mesHoje(){ const d=new Date(); return {a:d.getFullYear(), m:d.getMonth()+1}; }
+function mesLbl(a,m){ return MESES_PT[m]+' '+a; }
+function mesSoma(o,delta){ const d=new Date(o.a,o.m-1+delta,1); return {a:d.getFullYear(), m:d.getMonth()+1}; }
+function ehMesAtual(a,m){ const h=mesHoje(); return a===h.a && m===h.m; }
+function ehMesFuturo(a,m){ const h=mesHoje(); return a>h.a || (a===h.a && m>h.m); }
+
+/* Monta o objeto de dados de um mês (mesma forma do window._rel) */
+async function montarRel(ano,mes){
+  const ck=ano+'_'+mes;
+  // meses fechados podem ser cacheados; o mês corrente muda durante o dia
+  if(!ehMesAtual(ano,mes) && window._relCache[ck]) return window._relCache[ck];
+  const hoje=new Date();
+  const totalDU=diasUteis(ano,mes);
+  const decorridos = ehMesAtual(ano,mes) ? diasUteis(ano,mes,hoje.getDate())
+                    : (ehMesFuturo(ano,mes) ? 0 : totalDU);
+  const cfg=await getCfgMesSup(ano,mes);
+  const metas=metaAlvoDe(cfg);
+  const duMeta=cfg.diasUteis||totalDU;
+  const restMeta=ehMesAtual(ano,mes)?(Math.max(duMeta-decorridos,0)||1):(ehMesFuturo(ano,mes)?duMeta:1);
+  const cur={}, base={}, total={}, lastSale={}; CATS.forEach(c=>total[c.id]=0);
+  await Promise.all(VENDS.map(async v=>{
+    let doc=null; try{ if(DB) doc=await DB.collection('ls_historico').doc(keyHist(v,ano,mes)).get(); }catch(_){}
+    const o={}; CATS.forEach(c=>o[c.id]=0);
+    const regs=(doc&&doc.exists)?(doc.data().registros||[]):[];
+    regs.forEach(r=>CATS.forEach(c=>o[c.id]+=Number(r[c.id]||0)));
+    cur[v]=o; CATS.forEach(c=>total[c.id]+=o[c.id]);
+    const h=(HIST_2025[v]&&HIST_2025[v][mes])||null;
+    base[v]={sapatos:h?h.sap:0,meias:h?h.mei:0,cintos:h?h.ace:0,limpeza:h?h.lim:0,carteiras:0,prendedor:0};
+    let last=null;
+    regs.forEach(r=>{ if(!r.data)return; let iso=null; const _s=String(r.data);
+      const _m=_s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if(_m){ iso=_m[1]+'-'+String(+_m[2]).padStart(2,'0')+'-'+String(+_m[3]).padStart(2,'0'); }
+      else { const _p=_s.split('/'); if(_p.length>=2){ const dd=+_p[0],mm=+_p[1]; if(dd&&mm) iso=ano+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0'); } }
+      if(iso&&(!last||iso>last)) last=iso; });
+    lastSale[v]=last;
+  }));
+  const R={total,metas,cur,base,decorridos,totalDU,restantes:restMeta,duMeta,restMeta,ano,mes,lastSale,fechado:!ehMesAtual(ano,mes)&&!ehMesFuturo(ano,mes)};
+  window._relCache[ck]=R; return R;
+}
+
+/* Avaliações de um mês (com cache) */
+async function avaliacoesDoMes(ano,mes){
+  const key=ano+'_'+String(mes).padStart(2,'0');
+  if(window._avCache[key]) return window._avCache[key];
+  let dados={};
+  if(DB){ try{ const d=await DB.collection('ls_avaliacoes').doc(key).get(); dados=d.exists?(d.data().dados||{}):{}; }catch(e){ console.warn('avalMes',e); } }
+  window._avCache[key]=dados; return dados;
+}
+
+/* Barra de navegação reutilizável */
+function navMes(hostId,a,m,fn,extra){
+  const el=document.getElementById(hostId); if(!el)return;
+  const prox=mesSoma({a:a,m:m},1);
+  const futuro=ehMesFuturo(prox.a,prox.m);
+  el.innerHTML='<button class="nm-bt" onclick="'+fn+'(-1)">‹</button>'
+    +'<span class="nm-lbl">'+mesLbl(a,m)+'</span>'
+    +'<button class="nm-bt"'+(futuro?' disabled':'')+' onclick="'+fn+'(1)">›</button>'
+    +(ehMesAtual(a,m)?'':'<button class="nm-hoje" onclick="'+fn+'(0)">mês atual</button>')
+    +(extra||'');
+}
+function montarSeletorMesPauta(){
+  const sel=document.getElementById('sel-pauta-mes'); if(!sel)return;
+  const h=mesHoje(); let html='';
+  for(let i=0;i<13;i++){ const o=mesSoma(h,-i);
+    html+='<option value="'+o.a+'_'+o.m+'"'+(i===1?' selected':'')+'>'+mesLbl(o.a,o.m)+(i===0?' (atual)':'')+'</option>'; }
+  sel.innerHTML=html;
+}
+function navVendas(d){ const h=mesHoje();
+  window._vMes = d===0 ? h : mesSoma(window._vMes||h, d);
+  if(ehMesFuturo(window._vMes.a,window._vMes.m)) window._vMes=h;
+  carregarDadosReais();
+}
+function navCal(d){ const h=mesHoje();
+  window._cMes = d===0 ? h : mesSoma(window._cMes||h, d);
+  renderCalendario(window._lancItems||[]);
+  renderAusenciasMes(window._lancItems||[]);
+}
+
 function renderAlertas(){
   const el=document.getElementById('alertas-real'); if(!el)return;
   const R=window._rel, cur=window._cur||{}, ls=window._lastSale||{};
@@ -2427,7 +2510,8 @@ async function carregarMaiorVenda(){
 function renderAusenciasMes(items){
   const el=document.getElementById('aus-mes'); if(!el)return;
   if(window._lancErro){ el.innerHTML='<div class="aus-vazio">⚠ Esta conta não tem acesso aos lançamentos do RH — ausências, calendário e cobertura ficam incompletos. (Ajustar permissão no Firestore)</div>'; return; }
-  const d=new Date(), ym=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  const alvo = window._cMes || mesHoje();
+  const ym = alvo.a+'-'+String(alvo.m).padStart(2,'0');
   const doMes=(items||[]).filter(l=>l.inicio&&l.fim&&l.inicio.slice(0,7)<=ym&&l.fim.slice(0,7)>=ym);
   if(!doMes.length){ el.innerHTML='<div class="aus-vazio">Ninguém ausente neste mês.</div>'; return; }
   const grupos={};
@@ -2440,7 +2524,7 @@ function renderAusenciasMes(items){
   el.innerHTML=h; if(typeof aplicarFotos==='function') aplicarFotos();
 }
 
-function renderPainelVendedora(cur,base,restantes){
+function renderPainelVendedora(cur,base,restantes,fechado){
   const el=document.getElementById('pv-equipe'); if(!el)return;
   el.innerHTML=VENDS.filter(v=>v!=='Jhennifer').map(v=>{
     const tag = v==='Jhennifer' ? ' <small style="color:var(--cr3);font-weight:400">· supervisora · vende no salão</small>' : '';
@@ -2658,7 +2742,11 @@ function atualizarStatusHoje(){
 
 function renderCalendario(items){
   const grid=document.getElementById('cal-grid-rh'); if(!grid)return;
-  const d=new Date(), ano=d.getFullYear(), mes=d.getMonth()+1, hoje=d.getDate();
+  const alvo = window._cMes || mesHoje(); window._cMes = alvo;
+  const ano=alvo.a, mes=alvo.m;
+  const _h=new Date();
+  const hoje = ehMesAtual(ano,mes) ? _h.getDate() : -1;
+  navMes('nav-cal', ano, mes, 'navCal');
   const mesEl=document.getElementById('cal-mes-rh'); if(mesEl)mesEl.textContent=MESES[mes-1]+' '+ano;
   const totalDias=new Date(ano,mes,0).getDate();
   const evt={};
