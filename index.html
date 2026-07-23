@@ -1010,7 +1010,6 @@ async function cobrir(sel,id,nome){
         <div class="cal-dia"><div class="cal-dia-n">28</div><div class="cal-evt ani">🎂 Edson</div></div><div class="cal-dia"><div class="cal-dia-n">29</div></div><div class="cal-dia"><div class="cal-dia-n">30</div></div><div class="cal-dia fim"><div class="cal-dia-n">1/jul</div><div class="cal-evt ferias">🌴 Gustavo</div></div><div class="cal-dia fim"><div class="cal-dia-n">2</div><div class="cal-evt ferias">🌴 Gustavo</div></div><div class="cal-dia fim"></div><div class="cal-dia fim"></div>
       </div>
     </div>
-    </div>
   </div>
 
   <div class="rh-sec" id="rh-ocorrencias">
@@ -2174,6 +2173,7 @@ async function carregarMaiorVenda(){
 
 function renderAusenciasMes(items){
   const el=document.getElementById('aus-mes'); if(!el)return;
+  if(window._lancErro){ el.innerHTML='<div class="aus-vazio">⚠ Esta conta não tem acesso aos lançamentos do RH — ausências, calendário e cobertura ficam incompletos. (Ajustar permissão no Firestore)</div>'; return; }
   const d=new Date(), ym=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
   const doMes=(items||[]).filter(l=>l.inicio&&l.fim&&l.inicio.slice(0,7)<=ym&&l.fim.slice(0,7)>=ym);
   if(!doMes.length){ el.innerHTML='<div class="aus-vazio">Ninguém ausente neste mês.</div>'; return; }
@@ -2264,8 +2264,11 @@ async function carregarPresenca(){
   if(!DB) return;
   try{
     const hoje=new Date().toISOString().slice(0,10);
-    const doc=await DB.collection('lancamentos').doc('_data').get();
-    const items=doc.exists?(doc.data().items||[]):[];
+    let items=[]; window._lancErro=false;
+    try{
+      const doc=await DB.collection('lancamentos').doc('_data').get();
+      items=doc.exists?(doc.data().items||[]):[];
+    }catch(permErr){ window._lancErro=true; console.warn('lancamentos sem acesso',permErr); }
     const ausentes=items
       .filter(l=>l.inicio&&l.fim&&l.inicio<=hoje&&hoje<=l.fim)
       .map(l=>({nome:FUNC_MAP[l.funcId]||'?',mot:motivoDe(l.tipo),ate:l.fim}));
