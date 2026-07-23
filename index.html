@@ -57,7 +57,9 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .cap-av img{width:100%;height:100%;object-fit:cover;}
 .hoje-cap-status{font-size:12px;color:var(--cr3);margin-top:6px;}
 .hoje-cap-status b.warn{color:var(--amarelo);}
-.hoje-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px;}
+.hoje-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+@media(max-width:1250px){.hoje-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){.hoje-grid{grid-template-columns:1fr;}}
 .hoje-card{background:rgba(255,255,255,.025);border:1px solid var(--oud);padding:18px 20px;}
 .hoje-card.alerta{border-left:3px solid var(--vermelho-c);}
 .hoje-card-tit{font-size:9px;letter-spacing:3px;color:var(--cr3);text-transform:uppercase;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
@@ -512,7 +514,17 @@ body{zoom:1.1;}
 .rel-tab th{text-align:left;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--cr3);padding:6px 8px;border-bottom:1px solid var(--oud2);}
 .rel-tab td{padding:7px 8px;border-bottom:1px solid var(--oud2);color:var(--cr2);}
 .rel-tab tr:last-child td{border-bottom:none;}
-.atu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px;}
+.atu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:8px;}
+.status-v{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 8px;border:1px solid var(--oud2);text-align:center;}
+.status-v-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid var(--oud);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--ou);background:var(--v2);}
+.status-v-avatar img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+.status-v-nome{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cr2);font-weight:500;}
+.status-v-data{font-size:10px;color:var(--cr3);margin-top:2px;}
+.status-v-badge{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;padding:3px 10px;border:1px solid;}
+.status-v-badge.ok{color:#6dbf6d;border-color:rgba(109,191,109,.35);background:rgba(109,191,109,.07);}
+.status-v-badge.atencao{color:var(--ou);border-color:var(--oud);background:rgba(201,168,76,.07);}
+.status-v-badge.atrasada{color:#e07070;border-color:rgba(224,112,112,.35);background:rgba(224,112,112,.06);}
+@media(max-width:640px){.atu-grid{grid-template-columns:repeat(2,1fr);gap:8px;}}
 @media(max-width:640px){.atu-grid{grid-template-columns:repeat(2,1fr);}}
 .atu-card{display:flex;gap:10px;align-items:center;background:var(--bg2);border:1px solid var(--oud2);border-left:3px solid var(--oud);padding:11px 13px;}
 .atu-card.atu-ok{border-left-color:#6dbf6d;}
@@ -600,6 +612,43 @@ body{zoom:1.1;}
 .conf-item{cursor:pointer;user-select:none;}
 .conf-item .conf-stat.pend{color:var(--cr3);}
 .conf-item.pend .conf-titulo{color:var(--cr3);}
+/* ===== Mural de Melhorias ===== */
+.mel-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px;}
+.mel-novo{background:var(--ou);color:var(--bg);border:none;padding:11px 20px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:2px;white-space:nowrap;}
+.mel-novo:hover{background:var(--ou2);}
+.mel-form{background:var(--bg2);border:1px solid var(--oud);border-left:3px solid var(--ou);padding:18px;margin-bottom:18px;}
+.mel-f-linha{display:flex;gap:14px;flex-wrap:wrap;}
+.mel-f-linha>div{min-width:200px;}
+.mel-lbl{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cr3);margin:12px 0 5px;}
+.mel-in{width:100%;background:rgba(0,0,0,.18);border:1px solid var(--oud2);color:var(--cr);padding:10px 12px;font-family:Barlow,sans-serif;font-size:14px;border-radius:2px;box-sizing:border-box;}
+.mel-in:focus{outline:none;border-color:var(--ou);}
+.mel-ta{min-height:74px;resize:vertical;line-height:1.5;}
+.mel-f-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+.mel-btn{background:transparent;border:1px solid var(--oud);color:var(--cr2);padding:10px 18px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;border-radius:2px;}
+.mel-btn.primary{background:var(--ou);border-color:var(--ou);color:var(--bg);}
+.mel-btn:hover{border-color:var(--ou);}
+.mel-filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.mel-chip{background:transparent;border:1px solid var(--oud2);color:var(--cr3);padding:6px 13px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;border-radius:2px;}
+.mel-chip.on{border-color:var(--ou);color:var(--ou2);background:rgba(201,168,76,.08);}
+.mel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+@media(max-width:900px){.mel-grid{grid-template-columns:1fr;}}
+.mel-card{background:var(--bg2);border:1px solid var(--oud2);border-left:3px solid var(--ou);padding:16px;}
+.mel-card.st-feita{border-left-color:#6dbf6d;}
+.mel-card.st-andamento{border-left-color:#e0a86a;}
+.mel-c-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.mel-area{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border:1px solid var(--oud);color:var(--ou2);border-radius:2px;}
+.mel-status{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.2px;text-transform:uppercase;padding:3px 9px;border:1px solid var(--cr3);color:var(--cr3);border-radius:2px;cursor:pointer;}
+.mel-status.andamento{border-color:#c08a3a;color:#e0a86a;}
+.mel-status.feita{border-color:#6dbf6d;color:#6dbf6d;}
+.mel-c-tit{font-family:'Playfair Display',serif;font-size:17px;color:var(--cr);margin-bottom:10px;line-height:1.3;}
+.mel-bloco{margin-top:9px;}
+.mel-b-lbl{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.3px;text-transform:uppercase;color:var(--cr3);margin-bottom:3px;}
+.mel-b-txt{color:var(--cr2);font-size:13.5px;line-height:1.5;white-space:pre-wrap;}
+.mel-c-pe{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--oud2);margin-top:13px;padding-top:10px;}
+.mel-autor{font-size:11px;color:var(--cr3);}
+.mel-del{background:transparent;border:none;color:var(--cr3);cursor:pointer;font-size:11px;padding:2px 6px;}
+.mel-del:hover{color:#e07070;}
+.mel-vazio{background:var(--bg2);border:1px dashed var(--oud2);padding:26px;text-align:center;color:var(--cr3);font-size:13px;}
 </style>
 <!-- Firebase (compat) · Central Loretto Scarpa -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -613,6 +662,7 @@ body{zoom:1.1;}
   <button class="tabnav-btn" onclick="abrirTab('vendas',this)">Vendas</button>
   <button class="tabnav-btn" onclick="abrirTab('rh',this)">RH</button>
   <button class="tabnav-btn" onclick="abrirTab('relatorio',this)">Relatório</button>
+  <button class="tabnav-btn" onclick="abrirTab('melhorias',this)">Melhorias</button>
 </div>
 
 <main>
@@ -707,8 +757,7 @@ body{zoom:1.1;}
     <div class="slbl">Cobertura de Ausências</div>
     <div class="mc-cap">Quem está fora e quem assume o <b>celular de vendas</b> + as <b>funções</b> · vale pra folga, férias ou atestado</div>
     <div class="cob-grid" id="cob-grid"><div class="cob-status pend" style="border:none;background:transparent;">Ninguém ausente hoje.</div></div>
-    <button class="mural-novo-btn" style="width:auto;margin-top:2px;" onclick="alert('Em breve: registrar nova ausência (folga, férias ou atestado) e definir a cobertura. Vai ler o status do time direto do Firebase.')">+ Registrar ausência</button>
-  </div>
+    </div>
 </div>
 
 <script>
@@ -1119,6 +1168,49 @@ async function cobrir(sel,id,nome){
   </div>
 </div>
 
+
+<!-- MELHORIAS -->
+<div class="tab-content" id="tab-melhorias">
+  <div class="mel-top">
+    <div>
+      <div class="slbl" style="margin-top:0;">Mural de Melhorias</div>
+      <div class="mc-cap">Ideia de melhoria que surgiu no dia a dia · registre o problema e a solução que você enxerga</div>
+    </div>
+    <button class="mel-novo" onclick="toggleFormMelhoria()">+ Nova ideia</button>
+  </div>
+
+  <div class="mel-form" id="mel-form" style="display:none;">
+    <div class="mel-f-linha">
+      <div style="flex:2;">
+        <label class="mel-lbl">Título</label>
+        <input class="mel-in" id="mel-titulo" maxlength="90" placeholder="Ex: Etiqueta de tamanho na caixa">
+      </div>
+      <div style="flex:1;">
+        <label class="mel-lbl">Área</label>
+        <select class="mel-in" id="mel-area">
+          <option value="vendas">Vendas</option>
+          <option value="rh">RH</option>
+          <option value="entregas">Entregas</option>
+          <option value="estoque">Estoque</option>
+          <option value="financeiro">Financeiro</option>
+          <option value="processos">Processos internos</option>
+        </select>
+      </div>
+    </div>
+    <label class="mel-lbl">Qual o problema?</label>
+    <textarea class="mel-in mel-ta" id="mel-problema" placeholder="O que está acontecendo hoje que atrapalha?"></textarea>
+    <label class="mel-lbl">Qual a solução que você propõe?</label>
+    <textarea class="mel-in mel-ta" id="mel-solucao" placeholder="O que dá pra fazer pra resolver?"></textarea>
+    <div class="mel-f-btns">
+      <button class="mel-btn" onclick="toggleFormMelhoria(true)">Cancelar</button>
+      <button class="mel-btn primary" id="mel-salvar" onclick="salvarMelhoria()">Publicar ideia</button>
+    </div>
+  </div>
+
+  <div class="mel-filtros" id="mel-filtros"></div>
+  <div id="mel-lista"><div class="rel-load">Carregando ideias…</div></div>
+</div>
+
 </main>
 
 <!-- ╔════════════ FLOATING ACTION BUTTON ════════════╗ -->
@@ -1241,7 +1333,7 @@ function abrirFicha(nome){
     </div>
     <div class="ficha-acoes">
       <button onclick="fecharModal('modal-ficha');abrirPauta('${nome}')">📋 Preparar 1:1</button>
-      <button onclick="abrirFluxoFalar('${nome}','geral')">Falar</button>
+      <button onclick="abrirFluxoFalar('${nome}','geral')">Enviar mensagem</button>
       <button onclick="fecharModal('modal-ficha');abrirModalRapido('ocorrencia','${nome}')">+ Ocorrência</button>
       <button onclick="fecharModal('modal-ficha');abrirModalRapido('tarefa','${nome}')">+ Tarefa</button>
     </div>
@@ -1511,17 +1603,26 @@ function calcMesesEntre(arr){
 }
 
 // ════════ Fluxo WhatsApp + Registro ════════
+const TEL_EQUIPE = {
+  'Natália':'5562982001112',
+  'Ialey':'5562981728039',
+  'Michelly':'5562981940350'
+};
+function enviarWpp(nome, contexto){
+  const ta=document.getElementById('wpp-msg');
+  const msg=ta?ta.value:'';
+  const tel=TEL_EQUIPE[nome];
+  if(tel){ window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(msg),'_blank'); }
+  else { alert('Sem número cadastrado pra '+nome+'.\n\nCopie a mensagem e envie pelo WhatsApp:\n\n'+msg); }
+  depoisDoWpp(nome, contexto);
+}
 function abrirFluxoFalar(nome, contexto){
   fecharModal('modal-ficha');
-  const templates = {
-    'pace':  `Oi ${nome}! Notei que esse mês está um pouco abaixo do ritmo nas vendas de sapatos. Quero entender melhor o que está acontecendo, posso te ligar mais tarde? 💚`,
-    'envio': `Oi ${nome}! Cobrança rápida: o pedido #4521 (Recife) está parado há 3 dias. Consegue priorizar o envio ainda hoje? Obrigada!`,
-    'geral': `Oi ${nome}! Pode aparecer no escritório por uns minutos quando der? Queria conversar contigo.`
-  };
-  const msg = templates[contexto] || templates['geral'];
+  const templates = { 'geral': `Oi ${nome}! Queria conversar contigo.` };
+  const msg = templates['geral'];
 
   document.getElementById('wpp-content').innerHTML = `
-    <div class="modal-tit">Falar com ${nome}</div>
+    <div class="modal-tit">Enviar mensagem pra ${nome}</div>
     <div class="modal-sub">Fluxo: envia WhatsApp → registra como ocorrência automaticamente</div>
 
     <div class="wpp-passo"><b>1.</b> Mensagem template (edite se quiser):</div>
@@ -1529,7 +1630,7 @@ function abrirFluxoFalar(nome, contexto){
 
     <div class="wpp-btn-row">
       <button class="wpp-btn" onclick="fecharModal('modal-wpp')">Cancelar</button>
-      <button class="wpp-btn primary" onclick="depoisDoWpp('${nome}','${contexto}')">📱 Abrir WhatsApp</button>
+      <button class="wpp-btn primary" onclick="enviarWpp('${nome}','${contexto}')">📱 Abrir WhatsApp</button>
     </div>
   `;
   abrirModal('modal-wpp');
@@ -1718,7 +1819,7 @@ if(AUTH){
     SESSION = user;
     ROLE = (email === GESTOR_EMAIL) ? 'gestor' : 'supervisora';
     aplicarSessao(ROLE);
-    carregarCadastroRH().then(function(){ carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); });
+    carregarCadastroRH().then(function(){ carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); });
   });
 }
 
@@ -1726,6 +1827,7 @@ function saudacaoHora(){ const h=new Date().getHours(); return h<12?'Bom dia':h<
 
 function aplicarSessao(role){
   const nome = role==='gestor' ? 'Gregory' : 'Jhennifer';
+  window._usuario = nome;
   const sub  = role==='gestor' ? 'Loretto Scarpa · Painel da Gestão' : 'Loretto Scarpa · Painel da Jhennifer';
   const ub = document.querySelector('.h-user b'); if(ub) ub.textContent = nome.toUpperCase();
   const hs = document.querySelector('.h-sub');    if(hs) hs.textContent = sub;
@@ -2024,6 +2126,88 @@ function renderConf(){
   grid.innerHTML=CONF_DIA.map(it=>mk(it,'dia',dia)).join('')+CONF_SEM.map(it=>mk(it,'sem',sem)).join('');
 }
 
+const MEL_AREAS={vendas:'Vendas',rh:'RH',entregas:'Entregas',estoque:'Estoque',financeiro:'Financeiro',processos:'Processos internos'};
+const MEL_STATUS=['nova','andamento','feita'];
+const MEL_ST_LBL={nova:'Nova',andamento:'Em andamento',feita:'Feita'};
+function toggleFormMelhoria(fechar){
+  const f=document.getElementById('mel-form'); if(!f)return;
+  const abrir = fechar?false:(f.style.display==='none');
+  f.style.display=abrir?'':'none';
+  if(abrir){ const t=document.getElementById('mel-titulo'); if(t) t.focus(); }
+  else { ['mel-titulo','mel-problema','mel-solucao'].forEach(id=>{const e=document.getElementById(id); if(e)e.value='';}); }
+}
+async function salvarMelhoria(){
+  const tit=(document.getElementById('mel-titulo').value||'').trim();
+  const area=document.getElementById('mel-area').value;
+  const prob=(document.getElementById('mel-problema').value||'').trim();
+  const sol=(document.getElementById('mel-solucao').value||'').trim();
+  if(!tit){ alert('Coloque um título pra ideia.'); return; }
+  if(!prob && !sol){ alert('Descreva pelo menos o problema ou a solução.'); return; }
+  const btn=document.getElementById('mel-salvar'); if(btn){ btn.disabled=true; btn.textContent='Publicando…'; }
+  const item={titulo:tit,area:area,problema:prob,solucao:sol,status:'nova',
+    autor:(window._usuario||'Jhennifer'),criadoEm:new Date().toISOString()};
+  try{
+    if(DB){ const ref=await DB.collection('ls_melhorias').add(item); item.id=ref.id; }
+    else { item.id='local_'+Date.now(); }
+    window._melhorias=[item].concat(window._melhorias||[]);
+    toggleFormMelhoria(true); renderMelhorias();
+  }catch(e){ console.warn('salvarMelhoria',e); alert('Não consegui salvar agora. Tenta de novo em instantes.'); }
+  if(btn){ btn.disabled=false; btn.textContent='Publicar ideia'; }
+}
+async function carregarMelhorias(){
+  if(!DB){ window._melhorias=[]; renderMelhorias(); return; }
+  try{
+    const snap=await DB.collection('ls_melhorias').get();
+    const arr=[]; snap.forEach(d=>{ const o=d.data()||{}; o.id=d.id; arr.push(o); });
+    arr.sort((a,b)=>String(b.criadoEm||'').localeCompare(String(a.criadoEm||'')));
+    window._melhorias=arr;
+  }catch(e){ console.warn('carregarMelhorias',e); window._melhorias=[]; }
+  renderMelhorias();
+}
+async function ciclarStatusMelhoria(id){
+  const arr=window._melhorias||[]; const it=arr.find(x=>x.id===id); if(!it)return;
+  const i=MEL_STATUS.indexOf(it.status||'nova');
+  it.status=MEL_STATUS[(i+1)%MEL_STATUS.length];
+  renderMelhorias();
+  if(!DB)return;
+  try{ await DB.collection('ls_melhorias').doc(id).set({status:it.status},{merge:true}); }
+  catch(e){ console.warn('status melhoria',e); }
+}
+async function excluirMelhoria(id){
+  if(!confirm('Excluir esta ideia do mural?'))return;
+  window._melhorias=(window._melhorias||[]).filter(x=>x.id!==id);
+  renderMelhorias();
+  if(!DB)return;
+  try{ await DB.collection('ls_melhorias').doc(id).delete(); }
+  catch(e){ console.warn('excluir melhoria',e); }
+}
+function filtrarMelhorias(a){ window._melFiltro=a; renderMelhorias(); }
+function renderMelhorias(){
+  const lista=document.getElementById('mel-lista'); if(!lista)return;
+  const arr=window._melhorias||[]; const filtro=window._melFiltro||'todas';
+  const fl=document.getElementById('mel-filtros');
+  if(fl){
+    const cont={}; arr.forEach(i=>{ cont[i.area]=(cont[i.area]||0)+1; });
+    fl.innerHTML='<button class="mel-chip '+(filtro==='todas'?'on':'')+'" onclick="filtrarMelhorias(\'todas\')">Todas · '+arr.length+'</button>'
+      +Object.keys(MEL_AREAS).map(k=>cont[k]?('<button class="mel-chip '+(filtro===k?'on':'')+'" onclick="filtrarMelhorias(\''+k+'\')">'+MEL_AREAS[k]+' · '+cont[k]+'</button>'):'').join('');
+  }
+  const vis=filtro==='todas'?arr:arr.filter(i=>i.area===filtro);
+  if(!vis.length){ lista.innerHTML='<div class="mel-vazio">'+(arr.length?'Nenhuma ideia nesta área.':'Nenhuma ideia ainda. Clique em <b>+ Nova ideia</b> pra registrar a primeira.')+'</div>'; return; }
+  lista.innerHTML='<div class="mel-grid">'+vis.map(i=>{
+    const st=i.status||'nova';
+    const dt=i.criadoEm?(i.criadoEm.slice(8,10)+'/'+i.criadoEm.slice(5,7)+'/'+i.criadoEm.slice(0,4)):'';
+    return '<div class="mel-card st-'+st+'">'
+      +'<div class="mel-c-top"><span class="mel-area">'+(MEL_AREAS[i.area]||i.area)+'</span>'
+      +'<span class="mel-status '+st+'" onclick="ciclarStatusMelhoria(\''+i.id+'\')" title="clique pra mudar">'+MEL_ST_LBL[st]+'</span></div>'
+      +'<div class="mel-c-tit">'+esc(i.titulo||'')+'</div>'
+      +(i.problema?'<div class="mel-bloco"><div class="mel-b-lbl">Problema</div><div class="mel-b-txt">'+esc(i.problema)+'</div></div>':'')
+      +(i.solucao?'<div class="mel-bloco"><div class="mel-b-lbl">Solução proposta</div><div class="mel-b-txt">'+esc(i.solucao)+'</div></div>':'')
+      +'<div class="mel-c-pe"><span class="mel-autor">'+esc(i.autor||'')+(dt?' · '+dt:'')+'</span>'
+      +'<button class="mel-del" onclick="excluirMelhoria(\''+i.id+'\')">excluir</button></div></div>';
+  }).join('')+'</div>';
+}
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 function renderAcoes(){
   const host=document.getElementById('acoes-lista'); if(!host) return;
   const acoes=[]; const b=new Date(); const hoje=new Date(b.getFullYear(),b.getMonth(),b.getDate());
@@ -2032,10 +2216,10 @@ function renderAcoes(){
     acoes.push({p:1,txt:'🌴 <b class="nome-clic" onclick="abrirFicha(\''+a.nome+'\')">'+a.nome+'</b> está de '+mot+(a.ate?' até '+fmtData(a.ate):'')+' — organize a cobertura',btn:'Cobrir',act:"var g=document.getElementById('cob-grid');if(g)g.scrollIntoView({behavior:'smooth',block:'center'})"});
   });
   const ls=window._lastSale||{};
-  VENDS.forEach(v=>{ if(v==='Jhennifer'||!ls[v])return; const d=Math.floor((hoje-new Date(ls[v]+'T00:00:00'))/86400000);
-    if(d>=2) acoes.push({p:2,txt:'<b class="nome-clic" onclick="abrirFicha(\''+v+'\')">'+v+'</b> está há '+d+' dias sem lançar vendas',btn:'Falar',act:"abrirFluxoFalar('"+v+"','vendas')"});
+  VENDS.forEach(v=>{ if(v==='Jhennifer'||!ls[v])return; const d=atrasoDias(ls[v]);
+    if(d>=2) acoes.push({p:2,txt:'<b class="nome-clic" onclick="abrirFicha(\''+v+'\')">'+v+'</b> está há '+d+' dias sem lançar vendas',btn:'Enviar mensagem',act:"abrirFluxoFalar('"+v+"','vendas')"});
   });
-  ['Yuri','Edson'].forEach(n=>{ const p=PESSOAS[n]; if(p&&/atrasad/i.test(p.statusTxt||'')) acoes.push({p:2,txt:'<b class="nome-clic" onclick="abrirFicha(\''+n+'\')">'+n+'</b> · '+p.statusTxt,btn:'Cobrar',act:"abrirFluxoFalar('"+n+"','geral')"}); });
+  ['Yuri','Edson'].forEach(n=>{ const p=PESSOAS[n]; if(p&&/atrasad/i.test(p.statusTxt||'')) acoes.push({p:2,txt:'<b class="nome-clic" onclick="abrirFicha(\''+n+'\')">'+n+'</b> · '+p.statusTxt,btn:'Enviar mensagem',act:"abrirFluxoFalar('"+n+"','geral')"}); });
   Object.keys(EQUIPE_INFO).forEach(n=>{ const info=EQUIPE_INFO[n]; if(!info||!info.nasc)return; const pt=String(info.nasc).split('-'); if(pt.length<3)return;
     let prox=new Date(hoje.getFullYear(),(+pt[1])-1,+pt[2]); if(prox<hoje)prox=new Date(hoje.getFullYear()+1,(+pt[1])-1,+pt[2]);
     const diff=Math.round((prox-hoje)/86400000);
@@ -2049,89 +2233,44 @@ function renderAcoes(){
   host.innerHTML=top.map(a=>'<div class="acao-item"><div class="acao-texto">'+a.txt+'</div>'+(a.btn?'<button class="acao-btn" onclick="'+a.act.replace(/"/g,'&quot;')+'">'+a.btn+'</button>':'')+'</div>').join('');
 }
 
+function atrasoDias(iso){
+  // Regra idêntica ao painel de Metas: a referência é o último dia útil ANTES de hoje
+  // (vendedora lança o dia anterior; hoje ainda não fechou) e só contam dias úteis
+  // seg-sáb — domingo a loja fecha, então não conta atraso.
+  if(!iso) return null;
+  const m=String(iso).match(/(\d{4})-(\d{1,2})-(\d{1,2})/); if(!m) return null;
+  const dtUlt=new Date(+m[1],(+m[2])-1,+m[3]); dtUlt.setHours(0,0,0,0);
+  const dtHoje=new Date(); dtHoje.setHours(0,0,0,0);
+  const dtRef=new Date(dtHoje); dtRef.setDate(dtRef.getDate()-1);
+  while(dtRef.getDay()===0) dtRef.setDate(dtRef.getDate()-1);
+  let diff=0;
+  if(dtUlt<dtRef){ const cur=new Date(dtUlt);
+    while(cur<dtRef){ cur.setDate(cur.getDate()+1); if(cur.getDay()!==0) diff++; } }
+  return diff;
+}
+function _ddmm(d){ return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0'); }
+
 function renderAtualizacoes(lastSale){
   const el=document.getElementById('atu-equipe'); if(!el)return;
-  const hoje=new Date();
+  const hojeStr=_ddmm(new Date());
+  const ontemStr=(()=>{ const d=new Date(); d.setDate(d.getDate()-1); return _ddmm(d); })();
   el.innerHTML=VENDS.map(v=>{
-    const ls=lastSale[v]; let dias=null, dataFmt='—';
-    if(ls){ const m=String(ls).match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
-      if(m){ dataFmt=String(m[3]).padStart(2,'0')+'/'+String(m[2]).padStart(2,'0');
-        const dt=new Date(+m[1],(+m[2])-1,+m[3]), h0=new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate());
-        const dd=Math.round((h0-dt)/86400000); if(!isNaN(dd)) dias=dd; } }
-    let pcls,pill;
-    if(dias==null){ pcls='atu-bad'; pill='Sem registros'; }
-    else if(dias<=0){ pcls='atu-ok'; pill='Em dia'; }
-    else { pcls=dias>=3?'atu-bad':'atu-warn'; pill=dias+(dias>1?' dias atrasada':' dia atrasada'); }
-    return '<div class="atu-card"><div class="atu-foto" data-foto="'+v+'">'+v[0]+'</div>'
-      +'<div class="atu-nome">'+v.toUpperCase()+'</div><div class="atu-data">'+dataFmt+'</div>'
-      +'<div class="atu-pill '+pcls+'">'+pill+'</div></div>';
+    const iso=lastSale[v];
+    let diasStr='—', badge='atrasada', badgeLabel='Sem registros';
+    const diff=atrasoDias(iso);
+    if(diff!==null){
+      const m=String(iso).match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+      const ultimaData=String(m[3]).padStart(2,'0')+'/'+String(m[2]).padStart(2,'0');
+      if(diff<=0){ badge='ok'; badgeLabel='Em dia \u2713';
+        diasStr=(ultimaData===hojeStr)?'hoje':(ultimaData===ontemStr?'ontem':ultimaData); }
+      else if(diff===1){ badge='atencao'; badgeLabel='1 dia atrasada'; diasStr=ultimaData; }
+      else { badge='atrasada'; badgeLabel=diff+' dias atrasada'; diasStr=ultimaData; }
+    }
+    return '<div class="status-v"><div class="status-v-avatar" data-foto="'+v+'">'+v[0]+'</div>'
+      +'<div class="status-v-nome">'+v+'</div><div class="status-v-data">'+diasStr+'</div>'
+      +'<div class="status-v-badge '+badge+'">'+badgeLabel+'</div></div>';
   }).join('');
   if(typeof aplicarFotos==='function') aplicarFotos();
-}
-
-function renderAlertas(){
-  const el=document.getElementById('alertas-real'); if(!el)return;
-  const R=window._rel, cur=window._cur||{}, ls=window._lastSale||{};
-  const crit=[], aten=[]; const hoje=new Date();
-  if(R&&R.metas){
-    const total=R.total, metas=R.metas, decorridos=R.decorridos, totalDU=R.totalDU;
-    CATS.forEach(c=>{ const m=Number(metas[c.id]||0); if(!m)return; const v=total[c.id]||0;
-      const proj=decorridos?Math.round(v/decorridos*totalDU):0, pctP=m?Math.round(proj/m*100):0;
-      if(pctP<60) crit.push('Equipe deve bater só <b>'+pctP+'%</b> da meta de <b>'+c.nome+'</b> no ritmo atual');
-      else if(pctP<85) aten.push('<b>'+c.nome+'</b> projetado em <b>'+pctP+'%</b> da meta — precisa acelerar'); });
-    const metaTeam=CATS.reduce((a,c)=>a+Number(metas[c.id]||0),0), esperadoV=metaTeam?(metaTeam/VENDS.length)*(decorridos/totalDU):0;
-    VENDS.forEach(v=>{ if(v==='Jhennifer')return; const cv=CATS.reduce((a,c)=>a+((cur[v]&&cur[v][c.id])||0),0);
-      if(esperadoV>0){ const pct=Math.round(cv/esperadoV*100);
-        if(pct<50) crit.push('<b class="nome-clic" onclick="abrirFicha(\''+v+'\')">'+v+'</b> está <b>'+Math.max(100-pct,0)+'% abaixo</b> do ritmo necessário');
-        else if(pct<80) aten.push('<b class="nome-clic" onclick="abrirFicha(\''+v+'\')">'+v+'</b> abaixo do pace ('+pct+'% do esperado)'); } });
-  }
-  VENDS.forEach(v=>{ if(v==='Jhennifer'||!ls[v])return; const d=Math.floor((hoje-new Date(ls[v]+'T00:00:00'))/86400000);
-    if(d>=2) aten.push('<b class="nome-clic" onclick="abrirFicha(\''+v+'\')">'+v+'</b> há '+d+' dias sem lançar vendas'); });
-  function bloco(tit,cor,arr){ if(!arr.length)return''; return '<div style="margin-bottom:14px;"><div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;color:'+cor+';font-weight:600;">'+tit+'</div>'+arr.map(t=>'<div class="acao-item" style="border-left:3px solid '+cor+';"><div class="acao-texto">'+t+'</div></div>').join('')+'</div>'; }
-  const html=bloco('🔴 Crítico','#ff6b50',crit)+bloco('🟡 Atenção','#d4b86a',aten);
-  el.innerHTML=html||'<div class="acao-item"><div class="acao-texto">✓ Nenhum alerta no momento — equipe no ritmo.</div></div>';
-}
-
-function renderComparativos(){
-  const el=document.getElementById('comp-real'); if(!el)return;
-  const R=window._rel; if(!R){ el.innerHTML='<div class="rel-load">Carregando comparativo…</div>'; return; }
-  const mes=R.mes, ano=R.ano, mNome=MESES_PT[mes], dec=R.decorridos||1, du=R.totalDU||26;
-  const F={sapatos:'sap',meias:'mei',cintos:'ace',limpeza:'lim'};
-  const b25={}, cats=['sapatos','meias','cintos','limpeza'];
-  cats.forEach(c=>{ b25[c]=0; VENDS.forEach(v=>{ const h=HIST_2025[v]&&HIST_2025[v][mes]; if(h) b25[c]+=Number(h[F[c]]||0); }); });
-  const cur=R.total||{};
-  const proj=c=>dec?Math.round((cur[c]||0)/dec*du):0;
-  const pj=proj('sapatos'), pjPct=b25.sapatos?Math.round((pj-b25.sapatos)/b25.sapatos*100):0;
-  const h25=Math.max(b25.sapatos,1), hAlt=Math.round(Math.min((cur.sapatos||0)/h25,1)*95);
-  // quem cresceu/caiu (projeção sapatos vs 2025 individual)
-  const rank=VENDS.map(v=>{ const h=HIST_2025[v]&&HIST_2025[v][mes]; const base=h?Number(h.sap||0):0; if(!base) return null;
-    const pv=dec?Math.round(((R.cur[v]&&R.cur[v].sapatos)||0)/dec*du):0;
-    return {v, pct: Math.round((pv-base)/base*100)}; }).filter(Boolean).sort((a,b)=>b.pct-a.pct);
-  const up=rank[0]||null, down=rank.length>1?rank[rank.length-1]:null;
-  const cell=(nome,c)=>{ const b=b25[c], a2=cur[c]||0, pP=b?Math.round((proj(c)-b)/b*100):0, pD=b?Math.round((a2-b)/b*100):0;
-    const cor=pP>=0?'var(--verde)':'var(--vermelho)', seta=pP>=0?'⬆ +':'⬇ ';
-    return '<div><div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">'+nome+'</div>'
-      +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:14px;color:var(--cr3);">'+b+' → '+a2+'*</div>'
-      +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:22px;color:'+cor+';margin-top:6px;">'+seta+pP+'%</div>'
-      +'<div style="font-size:10px;color:var(--cr3);margin-top:4px;">parcial: '+(pD>=0?'+':'')+pD+'%</div></div>'; };
-  el.innerHTML=
-    '<div class="slbl">'+mNome+' 2025 vs '+mNome+' '+ano+' · Sapatos</div>'
-    +'<div style="background:var(--bg2);border:1px solid var(--oud2);padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:30px;">'
-    +'<div><div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">Ano contra Ano</div>'
-    +'<div style="display:flex;gap:14px;align-items:flex-end;height:140px;border-bottom:1px solid var(--oud2);padding:10px 0;">'
-    +'<div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;"><div style="width:55%;height:95%;background:rgba(201,168,76,.35);"></div><div style="font-family:\'Cormorant Garamond\',serif;font-size:16px;color:var(--ou2);margin-top:6px;">'+b25.sapatos+'</div><div style="font-size:9px;letter-spacing:1px;color:var(--cr3);text-transform:uppercase;">'+mNome.slice(0,3)+' 2025</div></div>'
-    +'<div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;"><div style="width:55%;height:'+Math.max(hAlt,4)+'%;background:linear-gradient(180deg,var(--ou2),var(--ou));"></div><div style="font-family:\'Cormorant Garamond\',serif;font-size:16px;color:var(--ou2);margin-top:6px;">'+(cur.sapatos||0)+'*</div><div style="font-size:9px;letter-spacing:1px;color:var(--cr3);text-transform:uppercase;">'+mNome.slice(0,3)+' '+ano+'</div></div>'
-    +'</div>'
-    +'<div style="font-size:11px;color:var(--cr3);margin-top:8px;">* '+mNome+' ainda em andamento ('+dec+'/'+du+' dias úteis)<br>Projeção fim de mês: ~'+pj+' ('+(pjPct>=0?'+':'')+pjPct+'% vs 2025)</div></div>'
-    +'<div><div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">Destaques vs Ano Passado</div>'
-    +(up?('<div style="border-left:2px solid var(--verde);background:rgba(255,255,255,.02);padding:12px 14px;margin-bottom:10px;"><div style="font-size:9px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;">Quem cresceu mais</div><div style="color:var(--cr);font-size:15px;margin:3px 0;">'+up.v+'</div><div style="font-family:\'Cormorant Garamond\',serif;font-size:18px;color:var(--verde);">⬆ '+(up.pct>=0?'+':'')+up.pct+'% vs '+mNome.slice(0,3)+' 2025</div></div>'):'')
-    +(down?('<div style="border-left:2px solid var(--vermelho);background:rgba(255,255,255,.02);padding:12px 14px;"><div style="font-size:9px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;">Quem caiu mais</div><div style="color:var(--cr);font-size:15px;margin:3px 0;">'+down.v+'</div><div style="font-family:\'Cormorant Garamond\',serif;font-size:18px;color:var(--vermelho);">⬇ '+down.pct+'% vs '+mNome.slice(0,3)+' 2025</div></div>'):'')
-    +'</div></div>'
-    +'<div class="slbl" style="margin-top:22px;">Comparativo por Categoria · '+mNome+' 25 vs '+String(ano).slice(2)+'</div>'
-    +'<div style="background:var(--bg2);border:1px solid var(--oud2);padding:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center;">'
-    +cell('Sapatos','sapatos')+cell('Meias','meias')+cell('Cintos','cintos')+cell('Limpeza','limpeza')
-    +'</div>'
-    +'<div style="font-size:10px;color:var(--cr3);margin-top:8px;">Projeção mantém o ritmo atual até o fim do mês · "parcial" compara o vendido até hoje com o mês cheio de 2025 · Cintos concentra os acessórios de 2025 (regra do painel de Metas)</div>';
 }
 
 function renderDestaques(){
