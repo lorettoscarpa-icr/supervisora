@@ -700,13 +700,8 @@ body{zoom:1.1;}
     </div>
 
     <div class="hoje-card" id="card-aniv">
-      <div class="hoje-card-tit">Aniversariantes <b>de Junho</b></div>
-      <div class="hoje-subgrupo">Aniversário</div>
-      <div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="Michelly">M</span>Michelly</span><span class="r">🎂 16/06 · dom</span></div>
-      <div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="Edson">E</span>Edson</span><span class="r">🎂 28/06 · sáb</span></div>
-      <div class="hoje-subgrupo">Tempo de casa</div>
-      <div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="Edson">E</span>Edson</span><span class="r ok">🎉 2 anos · jun/24</span></div>
-      <div style="margin-top:10px;font-size:10px;color:var(--cr3);font-style:italic;">Combinar com a equipe sobre celebração da Michelly e os 2 anos do Edson?</div>
+      <div class="hoje-card-tit">Aniversariantes <b>do Mês</b></div>
+      <div class="hoje-linha"><span class="l" style="color:var(--cr3);font-style:italic">Carregando…</span></div>
     </div>
 
     <div class="hoje-card">
@@ -1049,7 +1044,7 @@ async function cobrir(sel,id,nome){
     <div class="slbl">Ausências do Mês</div>
     <div class="aus-box" id="aus-mes"></div>
     <div class="cal">
-      <div class="cal-header"><div class="cal-mes" id="cal-mes-rh">Junho 2026</div><div style="font-size:10px;color:var(--cr3);">🎂 Aniv · 🏖 Folga · 🌴 Férias · 📅 Reunião</div></div>
+      <div class="cal-header"><div class="cal-mes" id="cal-mes-rh">—</div><div style="font-size:10px;color:var(--cr3);">🎂 Aniv · 🏖 Folga · 🌴 Férias · 📅 Reunião</div></div>
       <div class="cal-grid" id="cal-grid-rh">
         <div class="cal-wd">Dom</div><div class="cal-wd">Seg</div><div class="cal-wd">Ter</div><div class="cal-wd">Qua</div><div class="cal-wd">Qui</div><div class="cal-wd">Sex</div><div class="cal-wd">Sáb</div>
         <div class="cal-dia fim"></div><div class="cal-dia"><div class="cal-dia-n">1</div></div><div class="cal-dia"><div class="cal-dia-n">2</div></div><div class="cal-dia"><div class="cal-dia-n">3</div></div><div class="cal-dia"><div class="cal-dia-n">4</div></div><div class="cal-dia"><div class="cal-dia-n">5</div></div><div class="cal-dia"><div class="cal-dia-n">6</div></div>
@@ -1062,96 +1057,23 @@ async function cobrir(sel,id,nome){
   </div>
 
   <div class="rh-sec" id="rh-ocorrencias">
-    <button class="oc-novo-btn">+ Nova Ocorrência</button>
-    <div class="oc-filtros">
-      <button class="oc-filtro ativo">Todas</button>
-      <button class="oc-filtro">Atenção</button>
-      <button class="oc-filtro">Elogios</button>
-      <button class="oc-filtro">Pessoa: todos</button>
-      <button class="oc-filtro">Mês: Junho</button>
-    </div>
-    <div class="oc-item atencao">
-      <div class="oc-data">12/06</div><div class="oc-cat atraso">Atraso</div><div class="oc-pessoa"><b>Natália</b></div>
-      <div class="oc-obs">Chegou às 9:30 (atraso 30min). Segunda vez no mês. Justificou trânsito.</div>
-    </div>
-    <div class="oc-item elogio">
-      <div class="oc-data">10/06</div><div class="oc-cat elogio">Elogio</div><div class="oc-pessoa"><b>Michelly</b></div>
-      <div class="oc-obs">Cliente ligou parabenizando o atendimento, disse que foi tratada com muita atenção.</div>
-    </div>
-    <div class="oc-item atencao">
-      <div class="oc-data">08/06</div><div class="oc-cat vendas">Vendas</div><div class="oc-pessoa"><b>Edson</b></div>
-      <div class="oc-obs">3 envios atrasados na semana. Conversado sobre prazo. Justificou problema Bling.</div>
-    </div>
-    <div class="oc-item elogio">
-      <div class="oc-data">28/05</div><div class="oc-cat elogio">Elogio</div><div class="oc-pessoa"><b>Ialey</b></div>
-      <div class="oc-obs">Bateu meta individual de sapatos antes do dia 20. Reconhecida na reunião.</div>
-    </div>
-    <div class="oc-item atencao">
-      <div class="oc-data">22/05</div><div class="oc-cat comp">Comportamento</div><div class="oc-pessoa"><b>Natália</b></div>
-      <div class="oc-obs">Discussão com Ialey por cliente compartilhado. Conversado separadamente.</div>
-    </div>
-    <div class="oc-item atencao">
-      <div class="oc-data">15/01</div><div class="oc-cat atraso">Atraso</div><div class="oc-pessoa"><b>Natália</b></div>
-      <div class="oc-obs">Primeira ocorrência de atraso. Esporádico até agora.</div>
-    </div>
-    <div class="oc-resumo">
-      <div style="grid-column:1/-1;font-size:10px;letter-spacing:1.5px;color:var(--ou2);text-transform:uppercase;margin-bottom:6px;">Resumo · Atenção vs Elogios (mês)</div>
-      <div class="oc-resumo-cel"><span class="nome">Ialey</span><span class="vals"><span class="at">0</span> · <span class="el">1</span></span></div>
-      <div class="oc-resumo-cel"><span class="nome">Michelly</span><span class="vals"><span class="at">0</span> · <span class="el">1</span></span></div>
-      <div class="oc-resumo-cel"><span class="nome">Natália</span><span class="vals"><span class="at">2</span> · <span class="el">0</span></span></div>
-      <div class="oc-resumo-cel"><span class="nome">Edson</span><span class="vals"><span class="at">1</span> · <span class="el">0</span></span></div>
-      <div class="oc-resumo-cel"><span class="nome">Yuri</span><span class="vals"><span class="at">0</span> · <span class="el">0</span></span></div>
-      <div class="oc-resumo-cel"><span class="nome">Gustavo</span><span class="vals"><span class="at">0</span> · <span class="el">0</span></span></div>
-    </div>
+    <button class="oc-novo-btn" onclick="abrirModalRapido('ocorrencia')">+ Nova Ocorrência</button>
+    <div class="oc-filtros" id="oc-filtros"></div>
+    <div id="oc-lista"><div class="rel-load">Carregando ocorrências…</div></div>
   </div>
 
   <div class="rh-sec" id="rh-avaliacoes">
     <div class="av-mensal">
-      <div class="av-mensal-tit">Avaliações de Junho 2026</div>
+      <div class="av-mensal-tit" id="av-mes-tit">Avaliações</div>
       <div class="av-mensal-sub">Avalie cada colaborador no fechamento do mês · 1 a 5 estrelas por categoria + observação livre</div>
-      <div class="av-grupo-lbl">Vendedoras</div>
-      <div class="av-pessoa-list">
-        <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Ialey">I</div><div class="av-pess-info"><div class="av-pess-nome">Ialey</div><div class="av-pess-stt feita">✓ Avaliação feita</div></div><button class="av-pess-btn">Ver</button></div>
-        <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Michelly">M</div><div class="av-pess-info"><div class="av-pess-nome">Michelly</div><div class="av-pess-stt">Aguardando</div></div><button class="av-pess-btn">Avaliar</button></div>
-        <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Natália">N</div><div class="av-pess-info"><div class="av-pess-nome">Natália</div><div class="av-pess-stt">Aguardando</div></div><button class="av-pess-btn">Avaliar</button></div>
-      </div>
-      <div class="av-grupo-lbl">Operação</div>
-      <div class="av-pessoa-list">
-        <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Edson">E</div><div class="av-pess-info"><div class="av-pess-nome">Edson</div><div class="av-pess-stt">Aguardando</div></div><button class="av-pess-btn">Avaliar</button></div>
-        <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Yuri">Y</div><div class="av-pess-info"><div class="av-pess-nome">Yuri</div><div class="av-pess-stt">Aguardando</div></div><button class="av-pess-btn">Avaliar</button></div>
-        <div class="av-pessoa-item"><div class="av-pess-foto" data-foto="Gustavo">G</div><div class="av-pess-info"><div class="av-pess-nome">Gustavo</div><div class="av-pess-stt">Aguardando</div></div><button class="av-pess-btn">Avaliar</button></div>
-      </div>
-    </div>
-    <div class="av-detalhe">
-      <div style="font-size:13px;color:var(--ou2);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Exemplo · Avaliação da Ialey · Maio 2026</div>
-      <div class="av-cat">
-        <div class="av-cat-lbl">Desempenho <span style="color:var(--cr);">5/5</span></div>
-        <div class="av-stars"><span class="av-star on">★</span><span class="av-star on">★</span><span class="av-star on">★</span><span class="av-star on">★</span><span class="av-star on">★</span></div>
-      </div>
-      <div class="av-cat">
-        <div class="av-cat-lbl">Comportamento <span style="color:var(--cr);">4/5</span></div>
-        <div class="av-stars"><span class="av-star on">★</span><span class="av-star on">★</span><span class="av-star on">★</span><span class="av-star on">★</span><span class="av-star">★</span></div>
-      </div>
-      <div class="av-cat">
-        <div class="av-cat-lbl">Pró-atividade / Cultura <span style="color:var(--cr);">4/5</span></div>
-        <div class="av-stars"><span class="av-star on">★</span><span class="av-star on">★</span><span class="av-star on">★</span><span class="av-star on">★</span><span class="av-star">★</span></div>
-      </div>
-      <div class="av-cat">
-        <div class="av-cat-lbl">Observações</div>
-        <textarea class="av-obs" readonly>Mês muito bom da Ialey. Superou meta individual de sapatos antes do dia 20. Liderou no mix de acessórios. Pequeno ponto: discussão com Natália por cliente compartilhado, mas resolveu bem. Indicada pra reconhecimento.</textarea>
-      </div>
+      <div id="av-lista"><div class="rel-load">Carregando avaliações…</div></div>
     </div>
   </div>
 </div>
 
 <!-- RELATÓRIO -->
 <div class="tab-content" id="tab-relatorio">
-  <div class="rel-mensal">
-    <div class="slbl">Relatório Mensal</div>
-    <div id="rel-real"><div class="rel-load">Carregando dados reais do mês…</div></div>
-  </div>
-
-  <div class="rel-card" style="margin-top:18px;">
+  <div class="rel-card">
     <div class="rel-tit">Relatório Individual · Reunião 1:1</div>
     <div class="rel-sub">Pra Jhennifer chegar na conversa com o colaborador embasada — pontos pra <b style="color:var(--verde);">reconhecer</b> e pontos pra <b style="color:var(--ou2);">desenvolver</b>, com roteiro sugerido pra dar o feedback de forma construtiva. Sai na tela e em PDF de 1 página pra levar impressa.</div>
     <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;max-width:520px;margin:0 auto;">
@@ -1217,6 +1139,7 @@ async function cobrir(sel,id,nome){
 <div class="fab-menu" id="fab-menu">
   <button class="fab-item" onclick="abrirModalRapido('ocorrencia')"><span class="fab-item-ico">⚠</span> Nova Ocorrência</button>
   <button class="fab-item" onclick="abrirModalRapido('avaliacao')"><span class="fab-item-ico">⭐</span> Avaliar Colaborador</button>
+  <button class="fab-item" onclick="novaIdeiaMelhoria()"><span class="fab-item-ico">💡</span> Nova Ideia</button>
 </div>
 <button class="fab" id="fab" onclick="toggleFab()" title="Ações rápidas">+</button>
 
@@ -1255,25 +1178,17 @@ async function cobrir(sel,id,nome){
 <script>
 // ════════ Banco de dados mock ════════
 const PESSOAS = {
-  'Ialey':    {ini:'I', funcao:'Vendedora',   aniv:'22/09', admissao:'03/2023', status:'ok',   statusTxt:'Em dia · hoje 14h', sapatos:138, metaSap:195, conv:0.68, mix:'2º',  maiorV:3120, atrasos:0, oc_at:0, oc_el:1, av:[4,5,4]},
-  'Michelly': {ini:'M', funcao:'Vendedora',   aniv:'16/06', admissao:'08/2024', status:'ok',   statusTxt:'Em dia · ontem 18h', sapatos:168, metaSap:240, conv:0.56, mix:'1º',  maiorV:4280, atrasos:1, oc_at:0, oc_el:1, av:[5,5,5]},
-  'Natália':  {ini:'N', funcao:'Vendedora',   aniv:'11/03', admissao:'11/2024', status:'bad',  statusTxt:'Atrasada · 2 dias',   sapatos:95,  metaSap:165, conv:0.42, mix:'3º',  maiorV:2650, atrasos:2, oc_at:2, oc_el:0, av:[3,3,2]},
-  'Jhennifer':{ini:'J', funcao:'Supervisora',     aniv:'04/11', admissao:'01/2022', status:'ok',   statusTxt:'Em dia · vende no salão', sapatos:112, metaSap:150, conv:0.71, mix:'1º',  maiorV:3890, atrasos:0, oc_at:0, oc_el:1, av:[5,5,5]},
-  'Edson':    {ini:'E', funcao:'E-commerce',  aniv:'28/06', admissao:'06/2024', status:'warn', statusTxt:'1 envio atrasado',    sapatos:null,metaSap:null,conv:null, mix:null,  maiorV:null, atrasos:0, oc_at:1, oc_el:0, av:[4,3,3]},
-  'Yuri':     {ini:'Y', funcao:'Estoquista',  aniv:'19/01', admissao:'04/2024', status:'warn', statusTxt:'2 tarefas atrasadas', sapatos:null,metaSap:null,conv:null, mix:null,  maiorV:null, atrasos:0, oc_at:0, oc_el:0, av:[4,4,4]},
-  'Gustavo':  {ini:'G', funcao:'Entregador',  aniv:'07/05', admissao:'02/2025', status:'ok',   statusTxt:'Em rota',             sapatos:null,metaSap:null,conv:null, mix:null,  maiorV:null, atrasos:0, oc_at:0, oc_el:0, av:[5,4,5]}
+  'Ialey':    {ini:'I', funcao:'Vendedora',   aniv:'22/09', admissao:'03/2023', status:'ok',   statusTxt:'Em dia · hoje 14h', sapatos:138, metaSap:195, conv:0.68, mix:'2º',  maiorV:3120},
+  'Michelly': {ini:'M', funcao:'Vendedora',   aniv:'16/06', admissao:'08/2024', status:'ok',   statusTxt:'Em dia · ontem 18h', sapatos:168, metaSap:240, conv:0.56, mix:'1º',  maiorV:4280},
+  'Natália':  {ini:'N', funcao:'Vendedora',   aniv:'11/03', admissao:'11/2024', status:'bad',  statusTxt:'Atrasada · 2 dias',   sapatos:95,  metaSap:165, conv:0.42, mix:'3º',  maiorV:2650},
+  'Jhennifer':{ini:'J', funcao:'Supervisora',     aniv:'04/11', admissao:'01/2022', status:'ok',   statusTxt:'Em dia · vende no salão', sapatos:112, metaSap:150, conv:0.71, mix:'1º',  maiorV:3890},
+  'Edson':    {ini:'E', funcao:'E-commerce',  aniv:'28/06', admissao:'06/2024', status:'warn', statusTxt:'1 envio atrasado',    sapatos:null,metaSap:null,conv:null, mix:null,  maiorV:null},
+  'Yuri':     {ini:'Y', funcao:'Estoquista',  aniv:'19/01', admissao:'04/2024', status:'warn', statusTxt:'2 tarefas atrasadas', sapatos:null,metaSap:null,conv:null, mix:null,  maiorV:null},
+  'Gustavo':  {ini:'G', funcao:'Entregador',  aniv:'07/05', admissao:'02/2025', status:'ok',   statusTxt:'Em rota',             sapatos:null,metaSap:null,conv:null, mix:null,  maiorV:null}
 };
 
-const OCORRENCIAS_BY = {
-  'Natália': [
-    {data:'12/06', tipo:'atencao', cat:'Atraso',         obs:'Chegou às 9:30 (atraso 30min). Segunda vez no mês.'},
-    {data:'22/05', tipo:'atencao', cat:'Comportamento',  obs:'Discussão com Ialey por cliente compartilhado.'},
-    {data:'15/01', tipo:'atencao', cat:'Atraso',         obs:'Primeira ocorrência de atraso. Esporádico até agora.'}
-  ],
-  'Michelly': [{data:'10/06', tipo:'elogio', cat:'Elogio', obs:'Cliente ligou parabenizando o atendimento.'}],
-  'Ialey':    [{data:'28/05', tipo:'elogio', cat:'Elogio', obs:'Bateu meta individual antes do dia 20. Reconhecida.'}],
-  'Edson':    [{data:'08/06', tipo:'atencao', cat:'Vendas', obs:'3 envios atrasados na semana. Conversado sobre prazo.'}]
-};
+/* ocorrências agora vêm do Firestore (ls_ocorrencias) — ver carregarOcorrencias() */
+
 
 // ════════ Tabnav principal ════════
 function abrirTab(t, btn){
@@ -1321,7 +1236,8 @@ function fecharModal(id){ document.getElementById(id).classList.remove('open'); 
 function abrirFicha(nome){
   const p = PESSOAS[nome];
   if(!p) return;
-  const oc = OCORRENCIAS_BY[nome] || [];
+  const oc = (typeof ocorrenciasDe==='function'?ocorrenciasDe(nome):[]).map(o=>({
+    data:(o.data?o.data.slice(8,10)+'/'+o.data.slice(5,7):''), tipo:o.tipo, cat:o.cat, obs:o.obs }));
 
   // Header
   let html = `<div class="ficha-hd">
@@ -1393,19 +1309,17 @@ function abrirFicha(nome){
   html += `</div>`;
 
   // Seção: Avaliações
+  // Seção: Avaliações (real — ls_avaliacoes)
+  const _AVF=(window._avaliacoes||{})[nome]||null;
+  const _stf=k=>_AVF?('★'.repeat(_AVF.av[k])+'☆'.repeat(5-_AVF.av[k])):'—';
   html += `<div class="ficha-sec" id="ficha-av">
-    <div style="font-size:11px;color:var(--cr3);letter-spacing:.5px;margin-bottom:12px;">Última avaliação · Maio 2026</div>
-    <div class="ficha-stats">
-      <div class="ficha-stat"><div class="ficha-stat-lbl">Desempenho</div><div class="ficha-stat-val">${'★'.repeat(p.av[1])}${'☆'.repeat(5-p.av[1])}</div></div>
-      <div class="ficha-stat"><div class="ficha-stat-lbl">Comportamento</div><div class="ficha-stat-val">${'★'.repeat(p.av[0])}${'☆'.repeat(5-p.av[0])}</div></div>
-      <div class="ficha-stat"><div class="ficha-stat-lbl">Pró-atividade / Cultura</div><div class="ficha-stat-val">${'★'.repeat(p.av[2])}${'☆'.repeat(5-p.av[2])}</div></div>
-    </div>
-    <div style="font-size:11px;color:var(--cr3);letter-spacing:.5px;margin-bottom:6px;">Evolução · últimos 4 meses</div>
-    <div class="ficha-graf">
-      <div class="ficha-graf-bars">
-        ${[4,4,4,4,4,p.av[1]].map((v,i)=>`<div class="ficha-graf-col"><div class="ficha-graf-bar ${i<4?'muted':''}" style="height:${v*16}px;"></div><div class="ficha-graf-val">${v}</div><div class="ficha-graf-lbl">${['Jan','Fev','Mar','Abr','Mai','Jun'][i]}</div></div>`).join('')}
-      </div>
-    </div>
+    <div style="font-size:11px;color:var(--cr3);letter-spacing:.5px;margin-bottom:12px;">Última avaliação · ${window._avalMesLabel||'mês anterior'}</div>
+    ${_AVF?`<div class="ficha-stats">
+      <div class="ficha-stat"><div class="ficha-stat-lbl">Desempenho</div><div class="ficha-stat-val">${_stf(0)}</div></div>
+      <div class="ficha-stat"><div class="ficha-stat-lbl">Comportamento</div><div class="ficha-stat-val">${_stf(1)}</div></div>
+      <div class="ficha-stat"><div class="ficha-stat-lbl">Pró-atividade / Cultura</div><div class="ficha-stat-val">${_stf(2)}</div></div>
+    </div>${_AVF.obs?`<div style="font-size:12px;color:var(--cr2);margin-top:10px;line-height:1.5;">${esc(_AVF.obs)}</div>`:''}`
+    :`<div style="font-size:12px;color:var(--cr3);font-style:italic;">Ainda não avaliado — registre em RH › Avaliações Mensais.</div>`}
   </div>`;
 
   // Seção: Info
@@ -1413,7 +1327,7 @@ function abrirFicha(nome){
     <div class="ficha-stats">
       <div class="ficha-stat"><div class="ficha-stat-lbl">Aniversário</div><div class="ficha-stat-val" style="font-size:16px;">${p.aniv}</div></div>
       <div class="ficha-stat"><div class="ficha-stat-lbl">Admissão</div><div class="ficha-stat-val" style="font-size:16px;">${p.admissao}</div></div>
-      <div class="ficha-stat"><div class="ficha-stat-lbl">Atrasos no mês</div><div class="ficha-stat-val ${p.atrasos>0?'bad':'good'}">${p.atrasos}</div></div>
+      <div class="ficha-stat"><div class="ficha-stat-lbl">Atrasos registrados</div><div class="ficha-stat-val ${oc.filter(o=>(o.cat||'')==='Atraso').length>0?'bad':'good'}">${oc.filter(o=>(o.cat||'')==='Atraso').length}</div></div>
     </div>
     <div style="font-size:11px;color:var(--cr3);font-style:italic;margin-top:14px;">Dados de cadastro (documentos, banco de horas, contrato) ficam no Controle de RH.</div>
   </div>`;
@@ -1426,7 +1340,9 @@ function abrirFicha(nome){
 function abrirPauta(nome){
   const p = PESSOAS[nome];
   if(!p) return;
-  const oc = OCORRENCIAS_BY[nome] || [];
+  const oc = (typeof ocorrenciasDe==='function'?ocorrenciasDe(nome):[]).map(o=>({
+    data:(o.data?o.data.slice(8,10)+'/'+o.data.slice(5,7):''), tipo:o.tipo, cat:o.cat, obs:o.obs }));
+  const AV = (window._avaliacoes||{})[nome] || null;
   // ===== PERFORMANCE REAL (Firestore) — sobrescreve o mock; ocorrências/avaliações seguem demo =====
   if(window._rel && window._rel.cur && window._rel.cur[nome] && VENDS.indexOf(nome)>=0){
     const R=window._rel, curV=R.cur[nome]||{}, baseV=(R.base&&R.base[nome])||{};
@@ -1443,20 +1359,22 @@ function abrirPauta(nome){
   const pct = p.conv!=null ? Math.round(p.conv*100) : null;
 
   // tempo de casa (admissão MM/AAAA -> jun/2026)
+  const _ag=new Date(), _agA=_ag.getFullYear(), _agM=_ag.getMonth()+1;
   const [am,aa] = p.admissao.split('/').map(Number);
-  let meses = (2026-aa)*12 + (6-am); if(meses<0)meses=0;
+  let meses = (_agA-aa)*12 + (_agM-am); if(meses<0)meses=0;
   const anos = Math.floor(meses/12), rm = meses%12;
   const tempo = anos>0 ? (anos+' ano'+(anos>1?'s':'')+(rm?' e '+rm+' m':'')) : (rm+' meses');
 
   // saldos
   const nAtencao = oc.filter(o=>o.tipo==='atencao').length;
-  const avgAv = (p.av[0]+p.av[1]+p.av[2])/3;
+  const nAtrasos = oc.filter(o=>(o.cat||'')==='Atraso').length;
+  const avgAv = AV ? (AV.av[0]+AV.av[1]+AV.av[2])/3 : null;
 
   // tom sugerido
   let tom;
-  if(avgAv>=4.5 && nAtencao===0 && p.status==='ok' && p.atrasos===0)
+  if(avgAv!==null && avgAv>=4.5 && nAtencao===0 && p.status==='ok' && nAtrasos===0)
     tom={cls:'rec',t:'Reconhecimento',s:'reforçar o que vai bem'};
-  else if(p.status==='bad' || avgAv<3.5 || nAtencao>=2)
+  else if(p.status==='bad' || (avgAv!==null && avgAv<3.5) || nAtencao>=2)
     tom={cls:'cri',t:'Crítica construtiva',s:'alinhar com firmeza e cuidado'};
   else
     tom={cls:'ali',t:'Alinhamento',s:'ajustar pontos e reforçar metas'};
@@ -1467,16 +1385,16 @@ function abrirPauta(nome){
   if(p.mix==='1º') rec.push({t:'Líder no mix de acessórios do mês.'});
   if(pct!=null && p.conv>=0.6) rec.push({t:'Conversão forte no mês: '+pct+'%.'});
   if(p.maiorV && p.maiorV>=4000) rec.push({t:'Uma das maiores vendas do mês: R$ '+p.maiorV.toLocaleString('pt-BR')+'.'});
-  [1,0,2].forEach(i=>{ if(p.av[i]===5) rec.push({t:'Nota máxima em '+avLbl[i]+'.'}); });
-  if(p.status==='ok' && nAtencao===0 && p.atrasos===0) rec.push({t:'Mês sem ocorrências de atenção — constante e confiável.'});
+  if(AV) [1,0,2].forEach(i=>{ if(AV.av[i]===5) rec.push({t:'Nota máxima em '+avLbl[i]+'.'}); });
+  if(p.status==='ok' && nAtencao===0 && nAtrasos===0) rec.push({t:'Mês sem ocorrências de atenção — constante e confiável.'});
 
   // pontos pra desenvolver
   const dev=[];
   oc.filter(o=>o.tipo==='atencao').forEach(o=>dev.push({d:o.data,t:o.cat+': '+o.obs}));
-  if(p.atrasos>0) dev.push({t:'Atrasos no mês: '+p.atrasos+'.'});
+  if(nAtrasos>0) dev.push({t:'Atrasos registrados: '+nAtrasos+'.'});
   if(pct!=null && p.conv<0.45) dev.push({t:'Conversão abaixo do esperado: '+pct+'%.'});
   if(p.status==='bad') dev.push({t:'Está atrás da meta e ficou dias sem atualizar os dados.'});
-  [1,0,2].forEach(i=>{ if(p.av[i]<=3) dev.push({t:'Atenção em '+avLbl[i]+' ('+p.av[i]+'/5).'}); });
+  if(AV) [1,0,2].forEach(i=>{ if(AV.av[i]<=3) dev.push({t:'Atenção em '+avLbl[i]+' ('+AV.av[i]+'/5).'}); });
 
   const liHtml = (arr,cls,mk)=> arr.length
     ? arr.map(x=>`<div class="pauta-li ${cls}"><span class="mk">${mk}</span><span>${x.d?`<small>${x.d}</small>`:''}${x.t}</span></div>`).join('')
@@ -1491,32 +1409,37 @@ function abrirPauta(nome){
         <div class="cel"><div class="l">Sapatos</div><div class="v">${p.sapatos}/${p.metaSap}</div></div>
         <div class="cel"><div class="l">Conversão</div><div class="v">${pct}%</div></div>
         <div class="cel"><div class="l">Mix</div><div class="v">${p.mix}</div></div>
-        <div class="cel"><div class="l">Maior venda</div><div class="v">R$ ${(p.maiorV/1000).toFixed(1)}k</div></div>
+        <div class="cel"><div class="l">Maior venda</div><div class="v">${p.maiorV?("R$ "+(p.maiorV/1000).toFixed(1)+"k"):"—"}</div></div>
       </div>
     </div>`;
   }
 
-  const stars = i => '★'.repeat(p.av[i])+'☆'.repeat(5-p.av[i]);
+  const stars = i => AV ? ('★'.repeat(AV.av[i])+'☆'.repeat(5-AV.av[i])) : '—';
+  const _mesRef = MESES[_agM-1]+' '+_agA;
+  const avBloco = AV ? `<div class="pauta-sec">
+      <div class="pauta-sec-tit">Avaliação de ${window._avalMesLabel||'mês anterior'}</div>
+      <div class="pauta-perf">
+        <div class="cel"><div class="l">Desempenho</div><div class="v" style="font-size:14px;">${stars(0)}</div></div>
+        <div class="cel"><div class="l">Comportamento</div><div class="v" style="font-size:14px;">${stars(1)}</div></div>
+        <div class="cel"><div class="l">Pró-ativ./Cultura</div><div class="v" style="font-size:14px;">${stars(2)}</div></div>
+      </div>${AV.obs?`<div class="pauta-li" style="margin-top:8px;"><span>${esc(AV.obs)}</span></div>`:''}
+    </div>` : `<div class="pauta-sec">
+      <div class="pauta-sec-tit">Avaliação de ${window._avalMesLabel||'mês anterior'}</div>
+      <div class="pauta-li vazio">Ainda não avaliado — registre em RH › Avaliações Mensais.</div>
+    </div>`;
 
   const html = `
-    <div class="pauta-print-only">Loretto Scarpa · Pauta de Reunião 1:1 · Junho 2026</div>
+    <div class="pauta-print-only">Loretto Scarpa · Pauta de Reunião 1:1 · ${_mesRef}</div>
     <div class="pauta-hd">
       <div class="pauta-foto">${p.ini}</div>
       <div>
         <div class="pauta-nome">Reunião 1:1 · ${nome}</div>
-        <div class="pauta-meta">${p.funcao} · ${tempo} de casa · Junho 2026</div>
+        <div class="pauta-meta">${p.funcao} · ${tempo} de casa · ${_mesRef}</div>
       </div>
       <div class="pauta-tom ${tom.cls}">${tom.t}<small>${tom.s}</small></div>
     </div>
     ${perf}
-    <div class="pauta-sec">
-      <div class="pauta-sec-tit">Avaliação do mês</div>
-      <div class="pauta-perf">
-        <div class="cel"><div class="l">Desempenho</div><div class="v" style="font-size:14px;">${stars(1)}</div></div>
-        <div class="cel"><div class="l">Comportamento</div><div class="v" style="font-size:14px;">${stars(0)}</div></div>
-        <div class="cel"><div class="l">Pró-ativ./Cultura</div><div class="v" style="font-size:14px;">${stars(2)}</div></div>
-      </div>
-    </div>
+    ${avBloco}
     <div class="pauta-sec">
       <div class="pauta-sec-tit">✓ Pra reconhecer</div>
       ${liHtml(rec,'ok','✓')}
@@ -1606,7 +1529,10 @@ function calcMesesEntre(arr){
 const TEL_EQUIPE = {
   'Natália':'5562982001112',
   'Ialey':'5562981728039',
-  'Michelly':'5562981940350'
+  'Michelly':'5562981940350',
+  'Yuri':'5562996592844',
+  'Edson':'5511992924234',
+  'Gustavo':'5562998563940'
 };
 function enviarWpp(nome, contexto){
   const ta=document.getElementById('wpp-msg');
@@ -1688,27 +1614,25 @@ function abrirModalRapido(tipo, pessoaPrev){
 
   let body = '';
   if(tipo === 'ocorrencia'){
+    window._ocCatSel='Atraso';
+    const hojeIso=new Date().toISOString().slice(0,10);
     body = `
       <div class="rapido-grid">
         <div class="rapido-campo"><div class="rapido-lbl">Pessoa</div>
-          <select class="rapido-inp">${Object.keys(PESSOAS).map(n=>`<option ${n===pessoaPrev?'selected':''}>${n}</option>`).join('')}</select>
+          <select class="rapido-inp" id="oc-f-pessoa">${Object.keys(PESSOAS).map(n=>`<option ${n===pessoaPrev?'selected':''}>${n}</option>`).join('')}</select>
         </div>
         <div class="rapido-campo"><div class="rapido-lbl">Data</div>
-          <input class="rapido-inp" type="date" value="2026-06-14">
+          <input class="rapido-inp" type="date" id="oc-f-data" value="${hojeIso}">
         </div>
       </div>
       <div class="rapido-campo" style="margin-bottom:14px;">
         <div class="rapido-lbl">Categoria</div>
-        <div class="rapido-cat-row">
-          <button class="rapido-cat-btn active">Atraso</button>
-          <button class="rapido-cat-btn">Vendas</button>
-          <button class="rapido-cat-btn">Comportamento</button>
-          <button class="rapido-cat-btn">Outro</button>
-          <button class="rapido-cat-btn">Elogio</button>
+        <div class="rapido-cat-row" id="oc-cat-row">
+          ${OC_CATS.map((c,k)=>`<button class="rapido-cat-btn ${k===0?'active':''}" onclick="selCatOc(this,'${c}')">${c}</button>`).join('')}
         </div>
       </div>
       <div class="rapido-campo"><div class="rapido-lbl">Observação</div>
-        <textarea class="rapido-textarea" placeholder="O que aconteceu..."></textarea>
+        <textarea class="rapido-textarea" id="oc-f-obs" placeholder="O que aconteceu..."></textarea>
       </div>
     `;
   } else if(tipo === 'tarefa'){
@@ -1735,21 +1659,22 @@ function abrirModalRapido(tipo, pessoaPrev){
       </div>
     `;
   } else if(tipo === 'avaliacao'){
+    const prev=(window._avaliacoes||{})[pessoaPrev];
+    window._avSel = prev ? prev.av.slice() : [0,0,0];
+    const linha=(lbl,ci)=>`
+      <div class="rapido-campo" style="margin-bottom:10px;"><div class="rapido-lbl">${lbl}</div>
+        <div id="av-row-${ci}" style="display:flex;gap:6px;font-size:22px;cursor:pointer;">
+          ${[1,2,3,4,5].map(n=>`<span onclick="setEstrela(${ci},${n})" style="color:${n<=window._avSel[ci]?'var(--ou)':'var(--cr3)'}">${n<=window._avSel[ci]?'★':'☆'}</span>`).join('')}
+        </div>
+      </div>`;
     body = `
       <div class="rapido-campo" style="margin-bottom:14px;"><div class="rapido-lbl">Colaborador</div>
-        <select class="rapido-inp">${Object.keys(PESSOAS).map(n=>`<option ${n===pessoaPrev?'selected':''}>${n}</option>`).join('')}</select>
+        <select class="rapido-inp" id="av-f-pessoa">${AV_COLABS.map(n=>`<option ${n===pessoaPrev?'selected':''}>${n}</option>`).join('')}</select>
       </div>
-      <div class="rapido-campo" style="margin-bottom:10px;"><div class="rapido-lbl">Desempenho</div>
-        <div style="display:flex;gap:6px;font-size:22px;color:var(--cr3);">★★★★★</div>
-      </div>
-      <div class="rapido-campo" style="margin-bottom:10px;"><div class="rapido-lbl">Comportamento</div>
-        <div style="display:flex;gap:6px;font-size:22px;color:var(--cr3);">★★★★☆</div>
-      </div>
-      <div class="rapido-campo" style="margin-bottom:14px;"><div class="rapido-lbl">Pró-atividade / Cultura</div>
-        <div style="display:flex;gap:6px;font-size:22px;color:var(--cr3);">★★★★☆</div>
-      </div>
+      <div class="modal-sub" style="margin:-6px 0 10px;">Referente a <b>${window._avalMesLabel||'mês anterior'}</b></div>
+      ${linha('Desempenho',0)}${linha('Comportamento',1)}${linha('Pró-atividade / Cultura',2)}
       <div class="rapido-campo"><div class="rapido-lbl">Observação</div>
-        <textarea class="rapido-textarea" placeholder="Pontos altos e baixos do mês..."></textarea>
+        <textarea class="rapido-textarea" id="av-f-obs" placeholder="Pontos altos e baixos do mês...">${prev?esc(prev.obs||''):''}</textarea>
       </div>
     `;
   }
@@ -1760,7 +1685,7 @@ function abrirModalRapido(tipo, pessoaPrev){
     ${body}
     <div class="wpp-btn-row" style="margin-top:14px;">
       <button class="wpp-btn" onclick="fecharModal('modal-rapido')">Cancelar</button>
-      <button class="wpp-btn primary" style="background:var(--ou);color:var(--bg);border-color:var(--ou);" onclick="fecharModal('modal-rapido');alert('Salvo!');">✓ Salvar</button>
+      <button class="wpp-btn primary" style="background:var(--ou);color:var(--bg);border-color:var(--ou);" onclick="${tipo==='ocorrencia'?'salvarOcorrencia()':(tipo==='avaliacao'?'salvarAvaliacao()':"fecharModal('modal-rapido')")}">✓ Salvar</button>
     </div>
   `;
   abrirModal('modal-rapido');
@@ -1819,7 +1744,7 @@ if(AUTH){
     SESSION = user;
     ROLE = (email === GESTOR_EMAIL) ? 'gestor' : 'supervisora';
     aplicarSessao(ROLE);
-    carregarCadastroRH().then(function(){ carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); });
+    carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); });
   });
 }
 
@@ -1955,7 +1880,9 @@ async function carregarRelatorioAnterior(){
   }catch(e){ console.warn('carregarRelatorioAnterior',e); }
 }
 
-function renderRelatorio(){
+function renderRelatorio(){ return; /* Relatório Mensal removido — a aba tem só a pauta 1:1 */
+}
+function _renderRelatorioAntigo(){
   const box=document.getElementById('rel-real'); if(!box) return;
   const R=window._relAnt; if(!R){ box.innerHTML='<div class="rel-load">Carregando o mês anterior…</div>'; return; }
   const total=R.total, metas=R.metas, cur=R.cur, base=R.base, decorridos=R.decorridos, totalDU=R.totalDU, restantes=R.restantes, ano=R.ano, mes=R.mes;
@@ -2053,7 +1980,8 @@ async function carregarDadosReais(){
     window._rel={total:total,metas:metas,cur:cur,base:base,decorridos:decorridos,totalDU:totalDU,restantes:restantes,ano:ano,mes:mes};
     renderRelatorio();
     renderAtualizacoes(lastSale);
-    window._lastSale=lastSale; window._cur=cur; renderDestaques(); renderAlertas(); renderAcoes(); renderComparativos();
+    window._lastSale=lastSale; window._cur=cur;
+    _safe('destaques',renderDestaques); _safe('alertas',renderAlertas); _safe('acoes',renderAcoes); _safe('comparativos',renderComparativos);
     const _tm=metas?CATS.reduce((a,c)=>a+Number(metas[c.id]||0),0):0, _hj=new Date();
     VENDS.forEach(v=>{ const p=PESSOAS[v]; if(!p) return;
       let dias=null; if(lastSale[v]){ dias=Math.floor((_hj-new Date(lastSale[v]+'T00:00:00'))/86400000); }
@@ -2062,8 +1990,7 @@ async function carregarDadosReais(){
       else if(_esp!=null&&_ct<_esp){ p.status='warn'; p.statusTxt='Atrás da meta'; }
       else { p.status='ok'; p.statusTxt='Em dia'; }
     });
-    renderAniversarios();
-    atualizarStatusHoje();
+    _safe('aniversarios',renderAniversarios); _safe('statusHoje',atualizarStatusHoje);
     if(typeof aplicarFotos==='function') aplicarFotos();
   }catch(e){ console.warn('carregarDadosReais',e); }
 }
@@ -2129,6 +2056,13 @@ function renderConf(){
 const MEL_AREAS={vendas:'Vendas',rh:'RH',entregas:'Entregas',estoque:'Estoque',financeiro:'Financeiro',processos:'Processos internos'};
 const MEL_STATUS=['nova','andamento','feita'];
 const MEL_ST_LBL={nova:'Nova',andamento:'Em andamento',feita:'Feita'};
+function novaIdeiaMelhoria(){
+  const fm=document.getElementById('fab-menu'); if(fm) fm.classList.remove('open');
+  abrirTab('melhorias');
+  const f=document.getElementById('mel-form');
+  if(f && f.style.display==='none') toggleFormMelhoria();
+  const t=document.getElementById('mel-titulo'); if(t) setTimeout(()=>t.focus(),250);
+}
 function toggleFormMelhoria(fechar){
   const f=document.getElementById('mel-form'); if(!f)return;
   const abrir = fechar?false:(f.style.display==='none');
@@ -2271,6 +2205,186 @@ function renderAtualizacoes(lastSale){
       +'<div class="status-v-badge '+badge+'">'+badgeLabel+'</div></div>';
   }).join('');
   if(typeof aplicarFotos==='function') aplicarFotos();
+}
+
+function _safe(nome,fn){ try{ fn(); }catch(e){ console.warn('[painel] falhou o render de '+nome+':',e); } }
+
+/* ═════════ OCORRÊNCIAS (ls_ocorrencias) ═════════ */
+const OC_CATS=['Atraso','Vendas','Comportamento','Outro','Elogio'];
+function keyMesAtual(){ const d=new Date(); return d.getFullYear()+'_'+String(d.getMonth()+1).padStart(2,'0'); }
+async function carregarOcorrencias(){
+  if(!DB){ window._ocorrencias=[]; renderOcorrencias(); return; }
+  try{
+    const snap=await DB.collection('ls_ocorrencias').get();
+    const arr=[]; snap.forEach(d=>{ const o=d.data()||{}; o.id=d.id; arr.push(o); });
+    arr.sort((a,b)=>String(b.data||'').localeCompare(String(a.data||'')));
+    window._ocorrencias=arr;
+  }catch(e){ console.warn('carregarOcorrencias',e); window._ocorrencias=[]; }
+  renderOcorrencias();
+}
+function ocorrenciasDe(nome){ return (window._ocorrencias||[]).filter(o=>o.pessoa===nome); }
+function filtrarOc(f){ window._ocFiltro=f; renderOcorrencias(); }
+function renderOcorrencias(){
+  const lista=document.getElementById('oc-lista'); if(!lista)return;
+  const arr=window._ocorrencias||[], f=window._ocFiltro||'todas';
+  const fl=document.getElementById('oc-filtros');
+  if(fl){
+    const nAt=arr.filter(o=>o.tipo==='atencao').length, nEl=arr.filter(o=>o.tipo==='elogio').length;
+    fl.innerHTML='<button class="oc-filtro '+(f==='todas'?'ativo':'')+'" onclick="filtrarOc(\'todas\')">Todas · '+arr.length+'</button>'
+      +'<button class="oc-filtro '+(f==='atencao'?'ativo':'')+'" onclick="filtrarOc(\'atencao\')">Atenção · '+nAt+'</button>'
+      +'<button class="oc-filtro '+(f==='elogio'?'ativo':'')+'" onclick="filtrarOc(\'elogio\')">Elogios · '+nEl+'</button>';
+  }
+  const vis=f==='todas'?arr:arr.filter(o=>o.tipo===f);
+  if(!vis.length){ lista.innerHTML='<div class="mel-vazio">'+(arr.length?'Nenhuma ocorrência neste filtro.':'Nenhuma ocorrência registrada ainda. Use <b>+ Nova Ocorrência</b>.')+'</div>'; return; }
+  lista.innerHTML=vis.map(o=>{
+    const dt=o.data?(o.data.slice(8,10)+'/'+o.data.slice(5,7)):'';
+    const catCls=(o.cat||'').toLowerCase().replace(/[^a-z]/g,'');
+    return '<div class="oc-item '+(o.tipo||'atencao')+'">'
+      +'<div class="oc-data">'+dt+'</div><div class="oc-cat '+catCls+'">'+esc(o.cat||'')+'</div>'
+      +'<div class="oc-pessoa"><b>'+esc(o.pessoa||'')+'</b></div>'
+      +'<button class="mel-del" style="float:right" onclick="excluirOcorrencia(\''+o.id+'\')">excluir</button>'
+      +'<div class="oc-obs">'+esc(o.obs||'')+'</div></div>';
+  }).join('');
+}
+async function excluirOcorrencia(id){
+  if(!confirm('Excluir esta ocorrência?'))return;
+  window._ocorrencias=(window._ocorrencias||[]).filter(o=>o.id!==id); renderOcorrencias();
+  if(!DB)return; try{ await DB.collection('ls_ocorrencias').doc(id).delete(); }catch(e){ console.warn('excluirOc',e); }
+}
+function selCatOc(btn,cat){
+  document.querySelectorAll('#oc-cat-row .rapido-cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); window._ocCatSel=cat;
+}
+async function salvarOcorrencia(){
+  const pessoa=document.getElementById('oc-f-pessoa').value;
+  const data=document.getElementById('oc-f-data').value;
+  const obs=(document.getElementById('oc-f-obs').value||'').trim();
+  const cat=window._ocCatSel||'Atraso';
+  if(!obs){ alert('Descreva o que aconteceu.'); return; }
+  const item={pessoa:pessoa,data:data,cat:cat,tipo:(cat==='Elogio'?'elogio':'atencao'),obs:obs,
+    autor:(window._usuario||'Jhennifer'),criadoEm:new Date().toISOString()};
+  try{
+    if(DB){ const ref=await DB.collection('ls_ocorrencias').add(item); item.id=ref.id; }
+    else item.id='local_'+Date.now();
+    window._ocorrencias=[item].concat(window._ocorrencias||[]);
+    renderOcorrencias(); fecharModal('modal-rapido');
+  }catch(e){ console.warn('salvarOcorrencia',e); alert('Não consegui salvar agora.'); }
+}
+
+/* ═════════ AVALIAÇÕES (ls_avaliacoes/{ano_MM}) ═════════ */
+const AV_CATS=['Desempenho','Comportamento','Pró-atividade / Cultura'];
+const AV_COLABS=['Ialey','Michelly','Natália','Edson','Yuri','Gustavo'];
+function keyAvalMesAnterior(){ const d=new Date(); const pm=new Date(d.getFullYear(),d.getMonth()-1,1);
+  return {key:pm.getFullYear()+'_'+String(pm.getMonth()+1).padStart(2,'0'), lbl:MESES[pm.getMonth()]+' '+pm.getFullYear()}; }
+async function carregarAvaliacoes(){
+  const mk=keyAvalMesAnterior();
+  window._avalMesKey=mk.key; window._avalMesLabel=mk.lbl;
+  if(!DB){ window._avaliacoes={}; renderAvaliacoes(); return; }
+  try{
+    const doc=await DB.collection('ls_avaliacoes').doc(mk.key).get();
+    window._avaliacoes=doc.exists?(doc.data().dados||{}):{};
+  }catch(e){ console.warn('carregarAvaliacoes',e); window._avaliacoes={}; }
+  window._avalPend=AV_COLABS.filter(n=>!window._avaliacoes[n]).length;
+  renderAvaliacoes(); if(typeof renderPendencias==='function') renderPendencias();
+}
+function renderAvaliacoes(){
+  const el=document.getElementById('av-lista'); if(!el)return;
+  const tit=document.getElementById('av-mes-tit'); if(tit) tit.textContent='Avaliações de '+(window._avalMesLabel||'');
+  const dados=window._avaliacoes||{};
+  const grupo=(lbl,nomes)=>'<div class="av-grupo-lbl">'+lbl+'</div><div class="av-pessoa-list">'
+    +nomes.map(n=>{ const a=dados[n];
+      return '<div class="av-pessoa-item"><div class="av-pess-foto" data-foto="'+n+'">'+n[0]+'</div>'
+        +'<div class="av-pess-info"><div class="av-pess-nome">'+n+'</div>'
+        +'<div class="av-pess-st '+(a?'ok':'')+'">'+(a?('✓ Avaliação feita · '+((a.av[0]+a.av[1]+a.av[2])/3).toFixed(1)+'/5'):'Aguardando')+'</div></div>'
+        +'<button class="av-pess-btn" onclick="abrirModalRapido(\'avaliacao\',\''+n+'\')">'+(a?'Rever':'Avaliar')+'</button></div>'; }).join('')
+    +'</div>';
+  el.innerHTML=grupo('Vendedoras',['Ialey','Michelly','Natália'])+grupo('Operação',['Edson','Yuri','Gustavo']);
+  if(typeof aplicarFotos==='function') aplicarFotos();
+}
+function setEstrela(ci,n){
+  window._avSel=window._avSel||[0,0,0]; window._avSel[ci]=n;
+  const row=document.getElementById('av-row-'+ci);
+  if(row) row.querySelectorAll('span').forEach((e,k)=>{ e.textContent=k<n?'★':'☆'; e.style.color=k<n?'var(--ou)':'var(--cr3)'; });
+}
+async function salvarAvaliacao(){
+  const nome=document.getElementById('av-f-pessoa').value;
+  const av=window._avSel||[0,0,0];
+  if(av.some(x=>!x)){ alert('Dê uma nota de 1 a 5 nas três categorias.'); return; }
+  const obs=(document.getElementById('av-f-obs').value||'').trim();
+  const key=window._avalMesKey||keyAvalMesAnterior().key;
+  window._avaliacoes=window._avaliacoes||{};
+  window._avaliacoes[nome]={av:av.slice(),obs:obs,autor:(window._usuario||'Jhennifer'),criadoEm:new Date().toISOString()};
+  window._avalPend=AV_COLABS.filter(n=>!window._avaliacoes[n]).length;
+  renderAvaliacoes(); if(typeof renderPendencias==='function') renderPendencias();
+  fecharModal('modal-rapido');
+  if(!DB) return;
+  try{ await DB.collection('ls_avaliacoes').doc(key).set(
+    {dados:window._avaliacoes, feitos:Object.keys(window._avaliacoes)},{merge:true}); }
+  catch(e){ console.warn('salvarAvaliacao',e); }
+}
+
+function renderAlertas(){
+  const el=document.getElementById('alertas-real'); if(!el)return;
+  const R=window._rel, cur=window._cur||{}, ls=window._lastSale||{};
+  const crit=[], aten=[];
+  if(R&&R.metas){
+    const total=R.total, metas=R.metas, decorridos=R.decorridos, totalDU=R.totalDU;
+    CATS.forEach(c=>{ const m=Number(metas[c.id]||0); if(!m)return; const v=total[c.id]||0;
+      const proj=decorridos?Math.round(v/decorridos*totalDU):0, pctP=m?Math.round(proj/m*100):0;
+      if(pctP<60) crit.push('Equipe deve bater só <b>'+pctP+'%</b> da meta de <b>'+c.nome+'</b> no ritmo atual');
+      else if(pctP<85) aten.push('<b>'+c.nome+'</b> projetado em <b>'+pctP+'%</b> da meta — precisa acelerar'); });
+    const metaTeam=CATS.reduce((a,c)=>a+Number(metas[c.id]||0),0), esperadoV=metaTeam?(metaTeam/VENDS.length)*(decorridos/totalDU):0;
+    VENDS.forEach(v=>{ if(v==='Jhennifer')return; const cv=CATS.reduce((a,c)=>a+((cur[v]&&cur[v][c.id])||0),0);
+      if(esperadoV>0){ const pct=Math.round(cv/esperadoV*100);
+        if(pct<50) crit.push('<b class="nome-clic" onclick="abrirFicha(\''+v+'\')">'+v+'</b> está <b>'+Math.max(100-pct,0)+'% abaixo</b> do ritmo necessário');
+        else if(pct<80) aten.push('<b class="nome-clic" onclick="abrirFicha(\''+v+'\')">'+v+'</b> abaixo do pace ('+pct+'% do esperado)'); } });
+  }
+  VENDS.forEach(v=>{ if(v==='Jhennifer'||!ls[v])return; const d=atrasoDias(ls[v]);
+    if(d>=2) aten.push('<b class="nome-clic" onclick="abrirFicha(\''+v+'\')">'+v+'</b> há '+d+' dias sem lançar vendas'); });
+  function bloco(tit,cor,arr){ if(!arr.length)return''; return '<div style="margin-bottom:14px;"><div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;color:'+cor+';font-weight:600;">'+tit+'</div>'+arr.map(t=>'<div class="acao-item" style="border-left:3px solid '+cor+';"><div class="acao-texto">'+t+'</div></div>').join('')+'</div>'; }
+  const html=bloco('🔴 Crítico','#ff6b50',crit)+bloco('🟡 Atenção','#d4b86a',aten);
+  el.innerHTML=html||'<div class="acao-item"><div class="acao-texto">✓ Nenhum alerta no momento — equipe no ritmo.</div></div>';
+}
+
+function renderComparativos(){
+  const el=document.getElementById('comp-real'); if(!el)return;
+  const R=window._rel; if(!R){ el.innerHTML='<div class="rel-load">Carregando comparativo…</div>'; return; }
+  const mes=R.mes, ano=R.ano, mNome=MESES_PT[mes], dec=R.decorridos||1, du=R.totalDU||26;
+  const F={sapatos:'sap',meias:'mei',cintos:'ace',limpeza:'lim'};
+  const b25={}, cats=['sapatos','meias','cintos','limpeza'];
+  cats.forEach(c=>{ b25[c]=0; VENDS.forEach(v=>{ const h=HIST_2025[v]&&HIST_2025[v][mes]; if(h) b25[c]+=Number(h[F[c]]||0); }); });
+  const cur=R.total||{};
+  const proj=c=>dec?Math.round((cur[c]||0)/dec*du):0;
+  const pj=proj('sapatos'), pjPct=b25.sapatos?Math.round((pj-b25.sapatos)/b25.sapatos*100):0;
+  const h25=Math.max(b25.sapatos,1), hAlt=Math.round(Math.min((cur.sapatos||0)/h25,1)*95);
+  const rank=VENDS.map(v=>{ const h=HIST_2025[v]&&HIST_2025[v][mes]; const base=h?Number(h.sap||0):0; if(!base) return null;
+    const pv=dec?Math.round(((R.cur[v]&&R.cur[v].sapatos)||0)/dec*du):0;
+    return {v, pct: Math.round((pv-base)/base*100)}; }).filter(Boolean).sort((a,b)=>b.pct-a.pct);
+  const up=rank[0]||null, down=rank.length>1?rank[rank.length-1]:null;
+  const cell=(nome,c)=>{ const b=b25[c], a2=cur[c]||0, pP=b?Math.round((proj(c)-b)/b*100):0, pD=b?Math.round((a2-b)/b*100):0;
+    const cor=pP>=0?'var(--verde)':'var(--vermelho)', seta=pP>=0?'⬆ +':'⬇ ';
+    return '<div><div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">'+nome+'</div>'
+      +'<div style="font-family:Cormorant Garamond,serif;font-size:14px;color:var(--cr3);">'+b+' → '+a2+'*</div>'
+      +'<div style="font-family:Cormorant Garamond,serif;font-size:22px;color:'+cor+';margin-top:6px;">'+seta+pP+'%</div>'
+      +'<div style="font-size:10px;color:var(--cr3);margin-top:4px;">parcial: '+(pD>=0?'+':'')+pD+'%</div></div>'; };
+  el.innerHTML=
+    '<div class="slbl">'+mNome+' 2025 vs '+mNome+' '+ano+' · Sapatos</div>'
+    +'<div style="background:var(--bg2);border:1px solid var(--oud2);padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:30px;">'
+    +'<div><div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">Ano contra Ano</div>'
+    +'<div style="display:flex;gap:14px;align-items:flex-end;height:140px;border-bottom:1px solid var(--oud2);padding:10px 0;">'
+    +'<div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;"><div style="width:55%;height:95%;background:rgba(201,168,76,.35);"></div><div style="font-family:Cormorant Garamond,serif;font-size:16px;color:var(--ou2);margin-top:6px;">'+b25.sapatos+'</div><div style="font-size:9px;letter-spacing:1px;color:var(--cr3);text-transform:uppercase;">'+mNome.slice(0,3)+' 2025</div></div>'
+    +'<div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;"><div style="width:55%;height:'+Math.max(hAlt,4)+'%;background:linear-gradient(180deg,var(--ou2),var(--ou));"></div><div style="font-family:Cormorant Garamond,serif;font-size:16px;color:var(--ou2);margin-top:6px;">'+(cur.sapatos||0)+'*</div><div style="font-size:9px;letter-spacing:1px;color:var(--cr3);text-transform:uppercase;">'+mNome.slice(0,3)+' '+ano+'</div></div>'
+    +'</div>'
+    +'<div style="font-size:11px;color:var(--cr3);margin-top:8px;">* '+mNome+' ainda em andamento ('+dec+'/'+du+' dias úteis)<br>Projeção fim de mês: ~'+pj+' ('+(pjPct>=0?'+':'')+pjPct+'% vs 2025)</div></div>'
+    +'<div><div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">Destaques vs Ano Passado</div>'
+    +(up?('<div style="border-left:2px solid var(--verde);background:rgba(255,255,255,.02);padding:12px 14px;margin-bottom:10px;"><div style="font-size:9px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;">Quem cresceu mais</div><div style="color:var(--cr);font-size:15px;margin:3px 0;">'+up.v+'</div><div style="font-family:Cormorant Garamond,serif;font-size:18px;color:var(--verde);">⬆ '+(up.pct>=0?'+':'')+up.pct+'% vs '+mNome.slice(0,3)+' 2025</div></div>'):'')
+    +(down?('<div style="border-left:2px solid var(--vermelho);background:rgba(255,255,255,.02);padding:12px 14px;"><div style="font-size:9px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;">Quem caiu mais</div><div style="color:var(--cr);font-size:15px;margin:3px 0;">'+down.v+'</div><div style="font-family:Cormorant Garamond,serif;font-size:18px;color:var(--vermelho);">⬇ '+down.pct+'% vs '+mNome.slice(0,3)+' 2025</div></div>'):'')
+    +'</div></div>'
+    +'<div class="slbl" style="margin-top:22px;">Comparativo por Categoria · '+mNome+' 25 vs '+String(ano).slice(2)+'</div>'
+    +'<div style="background:var(--bg2);border:1px solid var(--oud2);padding:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center;">'
+    +cell('Sapatos','sapatos')+cell('Meias','meias')+cell('Cintos','cintos')+cell('Limpeza','limpeza')
+    +'</div>'
+    +'<div style="font-size:10px;color:var(--cr3);margin-top:8px;">Projeção mantém o ritmo atual até o fim do mês · "parcial" compara o vendido até hoje com o mês cheio de 2025 · Cintos concentra os acessórios de 2025 (regra do painel de Metas)</div>';
 }
 
 function renderDestaques(){
@@ -2439,7 +2553,8 @@ function renderPendencias(){
   el.innerHTML='<div class="pend-tit">⚡ Pra você resolver</div>'+its.map(i=>'<div class="pend-item"><span class="pend-ico">'+i.ico+'</span><span class="pend-txt">'+i.txt+'</span>'+(i.btn?'<button class="pend-btn" onclick="'+i.act.replace(/"/g,'&quot;')+'">'+i.btn+'</button>':'')+'</div>').join('');
 }
 
-async function carregarAvalPend(){
+async function carregarAvalPend(){ return carregarAvaliacoes(); }
+async function _carregarAvalPendAntigo(){
   if(!DB) return;
   try{
     const d=new Date(), pm=new Date(d.getFullYear(),d.getMonth()-1,1);
@@ -2455,7 +2570,7 @@ async function carregarAvalPend(){
 
 function renderEventos(){
   const el=document.getElementById('eventos-list'); if(!el)return;
-  const its=[{l:'📦 Pedido de Reposição Semanal',r:'Toda Seg'},{l:'📅 Atualização de Metas Semanal',r:'Toda Ter'}];
+  const its=[{l:'📦 Pedido de Reposição',r:'Toda Seg'},{l:'📅 Atualização de Metas',r:'Toda Ter'}];
   const ym=new Date().toISOString().slice(0,7);
   (window._lancItems||[]).filter(l=>l.tipo&&/feri/i.test(l.tipo)&&l.inicio&&l.fim).forEach(l=>{
     const nome=FUNC_MAP[l.funcId]||'?'; if(nome==='?')return;
