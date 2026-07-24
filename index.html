@@ -755,6 +755,8 @@ body{zoom:1.1;}
   .cob-status{font-size:12px;padding:8px 12px;border:1px solid var(--oud2);background:var(--oud2);}
   .cob-status.ok{color:var(--ou);border-color:var(--oud);}
   .cob-status.pend{color:var(--cr3);}
+  .cob-msgs{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+  .cob-msgs .acao-btn{flex:1;justify-content:center;}
   </style>
   <div class="cob-sec">
     <div class="slbl">Cobertura de Ausências</div>
@@ -1260,7 +1262,7 @@ function abrirFicha(nome){
     </div>
     <div class="ficha-acoes">
       <button onclick="fecharModal('modal-ficha');abrirPauta('${nome}')">📋 Preparar 1:1</button>
-      <button onclick="abrirFluxoFalar('${nome}','geral')">Enviar mensagem</button>
+      <button style="display:inline-flex;align-items:center;" onclick="abrirFluxoFalar('${nome}','geral')">${WA_ICON}Enviar mensagem</button>
       <button onclick="fecharModal('modal-ficha');abrirModalRapido('ocorrencia','${nome}')">+ Ocorrência</button>
       <button onclick="fecharModal('modal-ficha');abrirModalRapido('tarefa','${nome}')">+ Tarefa</button>
     </div>
@@ -1544,6 +1546,8 @@ function calcMesesEntre(arr){
 }
 
 // ════════ Fluxo WhatsApp + Registro ════════
+// Logo do WhatsApp (SVG inline) pra deixar os botões de mensagem mais bonitos
+const WA_ICON = `<svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:5px;flex-shrink:0" fill="#25d366"><path d="M17.5 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49s1.07 2.89 1.22 3.09c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35zM12.05 21.5a9.5 9.5 0 0 1-4.85-1.33l-.35-.2-3.6.94.96-3.5-.23-.36a9.47 9.47 0 0 1-1.45-5.05c0-5.24 4.26-9.49 9.51-9.49 2.54 0 4.93.99 6.72 2.79a9.44 9.44 0 0 1 2.78 6.72c0 5.24-4.26 9.48-9.5 9.48zM20.5 3.49A11.8 11.8 0 0 0 12.05.1C5.5.1.16 5.44.16 12c0 2.1.55 4.14 1.6 5.95L.06 24l6.2-1.63a11.9 11.9 0 0 0 5.79 1.48c6.56 0 11.9-5.34 11.9-11.9 0-3.18-1.24-6.17-3.45-8.46z"/></svg>`;
 const TEL_EQUIPE = {
   'Natália':'5562982001112',
   'Ialey':'5562981728039',
@@ -1560,13 +1564,17 @@ function enviarWpp(nome, contexto){
   else { alert('Sem número cadastrado pra '+nome+'.\n\nCopie a mensagem e envie pelo WhatsApp:\n\n'+msg); }
   depoisDoWpp(nome, contexto);
 }
-function abrirFluxoFalar(nome, contexto){
+function abrirFluxoFalar(nome, contexto, ref){
   fecharModal('modal-ficha');
+  const quem = ref || 'a colega';
   const metasMsg = `Oi, ${nome}! 😊\n\nNotei que você ainda não atualizou o painel de metas. Quando puder, você dá uma olhadinha? Manter o painel atualizado diariamente é muito importante para acompanharmos os resultados. Conto com você!`;
   const templates = {
     'geral': `Oi ${nome}! Queria conversar contigo.`,
     'vendas': metasMsg,
-    'metas': metasMsg
+    'metas': metasMsg,
+    'ferias': `Oi, ${nome}! 🌴\n\nPassando pra te desejar umas ótimas férias! Aproveite pra descansar bastante e recarregar as energias — você merece. Pode ficar tranquila que a gente cuida de tudo por aqui. Boas férias! 😊`,
+    'retorno': `Oi, ${nome}! 😊\n\nQue bom te ter de volta! Espero que tenha descansado bastante nas férias. Seja muito bem-vinda de volta, a equipe estava com saudade. Bora com tudo! 💪`,
+    'cobertura': `Oi, ${nome}! 😊\n\nEnquanto ${quem} estiver de férias, você vai ficar responsável pelo celular de vendas e pelas funções dela. Qualquer dúvida é só me chamar, tá? Obrigada pela parceria, conto com você! 🙏`
   };
   const msg = templates[contexto] || templates['geral'];
 
@@ -1579,10 +1587,18 @@ function abrirFluxoFalar(nome, contexto){
 
     <div class="wpp-btn-row">
       <button class="wpp-btn" onclick="fecharModal('modal-wpp')">Cancelar</button>
-      <button class="wpp-btn primary" onclick="enviarWpp('${nome}','${contexto}')">📱 Abrir WhatsApp</button>
+      <button class="wpp-btn primary" style="display:inline-flex;align-items:center;" onclick="enviarWpp('${nome}','${contexto}')">${WA_ICON}Abrir WhatsApp</button>
     </div>
   `;
   abrirModal('modal-wpp');
+}
+
+// Avisa a pessoa escolhida na cobertura que vai assumir as funções de quem está de férias
+function avisarCobertura(selId, ausente){
+  const sel=document.getElementById(selId);
+  const quem=sel?sel.value:'';
+  if(!quem){ alert('Escolha primeiro quem vai cobrir '+ausente+' no seletor acima.'); return; }
+  abrirFluxoFalar(quem,'cobertura',ausente);
 }
 
 function depoisDoWpp(nome, contexto){
@@ -2181,12 +2197,13 @@ function renderAcoes(){
   (window._ausentes||[]).forEach(a=>{ if(!a.nome||a.nome==='?') return;
     const mot=a.mot?a.mot.txt.toLowerCase():'folga';
     acoes.push({p:1,txt:'🌴 <b class="nome-clic" onclick="abrirFicha(\''+a.nome+'\')">'+a.nome+'</b> está de '+mot+(a.ate?' até '+fmtData(a.ate):'')+' — organize a cobertura',btn:'Cobrir',act:"var g=document.getElementById('cob-grid');if(g)g.scrollIntoView({behavior:'smooth',block:'center'})"});
+    if(a.mot&&a.mot.cls==='ferias') acoes.push({p:3,txt:'🌴 Deseje boas férias pra <b class="nome-clic" onclick="abrirFicha(\''+a.nome+'\')">'+a.nome+'</b>',btn:'Enviar mensagem',ico:'wa',act:"abrirFluxoFalar('"+a.nome+"','ferias')"});
   });
   const ls=window._lastSale||{};
   VENDS.forEach(v=>{ if(v==='Jhennifer'||!ls[v])return; const d=atrasoDias(ls[v]);
-    if(d>=2) acoes.push({p:2,txt:'<b class="nome-clic" onclick="abrirFicha(\''+v+'\')">'+v+'</b> está há '+d+' dias sem lançar vendas',btn:'Enviar mensagem',act:"abrirFluxoFalar('"+v+"','vendas')"});
+    if(d>=2) acoes.push({p:2,txt:'<b class="nome-clic" onclick="abrirFicha(\''+v+'\')">'+v+'</b> está há '+d+' dias sem lançar vendas',btn:'Enviar mensagem',ico:'wa',act:"abrirFluxoFalar('"+v+"','vendas')"});
   });
-  ['Yuri','Edson'].forEach(n=>{ const p=PESSOAS[n]; if(p&&/atrasad/i.test(p.statusTxt||'')) acoes.push({p:2,txt:'<b class="nome-clic" onclick="abrirFicha(\''+n+'\')">'+n+'</b> · '+p.statusTxt,btn:'Enviar mensagem',act:"abrirFluxoFalar('"+n+"','geral')"}); });
+  ['Yuri','Edson'].forEach(n=>{ const p=PESSOAS[n]; if(p&&/atrasad/i.test(p.statusTxt||'')) acoes.push({p:2,txt:'<b class="nome-clic" onclick="abrirFicha(\''+n+'\')">'+n+'</b> · '+p.statusTxt,btn:'Enviar mensagem',ico:'wa',act:"abrirFluxoFalar('"+n+"','geral')"}); });
   Object.keys(EQUIPE_INFO).forEach(n=>{ const info=EQUIPE_INFO[n]; if(!info||!info.nasc)return; const pt=String(info.nasc).split('-'); if(pt.length<3)return;
     let prox=new Date(hoje.getFullYear(),(+pt[1])-1,+pt[2]); if(prox<hoje)prox=new Date(hoje.getFullYear()+1,(+pt[1])-1,+pt[2]);
     const diff=Math.round((prox-hoje)/86400000);
@@ -2197,7 +2214,7 @@ function renderAcoes(){
   if(!acoes.length){ if(tit)tit.innerHTML='✓ Nenhuma ação urgente agora'; host.innerHTML='<div class="acao-item"><div class="acao-texto">Tudo em dia por aqui.</div></div>'; return; }
   const top=acoes.slice(0,5);
   if(tit)tit.innerHTML='⚠ '+top.length+' aç'+(top.length===1?'ão sugerida':'ões sugeridas')+' pra você hoje';
-  host.innerHTML=top.map(a=>'<div class="acao-item"><div class="acao-texto">'+a.txt+'</div>'+(a.btn?'<button class="acao-btn" onclick="'+a.act.replace(/"/g,'&quot;')+'">'+a.btn+'</button>':'')+'</div>').join('');
+  host.innerHTML=top.map(a=>'<div class="acao-item"><div class="acao-texto">'+a.txt+'</div>'+(a.btn?'<button class="acao-btn"'+(a.ico==='wa'?' style="display:inline-flex;align-items:center;justify-content:center;"':'')+' onclick="'+a.act.replace(/"/g,'&quot;')+'">'+(a.ico==='wa'?WA_ICON:'')+a.btn+'</button>':'')+'</div>').join('');
 }
 
 function atrasoDias(iso){
@@ -2704,10 +2721,10 @@ function renderEventos(){
   const ym=new Date().toISOString().slice(0,7);
   (window._lancItems||[]).filter(l=>l.tipo&&/feri/i.test(l.tipo)&&l.inicio&&l.fim).forEach(l=>{
     const nome=FUNC_MAP[l.funcId]||'?'; if(nome==='?')return;
-    if(l.inicio.slice(0,7)===ym) its.push({l:'🌴 '+nome+' entra de férias',r:fmtData(l.inicio)});
-    if(l.fim.slice(0,7)===ym) its.push({l:'🌴 '+nome+' volta de férias',r:fmtData(l.fim)});
+    if(l.inicio.slice(0,7)===ym) its.push({l:'🌴 '+nome+' entra de férias',r:fmtData(l.inicio),msg:{nome:nome,ctx:'ferias',lbl:'Boas férias'}});
+    if(l.fim.slice(0,7)===ym) its.push({l:'🌴 '+nome+' volta de férias',r:fmtData(l.fim),msg:{nome:nome,ctx:'retorno',lbl:'Bom retorno'}});
   });
-  el.innerHTML=its.map(e=>'<div class="hoje-linha"><span class="l">'+e.l+'</span><span class="r">'+e.r+'</span></div>').join('');
+  el.innerHTML=its.map(e=>'<div class="hoje-linha"><span class="l">'+e.l+'</span><span class="r" style="display:flex;align-items:center;gap:8px;">'+e.r+(e.msg?'<button class="acao-btn" style="display:inline-flex;align-items:center;justify-content:center;" onclick="abrirFluxoFalar(\''+e.msg.nome+'\',\''+e.msg.ctx+'\')">'+WA_ICON+e.msg.lbl+'</button>':'')+'</span></div>').join('');
 }
 
 function renderPresenca(ausentes){
@@ -2740,11 +2757,15 @@ function renderPresenca(ausentes){
           +'<div><div class="cob-nome">'+a.nome+'</div><div class="cob-motivo '+a.mot.cls+'">'+a.mot.txt
           +(a.mot.cls==='ferias'?' · volta '+fmtData(a.ate):'')+'</div></div></div>'
           +'<div class="cob-linha">📱 Celular de vendas + funções de '+a.nome+'</div>'
-          +'<div class="cob-assign">Assume → <select class="cob-sel" onchange="cobrir(this,\'cob-st-'+slug+'\')">'
+          +'<div class="cob-assign">Assume → <select id="cobsel-'+slug+'" class="cob-sel" onchange="cobrir(this,\'cob-st-'+slug+'\')">'
           +'<option value="">escolher quem cobre…</option>'
           +cands.map(n=>'<option value="'+n+'">'+n+'</option>').join('')
           +'</select></div>'
-          +'<div class="cob-status pend" id="cob-st-'+slug+'">Sem cobertura definida ainda</div></div>';
+          +'<div class="cob-status pend" id="cob-st-'+slug+'">Sem cobertura definida ainda</div>'
+          +'<div class="cob-msgs">'
+          +(a.mot.cls==='ferias'?'<button class="acao-btn" style="display:inline-flex;align-items:center;justify-content:center;" onclick="abrirFluxoFalar(\''+a.nome+'\',\'ferias\')">'+WA_ICON+'Boas férias</button>':'')
+          +'<button class="acao-btn" style="display:inline-flex;align-items:center;justify-content:center;" onclick="avisarCobertura(\'cobsel-'+slug+'\',\''+a.nome+'\')">'+WA_ICON+'Avisar quem cobre</button>'
+          +'</div></div>';
       }).join('');
     }
   }
