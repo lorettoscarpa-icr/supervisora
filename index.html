@@ -1562,8 +1562,13 @@ function enviarWpp(nome, contexto){
 }
 function abrirFluxoFalar(nome, contexto){
   fecharModal('modal-ficha');
-  const templates = { 'geral': `Oi ${nome}! Queria conversar contigo.` };
-  const msg = templates['geral'];
+  const metasMsg = `Oi, ${nome}! 😊\n\nNotei que você ainda não atualizou o painel de metas. Quando puder, você dá uma olhadinha? Manter o painel atualizado diariamente é muito importante para acompanharmos os resultados. Conto com você!`;
+  const templates = {
+    'geral': `Oi ${nome}! Queria conversar contigo.`,
+    'vendas': metasMsg,
+    'metas': metasMsg
+  };
+  const msg = templates[contexto] || templates['geral'];
 
   document.getElementById('wpp-content').innerHTML = `
     <div class="modal-tit">Enviar mensagem pra ${nome}</div>
