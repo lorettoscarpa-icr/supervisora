@@ -757,6 +757,8 @@ body{zoom:1.1;}
   .cob-status.pend{color:var(--cr3);}
   .cob-msgs{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
   .cob-msgs .acao-btn{flex:1;justify-content:center;}
+  .pv-msgs{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--oud2);}
+  .pv-msgs .acao-btn{flex:1;justify-content:center;}
   </style>
   <div class="cob-sec">
     <div class="slbl">Cobertura de Ausências</div>
@@ -1548,6 +1550,9 @@ function calcMesesEntre(arr){
 // ════════ Fluxo WhatsApp + Registro ════════
 // Logo do WhatsApp (SVG inline) pra deixar os botões de mensagem mais bonitos
 const WA_ICON = `<svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:5px;flex-shrink:0" fill="#25d366"><path d="M17.5 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49s1.07 2.89 1.22 3.09c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35zM12.05 21.5a9.5 9.5 0 0 1-4.85-1.33l-.35-.2-3.6.94.96-3.5-.23-.36a9.47 9.47 0 0 1-1.45-5.05c0-5.24 4.26-9.49 9.51-9.49 2.54 0 4.93.99 6.72 2.79a9.44 9.44 0 0 1 2.78 6.72c0 5.24-4.26 9.48-9.5 9.48zM20.5 3.49A11.8 11.8 0 0 0 12.05.1C5.5.1.16 5.44.16 12c0 2.1.55 4.14 1.6 5.95L.06 24l6.2-1.63a11.9 11.9 0 0 0 5.79 1.48c6.56 0 11.9-5.34 11.9-11.9 0-3.18-1.24-6.17-3.45-8.46z"/></svg>`;
+// Gênero da equipe — usado pra concordância das mensagens (dela/dele, bem-vinda/vindo etc)
+const GENERO = {'Jhennifer':'f','Ialey':'f','Michelly':'f','Natália':'f','Lorrayne':'f','Yuri':'m','Edson':'m','Gustavo':'m'};
+function ehHomem(n){ return GENERO[n]==='m'; }
 const TEL_EQUIPE = {
   'Natália':'5562982001112',
   'Ialey':'5562981728039',
@@ -1567,14 +1572,27 @@ function enviarWpp(nome, contexto){
 function abrirFluxoFalar(nome, contexto, ref){
   fecharModal('modal-ficha');
   const quem = ref || 'a colega';
+  const M = ehHomem(nome);        // gênero de quem recebe a mensagem
+  const g = (f,m)=>M?m:f;         // escolhe forma feminina/masculina p/ o destinatário
+  const posDela = ehHomem(ref)?'dele':'dela';   // gênero da pessoa referida (ausente)
   const metasMsg = `Oi, ${nome}! 😊\n\nNotei que você ainda não atualizou o painel de metas. Quando puder, você dá uma olhadinha? Manter o painel atualizado diariamente é muito importante para acompanharmos os resultados. Conto com você!`;
   const templates = {
     'geral': `Oi ${nome}! Queria conversar contigo.`,
     'vendas': metasMsg,
     'metas': metasMsg,
-    'ferias': `Oi, ${nome}! 🌴\n\nPassando pra te desejar umas ótimas férias! Aproveite pra descansar bastante e recarregar as energias — você merece. Pode ficar tranquila que a gente cuida de tudo por aqui. Boas férias! 😊`,
-    'retorno': `Oi, ${nome}! 😊\n\nQue bom te ter de volta! Espero que tenha descansado bastante nas férias. Seja muito bem-vinda de volta, a equipe estava com saudade. Bora com tudo! 💪`,
-    'cobertura': `Oi, ${nome}! 😊\n\nEnquanto ${quem} estiver de férias, você vai ficar responsável pelo celular de vendas e pelas funções dela. Qualquer dúvida é só me chamar, tá? Obrigada pela parceria, conto com você! 🙏`
+    'ferias': `Oi, ${nome}! 🌴\n\nPassando pra te desejar umas ótimas férias! Aproveite pra descansar bastante e recarregar as energias — você merece. Pode ficar ${g('tranquila','tranquilo')} que a gente cuida de tudo por aqui. Boas férias! 😊`,
+    'retorno': `Oi, ${nome}! 😊\n\nQue bom te ter de volta! Espero que tenha descansado bastante nas férias. Seja muito bem-${g('vinda','vindo')} de volta, a equipe estava com saudade. Bora com tudo! 💪`,
+    'cobertura': `Oi, ${nome}! 😊\n\nEnquanto ${quem} estiver de férias, você vai ficar responsável pelo celular de vendas e pelas funções ${posDela}. Qualquer dúvida é só me chamar, tá? Obrigada pela parceria, conto com você! 🙏`,
+    'parabens-meta': `Oi, ${nome}! 🎉\n\nParabéns, você bateu a meta! Que orgulho do seu trabalho e da sua dedicação esse mês. Continua assim, você faz toda a diferença no time! 👏`,
+    'destaque-mix': `Oi, ${nome}! 🏆\n\nVocê é ${g('a líder','o líder')} do Mix de Acessórios do mês! Mandou super bem puxando as vendas de acessórios junto com os sapatos. Parabéns pelo destaque, segue brilhando! ✨`,
+    'destaque-conv': `Oi, ${nome}! 🎯\n\nVocê fechou o mês com a Maior Conversão de Mix da equipe! Isso mostra o quanto você aproveita bem cada atendimento. Parabéns, resultado incrível! 👏`,
+    'destaque-venda': `Oi, ${nome}! 💰\n\nA Maior Venda do Mês foi sua! Que atendimento excelente — parabéns por esse resultado. Você é um exemplo pra equipe! 🌟`,
+    'apoio': `Oi, ${nome}! 😊\n\nDei uma olhada no painel e vi que o ritmo esse mês está um pouquinho abaixo do que a gente precisa. Quero te ajudar a virar isso! Como você está se sentindo? Bora pensar ${g('juntas','juntos')} nas próximas vendas? 💪`,
+    'apoio-cat': `Oi, ${nome}! 😊\n\nUma dica rápida: reparei no painel que a categoria de ${quem} está precisando de um empurrãozinho esse mês. Que tal dar um foco nela nos próximos atendimentos? Qualquer coisa a gente combina uma estratégia ${g('juntas','juntos')}. Conto com você! 💪`,
+    'aniversario': `Oi, ${nome}! 🎂🎉\n\nFeliz aniversário! Que seu dia seja muito especial, cheio de alegria e coisas boas. Obrigada por fazer parte do nosso time. Um super abraço e parabéns! 🥳`,
+    'aniversario-casa': `Oi, ${nome}! 🎉\n\nHoje é uma data especial: ${quem} de casa! Obrigada por toda a dedicação nesse tempo com a gente. Você é parte importante dessa equipe. Parabéns por mais um ano de parceria! 🙌`,
+    'lembrete-reposicao': `Oi, ${nome}! 📦\n\nPassando pra lembrar que hoje é dia do pedido de reposição. Quando puder, dá uma conferida no que está faltando e organiza o pedido, tá? Qualquer dúvida me chama. Obrigada!`,
+    'lembrete-metas': `Oi, ${nome}! 📊\n\nLembrete rápido: hoje é dia de atualizar o painel de metas. Quando tiver um tempinho, lança suas vendas pra gente manter tudo em dia. Obrigada, conto com você! 😊`
   };
   const msg = templates[contexto] || templates['geral'];
 
@@ -2544,13 +2562,14 @@ function renderDestaques(){
   const rankConv=VENDS.map(v=>{ const sap=(cur[v]&&cur[v].sapatos)||0, ac=ACESS.reduce((s,c)=>s+((cur[v]&&cur[v][c])||0),0); return {v,conv:sap>0?ac/sap:0,sap}; }).filter(o=>o.sap>0).sort((a,b)=>b.conv-a.conv);
   const lidConv=rankConv.length?rankConv[0]:null;
   const mv=window._maiorVenda;
-  function row(label,nome,valor){
+  function row(label,nome,valor,ctx){
     const av=nome?'<div class="dest-foto" data-foto="'+nome+'">'+nome[0]+'</div>':'<div class="dest-foto vazio">—</div>';
-    return '<div class="dest-item">'+av+'<div class="dest-txt"><div class="dest-lbl">'+label+'</div><div class="dest-val">'+(nome?('<b>'+nome+'</b>'+(valor?' · '+valor:'')):'<i>Sem registros</i>')+'</div></div></div>';
+    const btn=nome?'<button class="acao-btn" style="display:inline-flex;align-items:center;justify-content:center;margin-left:auto;flex-shrink:0;" onclick="abrirFluxoFalar(\''+nome+'\',\''+ctx+'\')">'+WA_ICON+'Parabéns</button>':'';
+    return '<div class="dest-item">'+av+'<div class="dest-txt"><div class="dest-lbl">'+label+'</div><div class="dest-val">'+(nome?('<b>'+nome+'</b>'+(valor?' · '+valor:'')):'<i>Sem registros</i>')+'</div></div>'+btn+'</div>';
   }
-  el.innerHTML=row('Líder Mix Acessórios', lidMix, lidMix?(nCats+(nCats===1?' categoria':' categorias')):'')
-    +row('Maior Conversão de Mix', lidConv?lidConv.v:null, lidConv?Math.round(lidConv.conv*100)+'%':'')
-    +row('Maior Venda do Mês', mv&&mv.vendedora?mv.vendedora:null, mv&&mv.valor?('R$ '+Number(mv.valor).toLocaleString('pt-BR')):'');
+  el.innerHTML=row('Líder Mix Acessórios', lidMix, lidMix?(nCats+(nCats===1?' categoria':' categorias')):'', 'destaque-mix')
+    +row('Maior Conversão de Mix', lidConv?lidConv.v:null, lidConv?Math.round(lidConv.conv*100)+'%':'', 'destaque-conv')
+    +row('Maior Venda do Mês', mv&&mv.vendedora?mv.vendedora:null, mv&&mv.valor?('R$ '+Number(mv.valor).toLocaleString('pt-BR')):'', 'destaque-venda');
   if(typeof aplicarFotos==='function') aplicarFotos();
 }
 
@@ -2591,12 +2610,15 @@ function renderPainelVendedora(cur,base,restantes,fechado){
   const el=document.getElementById('pv-equipe'); if(!el)return;
   el.innerHTML=VENDS.filter(v=>v!=='Jhennifer').map(v=>{
     const tag = v==='Jhennifer' ? ' <small style="color:var(--cr3);font-weight:400">· supervisora · vende no salão</small>' : '';
+    let algumSup=false, pior=null, piorPct=999;
     const cats=CATS.map(c=>{
       const atual=cur[v][c.id]||0, meta=base[v][c.id]||0;
       if(!meta) return '<div class="mi-cat sembase"><div class="mi-cat-nome">'+c.nome+'</div>'
         +'<div class="mi-vm"><span>Atual <b>'+atual+'</b></span></div><div class="mi-sembase">sem base 2025</div></div>';
       const pct=Math.round(atual/meta*100), falta=Math.max(meta-atual,0), sup=atual>=meta;
       const ok=sup||pct>=80;
+      if(sup) algumSup=true;
+      if(!sup && pct<piorPct){ piorPct=pct; pior=c.nome; }
       return '<div class="mi-cat"><div class="mi-cat-nome">'+c.nome+'</div>'
         +'<div class="mi-vm"><span>Atual <b>'+atual+'</b></span><span class="seta">→</span><span class="meta">Meta <b>'+meta+'</b></span></div>'
         +'<div class="pv-bar"><div class="pv-bar-f" style="width:'+Math.min(pct,100)+'%"></div></div>'
@@ -2606,9 +2628,15 @@ function renderPainelVendedora(cur,base,restantes,fechado){
         +(sup?'<span class="mi-falta sup">✓ Superou 2025 · +'+(atual-meta)+'</span>':'<span class="mi-falta">Faltam +'+falta+'</span>')
         +'<span class="mi-selo '+(ok?'ok':'')+'">'+(ok?'No ritmo':'Atrás')+'</span></div></div>';
     }).join('');
+    const btnP='display:inline-flex;align-items:center;justify-content:center;';
+    const msgs='<div class="pv-msgs">'
+      +(algumSup?'<button class="acao-btn" style="'+btnP+'" onclick="abrirFluxoFalar(\''+v+'\',\'parabens-meta\')">'+WA_ICON+'Parabéns</button>':'')
+      +(pior?'<button class="acao-btn" style="'+btnP+'" onclick="abrirFluxoFalar(\''+v+'\',\'apoio-cat\',\''+pior+'\')">'+WA_ICON+'Apoio</button>':'')
+      +'<button class="acao-btn" style="'+btnP+'" onclick="abrirFluxoFalar(\''+v+'\',\'lembrete-metas\')">'+WA_ICON+'Lembrar metas</button>'
+      +'</div>';
     return '<div class="pv-card"><div class="pv-card-header"><div class="pv-foto" data-foto="'+v+'">'+v[0]+'</div>'
       +'<div><div class="pv-nome">'+v+tag+'</div><div class="pv-status"><span class="dot ok"></span>Em dia</div></div></div>'
-      +'<div class="mi">'+cats+'</div></div>';
+      +'<div class="mi">'+cats+'</div>'+msgs+'</div>';
   }).join('');
 }
 
@@ -2717,7 +2745,8 @@ async function _carregarAvalPendAntigo(){
 
 function renderEventos(){
   const el=document.getElementById('eventos-list'); if(!el)return;
-  const its=[{l:'📦 Pedido de Reposição',r:'Toda Seg'},{l:'📅 Atualização de Metas',r:'Toda Ter'}];
+  const estoq=Object.keys(PESSOAS).find(n=>/estoq/i.test((PESSOAS[n]&&PESSOAS[n].funcao)||''))||'Yuri';
+  const its=[{l:'📦 Pedido de Reposição',r:'Toda Seg',msg:{nome:estoq,ctx:'lembrete-reposicao',lbl:'Lembrar'}},{l:'📅 Atualização de Metas',r:'Toda Ter'}];
   const ym=new Date().toISOString().slice(0,7);
   (window._lancItems||[]).filter(l=>l.tipo&&/feri/i.test(l.tipo)&&l.inicio&&l.fim).forEach(l=>{
     const nome=FUNC_MAP[l.funcId]||'?'; if(nome==='?')return;
@@ -2779,9 +2808,11 @@ function renderAniversarios(){
   const casa=nomes.filter(n=>+EQUIPE_INFO[n].adm.slice(5,7)===mes)
     .map(n=>({n,anos:ano-(+EQUIPE_INFO[n].adm.slice(0,4)),dia:+EQUIPE_INFO[n].adm.slice(8,10)}))
     .filter(x=>x.anos>0).sort((a,b)=>a.dia-b.dia);
+  const btnP='display:inline-flex;align-items:center;justify-content:center;';
   const lAniv=n=>{const dd=EQUIPE_INFO[n].nasc.slice(8,10),wd=new Date(ano,mes-1,+dd).getDay();
-    return '<div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="'+n+'">'+n[0]+'</span>'+n+'</span><span class="r">🎂 '+dd+'/'+String(mes).padStart(2,'0')+' · '+DIAS_SEMANA[wd]+'</span></div>';};
-  const lCasa=x=>'<div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="'+x.n+'">'+x.n[0]+'</span>'+x.n+'</span><span class="r ok">🎉 '+x.anos+(x.anos>1?' anos':' ano')+'</span></div>';
+    return '<div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="'+n+'">'+n[0]+'</span>'+n+'</span><span class="r" style="display:flex;align-items:center;gap:8px;">🎂 '+dd+'/'+String(mes).padStart(2,'0')+' · '+DIAS_SEMANA[wd]+'<button class="acao-btn" style="'+btnP+'" onclick="abrirFluxoFalar(\''+n+'\',\'aniversario\')">'+WA_ICON+'Parabéns</button></span></div>';};
+  const lCasa=x=>{const anosTxt=x.anos+(x.anos>1?' anos':' ano');
+    return '<div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="'+x.n+'">'+x.n[0]+'</span>'+x.n+'</span><span class="r ok" style="display:flex;align-items:center;gap:8px;">🎉 '+anosTxt+'<button class="acao-btn" style="'+btnP+'" onclick="abrirFluxoFalar(\''+x.n+'\',\'aniversario-casa\',\''+anosTxt+'\')">'+WA_ICON+'Parabéns</button></span></div>';};
   const vazio=t=>'<div class="hoje-linha"><span class="l" style="color:var(--cr3);font-style:italic">'+t+'</span></div>';
   el.innerHTML='<div class="hoje-card-tit">Aniversariantes <b>de '+MESES[mes-1]+'</b></div>'
     +'<div class="hoje-subgrupo">Aniversário</div>'+(anivs.length?anivs.map(lAniv).join(''):vazio('Ninguém este mês'))
