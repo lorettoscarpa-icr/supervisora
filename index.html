@@ -94,6 +94,22 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .hoje-edit:hover{color:var(--ou2);}
 .hoje-cob{font-size:10.5px;color:var(--azul);padding:0 0 7px 30px;margin-top:-3px;letter-spacing:.2px;}
 .hoje-cob b{color:var(--ou2);font-weight:600;}
+/* Eventos do Mês: adicionar / concluir / excluir */
+.ev-add-btn{background:transparent;border:1px solid var(--oud);color:var(--ou2);width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:14px;line-height:1;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;flex-shrink:0;padding:0;}
+.ev-add-btn:hover{background:var(--ou);color:var(--bg);border-color:var(--ou);}
+.ev-form{display:flex;flex-direction:column;gap:8px;margin:2px 0 12px;padding:12px;border:1px solid var(--oud2);background:rgba(255,255,255,.02);}
+.ev-inp{background:var(--v1);border:1px solid var(--oud);color:var(--cr);font-family:inherit;font-size:12px;padding:8px 10px;width:100%;box-sizing:border-box;}
+.ev-form-acoes{display:flex;gap:8px;justify-content:flex-end;}
+.ev-cancel{background:transparent;border:1px solid var(--oud2);color:var(--cr3);font-family:inherit;font-size:11px;padding:7px 12px;cursor:pointer;}
+.ev-cancel:hover{color:var(--cr);}
+.ev-salvar{background:var(--ou);border:none;color:var(--bg);font-family:inherit;font-size:11px;letter-spacing:.5px;text-transform:uppercase;font-weight:600;padding:7px 14px;cursor:pointer;}
+.ev-salvar:hover{background:var(--ou2);}
+.ev-check{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border:1px solid var(--oud);border-radius:3px;cursor:pointer;font-size:11px;color:var(--verde);flex-shrink:0;}
+.ev-check.done{background:rgba(109,191,109,.15);border-color:var(--verde);}
+.ev-txt.done{text-decoration:line-through;color:var(--cr3);}
+.ev-del{background:transparent;border:none;color:var(--cr3);cursor:pointer;font-size:15px;line-height:1;padding:0 2px;opacity:.5;font-family:inherit;}
+.hoje-linha:hover .ev-del{opacity:1;}
+.ev-del:hover{color:var(--vermelho);}
 /* modal editar status */
 .st-opts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:2px 0 18px;}
 .st-opt{display:flex;align-items:center;gap:9px;padding:12px;border:1px solid var(--oud2);background:rgba(255,255,255,.02);color:var(--cr2);cursor:pointer;font-family:inherit;font-size:12px;text-align:left;transition:border-color .15s,background .15s;}
@@ -736,8 +752,19 @@ body{zoom:1.1;}
       <div class="hoje-linha"><span class="l" style="color:var(--cr3);font-style:italic">Carregando…</span></div>
     </div>
 
-    <div class="hoje-card">
-      <div class="hoje-card-tit">Eventos <b>do Mês</b></div>
+    <div class="hoje-card" id="card-eventos">
+      <div class="hoje-card-tit" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <span>Eventos <b>do Mês</b></span>
+        <button class="ev-add-btn" onclick="toggleFormEvento()" title="Adicionar evento">＋</button>
+      </div>
+      <div id="ev-form" class="ev-form" style="display:none;">
+        <input id="ev-titulo" class="ev-inp" type="text" placeholder="Ex.: Inventário, Treinamento, Reunião…" maxlength="60">
+        <input id="ev-data" class="ev-inp" type="date">
+        <div class="ev-form-acoes">
+          <button class="ev-cancel" onclick="toggleFormEvento(true)">Cancelar</button>
+          <button class="ev-salvar" id="ev-salvar" onclick="salvarEvento()">Adicionar</button>
+        </div>
+      </div>
       <div id="eventos-list"></div>
     </div>
 
@@ -1817,7 +1844,7 @@ if(AUTH){
     SESSION = user;
     ROLE = (email === GESTOR_EMAIL) ? 'gestor' : 'supervisora';
     aplicarSessao(ROLE);
-    carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); montarSeletorMesPauta(); });
+    carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); carregarEventos(); montarSeletorMesPauta(); });
   });
 }
 
@@ -2732,8 +2759,9 @@ async function carregarPresenca(){
 
 function renderPendencias(){
   const el=document.getElementById('pendencias'); if(!el)return;
-  const its=[]; const d=new Date(), ym=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
-  (window._lancItems||[]).filter(l=>l.inicio&&l.fim&&l.inicio.slice(0,7)<=ym&&l.fim.slice(0,7)>=ym).forEach(l=>{
+  const its=[]; const d=new Date(), ym=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); const hoje=_hojeStr();
+  // só cobra organizar a cobertura enquanto a ausência não terminou (fim >= hoje) — comparação por data, não por mês
+  (window._lancItems||[]).filter(l=>l.inicio&&l.fim&&l.fim>=hoje&&l.inicio.slice(0,7)<=ym).forEach(l=>{
     const nome=FUNC_MAP[l.funcId]||'?'; if(nome==='?')return; const m=motivoDe(l.tipo);
     its.push({ico:'🌴',txt:'Organizar a cobertura de <b class="nome-clic" onclick="abrirFicha(\''+nome+'\')">'+nome+'</b> ('+m.txt.toLowerCase()+' até '+fmtData(l.fim)+')',btn:'Cobertura',act:"var g=document.getElementById('cob-grid');if(g)g.scrollIntoView({behavior:'smooth',block:'center'})"});
   });
@@ -2762,6 +2790,7 @@ async function _carregarAvalPendAntigo(){
 
 function renderEventos(){
   const el=document.getElementById('eventos-list'); if(!el)return;
+  // fixos (recorrentes) + automáticos (férias do RH) — só leitura
   const its=[{l:'📦 Pedido de Reposição',r:'Toda Seg'},{l:'📅 Atualização de Metas',r:'Toda Ter'}];
   const ym=new Date().toISOString().slice(0,7);
   (window._lancItems||[]).filter(l=>l.tipo&&/feri/i.test(l.tipo)&&l.inicio&&l.fim).forEach(l=>{
@@ -2769,7 +2798,70 @@ function renderEventos(){
     if(l.inicio.slice(0,7)===ym) its.push({l:'🌴 '+nome+' entra de férias',r:fmtData(l.inicio)});
     if(l.fim.slice(0,7)===ym) its.push({l:'🌴 '+nome+' volta de férias',r:fmtData(l.fim)});
   });
-  el.innerHTML=its.map(e=>'<div class="hoje-linha"><span class="l">'+e.l+'</span><span class="r">'+e.r+'</span></div>').join('');
+  let html=its.map(e=>'<div class="hoje-linha"><span class="l">'+e.l+'</span><span class="r">'+e.r+'</span></div>').join('');
+  // eventos criados pela supervisora (ls_eventos) — do mês atual, ordenados por data
+  const evs=(window._eventos||[]).filter(e=>e.data&&e.data.slice(0,7)===ym)
+    .sort((a,b)=>String(a.data).localeCompare(String(b.data)));
+  html+=evs.map(e=>{
+    const done=!!e.concluido;
+    return '<div class="hoje-linha">'
+      +'<span class="l">'
+      +'<span class="ev-check'+(done?' done':'')+'" title="'+(done?'Concluído — clique pra reabrir':'Marcar como concluído')+'" onclick="toggleEvento(\''+e.id+'\')">'+(done?'✓':'')+'</span>'
+      +'<span class="ev-txt'+(done?' done':'')+'">📌 '+esc(e.titulo||'')+'</span></span>'
+      +'<span class="hoje-right"><span class="r">'+fmtData(e.data)+'</span>'
+      +'<button class="ev-del" title="Excluir evento" onclick="excluirEvento(\''+e.id+'\')">×</button></span></div>';
+  }).join('');
+  el.innerHTML=html;
+}
+function toggleFormEvento(fechar){
+  const f=document.getElementById('ev-form'); if(!f)return;
+  const abrir = fechar?false:(f.style.display==='none');
+  f.style.display=abrir?'':'none';
+  if(abrir){
+    const dt=document.getElementById('ev-data'); if(dt&&!dt.value) dt.value=_hojeStr();
+    const t=document.getElementById('ev-titulo'); if(t) setTimeout(()=>t.focus(),80);
+  }else{
+    const t=document.getElementById('ev-titulo'); if(t)t.value='';
+    const dt=document.getElementById('ev-data'); if(dt)dt.value='';
+  }
+}
+async function salvarEvento(){
+  const tit=(document.getElementById('ev-titulo').value||'').trim();
+  const data=document.getElementById('ev-data').value||'';
+  if(!tit){ alert('Dê um nome pro evento.'); return; }
+  if(!data){ alert('Escolha a data do evento.'); return; }
+  const btn=document.getElementById('ev-salvar'); if(btn){ btn.disabled=true; btn.textContent='Salvando…'; }
+  const item={titulo:tit,data:data,concluido:false,autor:(window._usuario||'Jhennifer'),criadoEm:new Date().toISOString()};
+  try{
+    if(DB){ const ref=await DB.collection('ls_eventos').add(item); item.id=ref.id; }
+    else { item.id='local_'+_hojeStr()+'_'+((window._eventos||[]).length+1); }
+    window._eventos=[item].concat(window._eventos||[]);
+    toggleFormEvento(true); renderEventos();
+  }catch(e){ console.warn('salvarEvento',e); alert('Não consegui salvar agora. Tenta de novo em instantes.'); }
+  if(btn){ btn.disabled=false; btn.textContent='Adicionar'; }
+}
+async function carregarEventos(){
+  if(!DB){ window._eventos=window._eventos||[]; renderEventos(); return; }
+  try{
+    const snap=await DB.collection('ls_eventos').get();
+    const arr=[]; snap.forEach(d=>{ const o=d.data()||{}; o.id=d.id; arr.push(o); });
+    window._eventos=arr;
+  }catch(e){ console.warn('carregarEventos',e); window._eventos=[]; }
+  renderEventos();
+}
+async function toggleEvento(id){
+  const it=(window._eventos||[]).find(x=>x.id===id); if(!it)return;
+  it.concluido=!it.concluido; renderEventos();
+  if(!DB)return;
+  try{ await DB.collection('ls_eventos').doc(id).set({concluido:it.concluido},{merge:true}); }
+  catch(e){ console.warn('toggleEvento',e); }
+}
+async function excluirEvento(id){
+  if(!confirm('Excluir este evento?'))return;
+  window._eventos=(window._eventos||[]).filter(x=>x.id!==id); renderEventos();
+  if(!DB)return;
+  try{ await DB.collection('ls_eventos').doc(id).delete(); }
+  catch(e){ console.warn('excluirEvento',e); }
 }
 
 function renderPresenca(ausentes){
