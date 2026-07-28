@@ -1384,14 +1384,12 @@ function abrirFicha(nome){
   // Seção: Avaliações
   // Seção: Avaliações (real — ls_avaliacoes)
   const _AVF=(window._avaliacoes||{})[nome]||null;
-  const _stf=k=>_AVF?('★'.repeat(_AVF.av[k])+'☆'.repeat(5-_AVF.av[k])):'—';
+  const _stf=k=>{ const v=_AVF?(+(_AVF.av[k]||0)):0; return '★'.repeat(v)+'☆'.repeat(Math.max(5-v,0)); };
   html += `<div class="ficha-sec" id="ficha-av">
     <div style="font-size:11px;color:var(--cr3);letter-spacing:.5px;margin-bottom:12px;">Última avaliação · ${window._avalMesLabel||'mês anterior'}</div>
     ${_AVF?`<div class="ficha-stats">
-      <div class="ficha-stat"><div class="ficha-stat-lbl">Desempenho</div><div class="ficha-stat-val">${_stf(0)}</div></div>
-      <div class="ficha-stat"><div class="ficha-stat-lbl">Comportamento</div><div class="ficha-stat-val">${_stf(1)}</div></div>
-      <div class="ficha-stat"><div class="ficha-stat-lbl">Pró-atividade / Cultura</div><div class="ficha-stat-val">${_stf(2)}</div></div>
-    </div>${_AVF.obs?`<div style="font-size:12px;color:var(--cr2);margin-top:10px;line-height:1.5;">${esc(_AVF.obs)}</div>`:''}`
+      ${AV_CATS.map((c,k)=>`<div class="ficha-stat"><div class="ficha-stat-lbl">${c}</div><div class="ficha-stat-val">${_stf(k)}</div></div>`).join('')}
+    </div>${_AVF.positivos?`<div style="font-size:12px;color:var(--cr2);margin-top:10px;line-height:1.5;"><b style="color:var(--verde)">✅ Positivos:</b> ${esc(_AVF.positivos)}</div>`:''}${_AVF.melhorar?`<div style="font-size:12px;color:var(--cr2);margin-top:6px;line-height:1.5;"><b style="color:var(--ou2)">⚠ A melhorar:</b> ${esc(_AVF.melhorar)}</div>`:''}${(!_AVF.positivos&&!_AVF.melhorar&&_AVF.obs)?`<div style="font-size:12px;color:var(--cr2);margin-top:10px;line-height:1.5;">${esc(_AVF.obs)}</div>`:''}`
     :`<div style="font-size:12px;color:var(--cr3);font-style:italic;">Ainda não avaliado — registre em RH › Avaliações Mensais.</div>`}
   </div>`;
 
@@ -1494,15 +1492,13 @@ async function abrirPauta(nome){
     </div>`;
   }
 
-  const stars = i => AV ? ('★'.repeat(AV.av[i])+'☆'.repeat(5-AV.av[i])) : '—';
+  const stars = i => { const v=AV?(+(AV.av[i]||0)):0; return '★'.repeat(v)+'☆'.repeat(Math.max(5-v,0)); };
   const _mesRef = MESES[_pm-1]+' '+_pa;
   const avBloco = AV ? `<div class="pauta-sec">
       <div class="pauta-sec-tit">Avaliação de ${_mesRef}</div>
       <div class="pauta-perf">
-        <div class="cel"><div class="l">Desempenho</div><div class="v" style="font-size:14px;">${stars(0)}</div></div>
-        <div class="cel"><div class="l">Comportamento</div><div class="v" style="font-size:14px;">${stars(1)}</div></div>
-        <div class="cel"><div class="l">Pró-ativ./Cultura</div><div class="v" style="font-size:14px;">${stars(2)}</div></div>
-      </div>${AV.obs?`<div class="pauta-li" style="margin-top:8px;"><span>${esc(AV.obs)}</span></div>`:''}
+        ${AV_CATS.map((c,i)=>`<div class="cel"><div class="l">${c}</div><div class="v" style="font-size:14px;">${stars(i)}</div></div>`).join('')}
+      </div>${AV.positivos?`<div class="pauta-li" style="margin-top:8px;"><span><b style="color:var(--verde)">✅ Positivos:</b> ${esc(AV.positivos)}</span></div>`:''}${AV.melhorar?`<div class="pauta-li" style="margin-top:4px;"><span><b style="color:var(--ou2)">⚠ A melhorar:</b> ${esc(AV.melhorar)}</span></div>`:''}${(!AV.positivos&&!AV.melhorar&&AV.obs)?`<div class="pauta-li" style="margin-top:8px;"><span>${esc(AV.obs)}</span></div>`:''}
     </div>` : `<div class="pauta-sec">
       <div class="pauta-sec-tit">Avaliação de ${_mesRef}</div>
       <div class="pauta-li vazio">Ainda não avaliado — registre em RH › Avaliações Mensais.</div>
@@ -1689,7 +1685,7 @@ function abrirModalRapido(tipo, pessoaPrev){
     'ocorrencia':'Registre uma chamada de atenção ou elogio',
     'tarefa':'Atribua uma tarefa pra alguém com prazo',
     'comunicado':'Aviso visível pra todo o time no Mural',
-    'avaliacao':'Avalie 3 categorias + observação livre'
+    'avaliacao':'Avalie 5 critérios + pontos positivos e a melhorar'
   };
 
   let body = '';
@@ -1740,7 +1736,7 @@ function abrirModalRapido(tipo, pessoaPrev){
     `;
   } else if(tipo === 'avaliacao'){
     const prev=(window._avaliacoes||{})[pessoaPrev];
-    window._avSel = prev ? prev.av.slice() : [0,0,0];
+    window._avSel = AV_CATS.map((_,i)=> prev&&prev.av ? (+prev.av[i]||0) : 0);
     const linha=(lbl,ci)=>`
       <div class="rapido-campo" style="margin-bottom:10px;"><div class="rapido-lbl">${lbl}</div>
         <div id="av-row-${ci}" style="display:flex;gap:6px;font-size:22px;cursor:pointer;">
@@ -1749,12 +1745,15 @@ function abrirModalRapido(tipo, pessoaPrev){
       </div>`;
     body = `
       <div class="rapido-campo" style="margin-bottom:14px;"><div class="rapido-lbl">Colaborador</div>
-        <select class="rapido-inp" id="av-f-pessoa">${AV_COLABS.map(n=>`<option ${n===pessoaPrev?'selected':''}>${n}</option>`).join('')}</select>
+        <select class="rapido-inp" id="av-f-pessoa">${AV_TODOS.map(n=>`<option ${n===pessoaPrev?'selected':''}>${n}</option>`).join('')}</select>
       </div>
       <div class="modal-sub" style="margin:-6px 0 10px;">Referente a <b>${mesLbl((window._cMes||mesHoje()).a,(window._cMes||mesHoje()).m)}</b></div>
-      ${linha('Desempenho',0)}${linha('Comportamento',1)}${linha('Pró-atividade / Cultura',2)}
-      <div class="rapido-campo"><div class="rapido-lbl">Observação</div>
-        <textarea class="rapido-textarea" id="av-f-obs" placeholder="Pontos altos e baixos do mês...">${prev?esc(prev.obs||''):''}</textarea>
+      ${AV_CATS.map((lbl,ci)=>linha(lbl,ci)).join('')}
+      <div class="rapido-campo" style="margin-bottom:12px;"><div class="rapido-lbl">✅ Pontos positivos</div>
+        <textarea class="rapido-textarea" id="av-f-pos" placeholder="O que a pessoa mandou bem no mês...">${prev?esc(prev.positivos||prev.obs||''):''}</textarea>
+      </div>
+      <div class="rapido-campo"><div class="rapido-lbl">⚠ Pontos a melhorar</div>
+        <textarea class="rapido-textarea" id="av-f-mel" placeholder="Onde pode evoluir...">${prev?esc(prev.melhorar||''):''}</textarea>
       </div>
     `;
   }
@@ -2071,6 +2070,7 @@ async function carregarDadosReais(){
     renderAtualizacoes(lastSale);
     window._lastSale=lastSale; window._cur=cur;
     _safe('destaques',renderDestaques); _safe('alertas',renderAlertas); _safe('acoes',renderAcoes); _safe('comparativos',renderComparativos);
+    carregarHistoricoAno();
     const _tm=metas?CATS.reduce((a,c)=>a+Number(metas[c.id]||0),0):0;
     VENDS.forEach(v=>{ const p=PESSOAS[v]; if(!p) return;
       const d=atrasoDias(lastSale[v]);
@@ -2104,7 +2104,7 @@ function renderMetasCategoria(total,metas,decorridos,restantes,totalDU,fechado){
     : 'Faltam <b>'+restantes+' dias úteis</b> · quanto cada categoria precisa vender por dia pra bater a meta do mês'; }
 }
 
-const CONF_DIA=[{id:'caixa',t:'Caixa fechado ontem'},{id:'loja',t:'Loja organizada'},{id:'vitrine',t:'Vitrine alinhada'}];
+const CONF_DIA=[{id:'caixa',t:'Caixa fechado ontem'},{id:'loja',t:'Loja organizada'},{id:'vitrine',t:'Vitrine alinhada'},{id:'repac',t:'Reposição de acessórios'}];
 const CONF_SEM=[{id:'reposicao',t:'Estoque · Reposição Semanal'}];
 function _isoWeek(d){ const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); const dn=t.getUTCDay()||7; t.setUTCDate(t.getUTCDate()+4-dn); const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1)); return {y:t.getUTCFullYear(), w:Math.ceil(((t-y0)/86400000+1)/7)}; }
 function confKeyDia(){ const d=new Date(); return 'conf_'+d.getFullYear()+'_'+String(d.getMonth()+1).padStart(2,'0')+'_'+String(d.getDate()).padStart(2,'0'); }
@@ -2142,6 +2142,7 @@ function renderConf(){
       +'<div class="conf-titulo">'+it.t+'</div><div class="conf-stat'+(f?'':' pend')+'">'+(f?'✓':'○')+'</div>'
       +'<div class="conf-quem">'+quem+'</div></div>'; };
   grid.innerHTML=CONF_DIA.map(it=>mk(it,'dia',dia)).join('')+CONF_SEM.map(it=>mk(it,'sem',sem)).join('');
+  if(typeof renderPendencias==='function') renderPendencias();
 }
 
 const MEL_AREAS={vendas:'Vendas',rh:'RH',entregas:'Entregas',estoque:'Estoque',financeiro:'Financeiro',processos:'Processos internos'};
@@ -2366,8 +2367,11 @@ async function salvarOcorrencia(){
 }
 
 /* ═════════ AVALIAÇÕES (ls_avaliacoes/{ano_MM}) ═════════ */
-const AV_CATS=['Desempenho','Comportamento','Pró-atividade / Cultura'];
+const AV_CATS=['Trabalho em equipe','Comunicação e convivência','Soluções práticas (resolve sozinho)','Aberto a críticas','Pontualidade e responsabilidade'];
 const AV_COLABS=['Ialey','Michelly','Natália','Edson','Yuri','Gustavo'];
+// Jhennifer entra como perfil avaliável pela Gestão (não conta na pendência do time)
+const AV_GESTAO=['Jhennifer'];
+const AV_TODOS=AV_COLABS.concat(AV_GESTAO);
 function keyAvalMesAnterior(){ const d=new Date(); const pm=new Date(d.getFullYear(),d.getMonth()-1,1);
   return {key:pm.getFullYear()+'_'+String(pm.getMonth()+1).padStart(2,'0'), lbl:MESES[pm.getMonth()]+' '+pm.getFullYear()}; }
 async function carregarAvaliacoes(){
@@ -2385,30 +2389,33 @@ function renderAvaliacoes(){
   const alvo=window._cMes||mesHoje();
   const tit=document.getElementById('av-mes-tit'); if(tit) tit.textContent='Avaliações de '+mesLbl(alvo.a,alvo.m);
   const dados=window._avaliacoes||{};
+  const media=a=>{ const arr=(a&&a.av)||[]; return arr.length?(arr.reduce((s,x)=>s+(+x||0),0)/arr.length):0; };
   const grupo=(lbl,nomes)=>'<div class="av-grupo-lbl">'+lbl+'</div><div class="av-pessoa-list">'
     +nomes.map(n=>{ const a=dados[n];
       return '<div class="av-pessoa-item"><div class="av-pess-foto" data-foto="'+n+'">'+n[0]+'</div>'
         +'<div class="av-pess-info"><div class="av-pess-nome">'+n+'</div>'
-        +'<div class="av-pess-st '+(a?'ok':'')+'">'+(a?('✓ Avaliação feita · '+((a.av[0]+a.av[1]+a.av[2])/3).toFixed(1)+'/5'):'Aguardando')+'</div></div>'
+        +'<div class="av-pess-st '+(a?'ok':'')+'">'+(a?('✓ Avaliação feita · '+media(a).toFixed(1)+'/5'):'Aguardando')+'</div></div>'
         +'<button class="av-pess-btn" onclick="abrirModalRapido(\'avaliacao\',\''+n+'\')">'+(a?'Rever':'Avaliar')+'</button></div>'; }).join('')
     +'</div>';
-  el.innerHTML=grupo('Vendedoras',['Ialey','Michelly','Natália'])+grupo('Operação',['Edson','Yuri','Gustavo']);
+  el.innerHTML=grupo('Vendedoras',['Ialey','Michelly','Natália'])+grupo('Operação',['Edson','Yuri','Gustavo'])
+    +grupo('Supervisão · avaliação da Gestão',AV_GESTAO);
   if(typeof aplicarFotos==='function') aplicarFotos();
 }
 function setEstrela(ci,n){
-  window._avSel=window._avSel||[0,0,0]; window._avSel[ci]=n;
+  window._avSel=window._avSel||AV_CATS.map(()=>0); window._avSel[ci]=n;
   const row=document.getElementById('av-row-'+ci);
   if(row) row.querySelectorAll('span').forEach((e,k)=>{ e.textContent=k<n?'★':'☆'; e.style.color=k<n?'var(--ou)':'var(--cr3)'; });
 }
 async function salvarAvaliacao(){
   const nome=document.getElementById('av-f-pessoa').value;
-  const av=window._avSel||[0,0,0];
-  if(av.some(x=>!x)){ alert('Dê uma nota de 1 a 5 nas três categorias.'); return; }
-  const obs=(document.getElementById('av-f-obs').value||'').trim();
+  const av=window._avSel||AV_CATS.map(()=>0);
+  if(av.length<AV_CATS.length || av.some(x=>!x)){ alert('Dê nota de 1 a 5 em todos os '+AV_CATS.length+' critérios.'); return; }
+  const positivos=(document.getElementById('av-f-pos').value||'').trim();
+  const melhorar=(document.getElementById('av-f-mel').value||'').trim();
   const alvo=window._cMes||mesHoje();
   const key=alvo.a+'_'+String(alvo.m).padStart(2,'0');
   window._avaliacoes=window._avaliacoes||{};
-  window._avaliacoes[nome]={av:av.slice(),obs:obs,autor:(window._usuario||'Jhennifer'),criadoEm:new Date().toISOString()};
+  window._avaliacoes[nome]={av:av.slice(),positivos:positivos,melhorar:melhorar,autor:(window._usuario||'Jhennifer'),criadoEm:new Date().toISOString()};
   window._avCache[key]=window._avaliacoes;
   const _pm=mesSoma(mesHoje(),-1), _pk=_pm.a+'_'+String(_pm.m).padStart(2,'0');
   if(key===_pk) window._avalPend=AV_COLABS.filter(n=>!window._avaliacoes[n]).length;
@@ -2533,6 +2540,66 @@ function renderAlertas(){
   el.innerHTML=html||'<div class="acao-item"><div class="acao-texto">✓ Nenhum alerta no momento — equipe no ritmo.</div></div>';
 }
 
+/* Histórico do ano: acumula mês a mês o vendido (ano atual) vs 2025 vs meta.
+   Categorias comparáveis com 2025: sapatos, meias, cintos, limpeza. */
+const HIST_CATS4=['sapatos','meias','cintos','limpeza'];
+const HIST_F={sapatos:'sap',meias:'mei',cintos:'ace',limpeza:'lim'};
+async function carregarHistoricoAno(force){
+  const ano=(window._vMes||mesHoje()).a;
+  if(!force && window._histAno && window._histAno.ano===ano) return window._histAno;
+  const hj=mesHoje(); const ultimoMes=(ano<hj.a)?12:(ano>hj.a?0:hj.m);
+  const meses=[];
+  for(let m=1;m<=12;m++){
+    let atual=0, meta=0;
+    if(m<=ultimoMes){
+      try{ const R=await montarRel(ano,m); HIST_CATS4.forEach(c=>{ atual+=Number((R.total&&R.total[c])||0); meta+=Number((R.metas&&R.metas[c])||0); }); }catch(_){}
+    }else{
+      try{ const mv=metaAlvoDe(await getCfgMesSup(ano,m)); HIST_CATS4.forEach(c=>meta+=Number(mv[c]||0)); }catch(_){}
+    }
+    let base=0; VENDS.forEach(v=>{ const h=HIST_2025[v]&&HIST_2025[v][m]; if(h) HIST_CATS4.forEach(c=>base+=Number(h[HIST_F[c]]||0)); });
+    meses.push({m,atual,base,meta,futuro:m>ultimoMes});
+  }
+  window._histAno={ano,meses,ultimoMes};
+  if(typeof renderComparativos==='function') renderComparativos();
+  return window._histAno;
+}
+function histAnoHtml(){
+  const H=window._histAno; if(!H) return '<div class="slbl" style="margin-top:22px;">Histórico do Ano</div><div class="rel-load">Carregando histórico do ano…</div>';
+  const feitos=H.meses.filter(x=>!x.futuro);
+  const ytdAtual=feitos.reduce((s,x)=>s+x.atual,0);
+  const ytdBase=feitos.reduce((s,x)=>s+x.base,0);
+  const ytdMeta=feitos.reduce((s,x)=>s+x.meta,0);
+  const anoMeta=H.meses.reduce((s,x)=>s+x.meta,0);
+  const pctBase=ytdBase?Math.round((ytdAtual-ytdBase)/ytdBase*100):0;
+  const pctMetaAno=anoMeta?Math.round(ytdAtual/anoMeta*100):0;
+  const pctMetaAcum=ytdMeta?Math.round(ytdAtual/ytdMeta*100):0;
+  const maxV=Math.max(1,...H.meses.map(x=>Math.max(x.atual,x.base)));
+  const cardYtd=(lbl,val,sub,cor)=>'<div style="background:var(--bg2);border:1px solid var(--oud2);padding:14px 16px;">'
+    +'<div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;">'+lbl+'</div>'
+    +'<div style="font-family:Cormorant Garamond,serif;font-size:26px;color:'+(cor||'var(--ou2)')+';margin-top:4px;">'+val+'</div>'
+    +'<div style="font-size:11px;color:var(--cr3);margin-top:2px;">'+sub+'</div></div>';
+  const linhaMes=x=>{ const hA=Math.round(x.atual/maxV*100), hB=Math.round(x.base/maxV*100);
+    const p=x.base?Math.round((x.atual-x.base)/x.base*100):0; const cor=p>=0?'var(--verde)':'var(--vermelho)';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);'+(x.futuro?'opacity:.4;':'')+'">'
+      +'<div style="width:34px;font-size:10px;letter-spacing:1px;color:var(--cr3);text-transform:uppercase;">'+MESES[x.m-1].slice(0,3)+'</div>'
+      +'<div style="flex:1;display:flex;flex-direction:column;gap:3px;">'
+        +'<div style="display:flex;align-items:center;gap:6px;"><div style="height:8px;width:'+Math.max(hB,1)+'%;background:rgba(201,168,76,.35);"></div><span style="font-size:10px;color:var(--cr3);">25: '+x.base+'</span></div>'
+        +'<div style="display:flex;align-items:center;gap:6px;"><div style="height:8px;width:'+Math.max(hA,1)+'%;background:linear-gradient(90deg,var(--ou2),var(--ou));"></div><span style="font-size:10px;color:var(--cr2);">'+String(H.ano).slice(2)+': '+x.atual+(x.futuro?'':'')+'</span></div>'
+      +'</div>'
+      +'<div style="width:52px;text-align:right;font-family:Cormorant Garamond,serif;font-size:15px;color:'+(x.futuro?'var(--cr3)':cor)+';">'+(x.futuro?'—':((p>=0?'+':'')+p+'%'))+'</div></div>'; };
+  return '<div class="slbl" style="margin-top:22px;">Histórico do Ano · '+H.ano+' vs 2025</div>'
+    +'<div class="mc-cap">Total já feito no ano (sapatos, meias, cintos e limpeza) comparado a 2025 e à meta do ano</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px;">'
+    +cardYtd('Feito no ano',ytdAtual,'até '+MESES[H.ultimoMes-1||0]+' · '+(pctBase>=0?'+':'')+pctBase+'% vs 2025',pctBase>=0?'var(--verde)':'var(--vermelho)')
+    +cardYtd('Mesmo período 2025',ytdBase,'base do ano passado')
+    +cardYtd('Meta do ano',anoMeta,pctMetaAno+'% da meta anual atingido')
+    +'</div>'
+    +'<div style="background:var(--bg2);border:1px solid var(--oud2);padding:14px 16px;">'
+    +'<div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:8px;">Mês a mês · '+String(H.ano).slice(2)+' (barra dourada) vs 2025 (barra clara)</div>'
+    +H.meses.map(linhaMes).join('')
+    +'<div style="font-size:10px;color:var(--cr3);margin-top:8px;">Meta acumulada até agora: '+ytdMeta+' · atingido '+pctMetaAcum+'%</div>'
+    +'</div>';
+}
 function renderComparativos(){
   const el=document.getElementById('comp-real'); if(!el)return;
   const R=window._rel; if(!R){ el.innerHTML='<div class="rel-load">Carregando comparativo…</div>'; return; }
@@ -2571,7 +2638,8 @@ function renderComparativos(){
     +'<div style="background:var(--bg2);border:1px solid var(--oud2);padding:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center;">'
     +cell('Sapatos','sapatos')+cell('Meias','meias')+cell('Cintos','cintos')+cell('Limpeza','limpeza')
     +'</div>'
-    +'<div style="font-size:10px;color:var(--cr3);margin-top:8px;">Projeção mantém o ritmo atual até o fim do mês · "parcial" compara o vendido até hoje com o mês cheio de 2025 · Cintos concentra os acessórios de 2025 (regra do painel de Metas)</div>';
+    +'<div style="font-size:10px;color:var(--cr3);margin-top:8px;">Projeção mantém o ritmo atual até o fim do mês · "parcial" compara o vendido até hoje com o mês cheio de 2025 · Cintos concentra os acessórios de 2025 (regra do painel de Metas)</div>'
+    +histAnoHtml();
 }
 
 function renderDestaques(){
@@ -2760,6 +2828,13 @@ async function carregarPresenca(){
 function renderPendencias(){
   const el=document.getElementById('pendencias'); if(!el)return;
   const its=[]; const d=new Date(), ym=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); const hoje=_hojeStr();
+  // tarefas do dia (conferências diárias) — o mais urgente pra hoje; avisa se ainda não atualizou
+  const _confDia=window._confDia||{};
+  const _feitasDia=CONF_DIA.filter(it=>_confDia[it.id]&&_confDia[it.id].feito).length;
+  if(_feitasDia<CONF_DIA.length){
+    const _faltam=CONF_DIA.filter(it=>!(_confDia[it.id]&&_confDia[it.id].feito)).map(it=>it.t).join(', ');
+    its.push({ico:'📋',txt:'Você ainda não atualizou as <b>tarefas do dia</b> — falta: '+_faltam,btn:'Conferir',act:"var g=document.getElementById('conf-grid');if(g)g.scrollIntoView({behavior:'smooth',block:'center'})"});
+  }
   // só cobra organizar a cobertura enquanto a ausência não terminou (fim >= hoje) — comparação por data, não por mês
   (window._lancItems||[]).filter(l=>l.inicio&&l.fim&&l.fim>=hoje&&l.inicio.slice(0,7)<=ym).forEach(l=>{
     const nome=FUNC_MAP[l.funcId]||'?'; if(nome==='?')return; const m=motivoDe(l.tipo);
@@ -2878,9 +2953,12 @@ function renderPresenca(ausentes){
         ? '<div class="hoje-cob">↳ coberto por <b>'+quem+'</b> · celular + funções</div>'
         : '<div class="hoje-cob" style="color:var(--cr3)">↳ sem cobertura definida</div>';
     }
+    // observação da supervisora sobre a mudança de status (vale pra presente ou ausente)
+    const ovp=(window._presencaOv||{})[nome];
+    const obsHtml=(ovp&&ovp.obs)?'<div class="hoje-cob" style="color:var(--cr3)">📝 '+esc(ovp.obs)+'</div>':'';
     return '<div class="hoje-linha"><span class="l"><span class="mini-av" data-foto="'+nome+'">'+nome[0]+'</span>'+nome+(extra||'')+'</span>'
       +'<span class="hoje-right">'+right
-      +'<button class="hoje-edit" title="Editar status de '+nome+'" onclick="abrirStatus(\''+nome+'\')">✎</button></span></div>'+cobHtml;
+      +'<button class="hoje-edit" title="Editar status de '+nome+'" onclick="abrirStatus(\''+nome+'\')">✎</button></span></div>'+cobHtml+obsHtml;
   }
   const card=document.getElementById('card-loja');
   if(card){
@@ -2913,11 +2991,14 @@ function abrirStatus(nome){
   const cobId=_cobId(nome,_inicioAusencia(nome));
   const cobre=(ov&&ov.cobre)||(window._cob||{})[cobId]||'';
   const ate=(ov&&ov.ate)||(atual&&atual.fim)||'';
-  window._stEdit={nome,status,cobre,ate};
+  const obs=(ov&&ov.obs)||'';
+  window._stEdit={nome,status,cobre,ate,obs};
   stRenderBody();
   abrirModal('modal-status');
 }
 function stSet(campo,val){ if(window._stEdit){ window._stEdit[campo]=val; stRenderBody(); } }
+// observação não re-renderiza (não perde o foco enquanto digita)
+function stSetObs(val){ if(window._stEdit){ window._stEdit.obs=val; } }
 function stRenderBody(){
   const s=window._stEdit; if(!s)return;
   const el=document.getElementById('status-content'); if(!el)return;
@@ -2942,10 +3023,13 @@ function stRenderBody(){
           ? '<div class="st-field"><span class="st-lbl">Volta em (opcional)</span><input type="date" class="st-inp" value="'+(s.ate||'')+'" onchange="stSet(\'ate\',this.value)"></div>'
           : '');
   }
+  const obsCampo='<div class="st-field"><span class="st-lbl">Observação (motivo da mudança)</span>'
+    +'<textarea class="st-inp" id="st-obs" rows="2" placeholder="Ex.: avisou que ia faltar, chegou atestado, trocou folga com colega…" oninput="stSetObs(this.value)">'+esc(s.obs||'')+'</textarea></div>';
   el.innerHTML='<div class="modal-tit">Editar status</div>'
     +'<div class="modal-sub">'+s.nome.toUpperCase()+' · HOJE ('+fmtData(_hojeStr())+')</div>'
     +'<div class="st-opts">'+opts+'</div>'
     +campos
+    +obsCampo
     +'<button class="st-save" onclick="salvarStatus()">Salvar</button>'
     +'<div class="st-hint">'+(ausente
         ? 'Marca a ausência de <b>'+s.nome+'</b> só pra hoje e já registra a cobertura no painel de <b>Cobertura de Ausências</b>.'
@@ -2956,10 +3040,11 @@ async function salvarStatus(){
   const nome=s.nome, hj=_hojeStr();
   const inicioRef=_inicioAusencia(nome);
   const ov=window._presencaOv||(window._presencaOv={});
+  const obs=(s.obs||'').trim();
   if(s.status==='presente'){
-    ov[nome]={status:'presente',cobre:'',ate:'',por:'Jhennifer',em:new Date().toISOString()};
+    ov[nome]={status:'presente',cobre:'',ate:'',obs:obs,por:'Jhennifer',em:new Date().toISOString()};
   }else{
-    ov[nome]={status:s.status,cobre:s.cobre||'',ate:(s.status==='ferias'?(s.ate||''):''),por:'Jhennifer',em:new Date().toISOString()};
+    ov[nome]={status:s.status,cobre:s.cobre||'',ate:(s.status==='ferias'?(s.ate||''):''),obs:obs,por:'Jhennifer',em:new Date().toISOString()};
   }
   // sincroniza a cobertura com o mesmo registro que o grid usa
   const cid=_cobId(nome,inicioRef);
