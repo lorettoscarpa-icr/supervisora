@@ -649,8 +649,11 @@ body{zoom:1.1;}
 .atu-nome{font-size:10px;letter-spacing:1.5px;margin-bottom:4px;}
 .atu-data{font-size:12px;margin-bottom:8px;}
 .atu-pill{font-size:8px;padding:4px 9px;}
-.conf-item{cursor:pointer;user-select:none;}
+.conf-item{cursor:pointer;user-select:none;position:relative;}
 .conf-item .conf-stat.pend{color:var(--cr3);}
+.conf-del{position:absolute;top:3px;right:6px;background:transparent;border:none;color:var(--cr3);cursor:pointer;font-size:15px;line-height:1;opacity:0;transition:opacity .15s,color .15s;padding:2px 4px;font-family:inherit;}
+.conf-item:hover .conf-del{opacity:.55;}
+.conf-del:hover{color:var(--vermelho);opacity:1;}
 .conf-item.pend .conf-titulo{color:var(--cr3);}
 /* ===== Mural de Melhorias ===== */
 .mel-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px;}
@@ -784,7 +787,21 @@ body{zoom:1.1;}
     </div>
   </div>
 
-  <div class="slbl"><span id="conf-data">Conferências Diárias</span></div>
+  <div class="slbl" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+    <span id="conf-data">Conferências Diárias</span>
+    <button class="ev-add-btn" onclick="toggleFormConf()" title="Adicionar conferência">＋</button>
+  </div>
+  <div id="conf-form" class="ev-form" style="display:none;max-width:440px;">
+    <input id="conf-titulo" class="ev-inp" type="text" placeholder="Ex.: Estoque conferido, Provador organizado…" maxlength="40">
+    <select id="conf-tipo" class="ev-inp">
+      <option value="dia">Diária · vale o dia</option>
+      <option value="sem">Semanal · vale a semana</option>
+    </select>
+    <div class="ev-form-acoes">
+      <button class="ev-cancel" onclick="toggleFormConf(true)">Cancelar</button>
+      <button class="ev-salvar" id="conf-salvar" onclick="salvarConfItem()">Adicionar</button>
+    </div>
+  </div>
   <div class="conf-grid" id="conf-grid" style="margin-bottom:18px;"></div>
 
   <div class="acoes-card">
@@ -2111,21 +2128,59 @@ function renderMetasCategoria(total,metas,decorridos,restantes,totalDU,fechado){
     : 'Faltam <b>'+restantes+' dias úteis</b> · quanto cada categoria precisa vender por dia pra bater a meta do mês'; }
 }
 
+// Listas PADRÃO — a supervisora pode editar (add/excluir); a config vai pra ls_conferencias/_config
 const CONF_DIA=[{id:'caixa',t:'Caixa fechado ontem'},{id:'loja',t:'Loja organizada'},{id:'vitrine',t:'Vitrine alinhada'},{id:'repac',t:'Reposição de acessórios'}];
 const CONF_SEM=[{id:'reposicao',t:'Estoque · Reposição Semanal'}];
+// lista efetiva (config salva ou o padrão)
+function confList(tipo){ const c=window._confCfg||{}; const l=tipo==='sem'?c.sem:c.dia; return (l&&l.length!==undefined)?l:(tipo==='sem'?CONF_SEM:CONF_DIA); }
+function _confSlug(t){ return 'c_'+String(t||'').normalize('NFD').replace(/[^a-zA-Z0-9]/g,'').toLowerCase().slice(0,18)+'_'+Date.now().toString(36); }
 function _isoWeek(d){ const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); const dn=t.getUTCDay()||7; t.setUTCDate(t.getUTCDate()+4-dn); const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1)); return {y:t.getUTCFullYear(), w:Math.ceil(((t-y0)/86400000+1)/7)}; }
 function confKeyDia(){ const d=new Date(); return 'conf_'+d.getFullYear()+'_'+String(d.getMonth()+1).padStart(2,'0')+'_'+String(d.getDate()).padStart(2,'0'); }
 function confKeySem(){ const w=_isoWeek(new Date()); return 'confsem_'+w.y+'_'+String(w.w).padStart(2,'0'); }
 async function carregarConf(){
   if(!DB){ renderConf(); return; }
   try{
-    const [dd,ss]=await Promise.all([
+    const [dd,ss,cfg]=await Promise.all([
       DB.collection('ls_conferencias').doc(confKeyDia()).get(),
-      DB.collection('ls_conferencias').doc(confKeySem()).get()
+      DB.collection('ls_conferencias').doc(confKeySem()).get(),
+      DB.collection('ls_conferencias').doc('_config').get()
     ]);
     window._confDia=dd.exists?dd.data():{}; window._confSem=ss.exists?ss.data():{};
+    if(cfg.exists){ const c=cfg.data()||{}; window._confCfg={dia:Array.isArray(c.dia)?c.dia:CONF_DIA.slice(),sem:Array.isArray(c.sem)?c.sem:CONF_SEM.slice()}; }
+    else window._confCfg={dia:CONF_DIA.slice(),sem:CONF_SEM.slice()};
   }catch(e){ console.warn('carregarConf',e); window._confDia={}; window._confSem={}; }
   renderConf();
+}
+async function persistConfCfg(){
+  window._confCfg=window._confCfg||{dia:CONF_DIA.slice(),sem:CONF_SEM.slice()};
+  if(!DB) return;
+  try{ await DB.collection('ls_conferencias').doc('_config').set({dia:window._confCfg.dia,sem:window._confCfg.sem,atualizadoEm:new Date().toISOString()},{merge:true}); }
+  catch(e){ console.warn('persistConfCfg',e); }
+}
+function toggleFormConf(fechar){
+  const f=document.getElementById('conf-form'); if(!f)return;
+  const abrir=fechar?false:(f.style.display==='none');
+  f.style.display=abrir?'':'none';
+  if(abrir){ const t=document.getElementById('conf-titulo'); if(t) setTimeout(()=>t.focus(),80); }
+  else { const t=document.getElementById('conf-titulo'); if(t)t.value=''; }
+}
+async function salvarConfItem(){
+  const tit=(document.getElementById('conf-titulo').value||'').trim();
+  const tipo=document.getElementById('conf-tipo').value==='sem'?'sem':'dia';
+  if(!tit){ alert('Dê um nome pra conferência.'); return; }
+  window._confCfg=window._confCfg||{dia:CONF_DIA.slice(),sem:CONF_SEM.slice()};
+  window._confCfg[tipo]=(window._confCfg[tipo]||[]).concat([{id:_confSlug(tit),t:tit}]);
+  const btn=document.getElementById('conf-salvar'); if(btn){ btn.disabled=true; btn.textContent='Salvando…'; }
+  toggleFormConf(true); renderConf(); await persistConfCfg();
+  if(btn){ btn.disabled=false; btn.textContent='Adicionar'; }
+}
+async function excluirConfItem(tipo,id){
+  tipo=tipo==='sem'?'sem':'dia';
+  const it=(confList(tipo)||[]).filter(x=>x.id===id)[0];
+  if(!confirm('Excluir "'+((it&&it.t)||'esta conferência')+'" da lista?'))return;
+  window._confCfg=window._confCfg||{dia:CONF_DIA.slice(),sem:CONF_SEM.slice()};
+  window._confCfg[tipo]=(window._confCfg[tipo]||[]).filter(x=>x.id!==id);
+  renderConf(); await persistConfCfg();
 }
 async function toggleConf(tipo,id){
   const store=tipo==='sem'?(window._confSem=window._confSem||{}):(window._confDia=window._confDia||{});
@@ -2146,9 +2201,11 @@ function renderConf(){
   const mk=(it,tipo,st)=>{ const f=st[it.id]&&st[it.id].feito;
     const quem=f?((st[it.id].por||'Jhennifer')+' · '+(st[it.id].hora||'')):(tipo==='sem'?'toque ao repor · vale a semana':'toque para marcar');
     return '<div class="conf-item '+(f?'ok':'pend')+'" onclick="toggleConf(\''+tipo+'\',\''+it.id+'\')">'
-      +'<div class="conf-titulo">'+it.t+'</div><div class="conf-stat'+(f?'':' pend')+'">'+(f?'✓':'○')+'</div>'
+      +'<button class="conf-del" title="Excluir conferência" onclick="event.stopPropagation();excluirConfItem(\''+tipo+'\',\''+it.id+'\')">×</button>'
+      +'<div class="conf-titulo">'+esc(it.t)+'</div><div class="conf-stat'+(f?'':' pend')+'">'+(f?'✓':'○')+'</div>'
       +'<div class="conf-quem">'+quem+'</div></div>'; };
-  grid.innerHTML=CONF_DIA.map(it=>mk(it,'dia',dia)).join('')+CONF_SEM.map(it=>mk(it,'sem',sem)).join('');
+  const html=confList('dia').map(it=>mk(it,'dia',dia)).join('')+confList('sem').map(it=>mk(it,'sem',sem)).join('');
+  grid.innerHTML=html||'<div class="conf-quem" style="grid-column:1/-1;">Nenhuma conferência na lista. Clique em ＋ pra adicionar.</div>';
   if(typeof renderPendencias==='function') renderPendencias();
 }
 
@@ -2847,10 +2904,10 @@ function renderPendencias(){
   const el=document.getElementById('pendencias'); if(!el)return;
   const its=[]; const d=new Date(), ym=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); const hoje=_hojeStr();
   // tarefas do dia (conferências diárias) — o mais urgente pra hoje; avisa se ainda não atualizou
-  const _confDia=window._confDia||{};
-  const _feitasDia=CONF_DIA.filter(it=>_confDia[it.id]&&_confDia[it.id].feito).length;
-  if(_feitasDia<CONF_DIA.length){
-    const _faltam=CONF_DIA.filter(it=>!(_confDia[it.id]&&_confDia[it.id].feito)).map(it=>it.t).join(', ');
+  const _confDia=window._confDia||{}; const _listaDia=confList('dia');
+  const _feitasDia=_listaDia.filter(it=>_confDia[it.id]&&_confDia[it.id].feito).length;
+  if(_listaDia.length && _feitasDia<_listaDia.length){
+    const _faltam=_listaDia.filter(it=>!(_confDia[it.id]&&_confDia[it.id].feito)).map(it=>it.t).join(', ');
     its.push({ico:'📋',txt:'Você ainda não atualizou as <b>tarefas do dia</b> — falta: '+_faltam,btn:'Conferir',act:"var g=document.getElementById('conf-grid');if(g)g.scrollIntoView({behavior:'smooth',block:'center'})"});
   }
   // só cobra organizar a cobertura enquanto a ausência não terminou (fim >= hoje) — comparação por data, não por mês
