@@ -1457,7 +1457,6 @@ async function abrirPauta(nome){
     const pos=rank.findIndex(x=>x.v===nome)+1; if(pos>0) p.mix=pos+'º';
     p.maiorV = (window._maiorVenda && window._maiorVenda.vendedora===nome) ? window._maiorVenda.valor : 0;
   }
-  const avLbl = ['Comportamento','Desempenho','Pró-atividade / Cultura'];
   const pct = p.conv!=null ? Math.round(p.conv*100) : null;
 
   // tempo de casa (admissão MM/AAAA -> jun/2026)
@@ -1470,7 +1469,7 @@ async function abrirPauta(nome){
   // saldos
   const nAtencao = oc.filter(o=>o.tipo==='atencao').length;
   const nAtrasos = oc.filter(o=>(o.cat||'')==='Atraso').length;
-  const avgAv = AV ? (AV.av[0]+AV.av[1]+AV.av[2])/3 : null;
+  const avgAv = AV&&AV.av&&AV.av.length ? (AV.av.reduce((s,x)=>s+(+x||0),0)/AV.av.length) : null;
 
   // tom sugerido
   let tom;
@@ -1487,7 +1486,7 @@ async function abrirPauta(nome){
   if(p.mix==='1º') rec.push({t:'Líder no mix de acessórios do mês.'});
   if(pct!=null && p.conv>=0.6) rec.push({t:'Conversão forte no mês: '+pct+'%.'});
   if(p.maiorV && p.maiorV>=4000) rec.push({t:'Uma das maiores vendas do mês: R$ '+p.maiorV.toLocaleString('pt-BR')+'.'});
-  if(AV) [1,0,2].forEach(i=>{ if(AV.av[i]===5) rec.push({t:'Nota máxima em '+avLbl[i]+'.'}); });
+  if(AV) AV_CATS.forEach((lbl,i)=>{ if((+AV.av[i]||0)===5) rec.push({t:'Nota máxima em '+lbl+'.'}); });
   if(p.status==='ok' && nAtencao===0 && nAtrasos===0) rec.push({t:'Mês sem ocorrências de atenção — constante e confiável.'});
 
   // pontos pra desenvolver
@@ -1496,7 +1495,7 @@ async function abrirPauta(nome){
   if(nAtrasos>0) dev.push({t:'Atrasos registrados: '+nAtrasos+'.'});
   if(pct!=null && p.conv<0.45) dev.push({t:'Conversão abaixo do esperado: '+pct+'%.'});
   if(p.status==='bad') dev.push({t:'Está atrás da meta e ficou dias sem atualizar os dados.'});
-  if(AV) [1,0,2].forEach(i=>{ if(AV.av[i]<=3) dev.push({t:'Atenção em '+avLbl[i]+' ('+AV.av[i]+'/5).'}); });
+  if(AV) AV_CATS.forEach((lbl,i)=>{ const n=+AV.av[i]||0; if(n&&n<=3) dev.push({t:'Atenção em '+lbl+' ('+n+'/5).'}); });
 
   const liHtml = (arr,cls,mk)=> arr.length
     ? arr.map(x=>`<div class="pauta-li ${cls}"><span class="mk">${mk}</span><span>${x.d?`<small>${x.d}</small>`:''}${x.t}</span></div>`).join('')
@@ -2431,7 +2430,7 @@ async function salvarOcorrencia(){
 }
 
 /* ═════════ AVALIAÇÕES (ls_avaliacoes/{ano_MM}) ═════════ */
-const AV_CATS=['Trabalho em equipe','Comunicação e convivência','Soluções práticas (resolve sozinho)','Aberto a críticas','Pontualidade e responsabilidade'];
+const AV_CATS=['Desempenho e resultados','Pontualidade e responsabilidade','Trabalho em equipe e convivência','Pró-atividade e soluções práticas','Aberto a críticas'];
 const AV_COLABS=['Ialey','Michelly','Natália','Edson','Yuri','Gustavo'];
 // Jhennifer entra como perfil avaliável pela Gestão (não conta na pendência do time)
 const AV_GESTAO=['Jhennifer'];
