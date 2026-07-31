@@ -293,6 +293,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .oc-data{font-size:10px;color:var(--cr3);font-family:'DM Mono',monospace;min-width:60px;}
 .oc-cat{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;padding:2px 8px;border-radius:2px;}
 .oc-cat.atraso{color:var(--vermelho);background:rgba(217,117,96,.12);}
+.oc-cat.ausencia{color:var(--azul);background:rgba(122,155,191,.14);}
 .oc-cat.comp{color:var(--amarelo);background:rgba(212,184,106,.12);}
 .oc-cat.vendas{color:var(--vermelho);background:rgba(217,117,96,.12);}
 .oc-cat.elogio{color:var(--verde);background:rgba(127,191,127,.12);}
@@ -2365,7 +2366,7 @@ function renderAtualizacoes(lastSale){
 function _safe(nome,fn){ try{ fn(); }catch(e){ console.warn('[painel] falhou o render de '+nome+':',e); } }
 
 /* ═════════ OCORRÊNCIAS (ls_ocorrencias) ═════════ */
-const OC_CATS=['Atraso','Vendas','Comportamento','Outro','Elogio'];
+const OC_CATS=['Atraso','Ausência','Vendas','Comportamento','Outro','Elogio'];
 function keyMesAtual(){ const d=new Date(); return d.getFullYear()+'_'+String(d.getMonth()+1).padStart(2,'0'); }
 async function carregarOcorrencias(){
   if(!DB){ window._ocorrencias=[]; renderOcorrencias(); return; }
@@ -2396,7 +2397,7 @@ function renderOcorrencias(){
   if(!vis.length){ lista.innerHTML='<div class="mel-vazio">'+(arr.length?'Nenhuma ocorrência neste filtro.':'Nenhuma ocorrência em '+mesLbl(alvo.a,alvo.m)+'.')+'</div>'; return; }
   lista.innerHTML=vis.map(o=>{
     const dt=o.data?(o.data.slice(8,10)+'/'+o.data.slice(5,7)):'';
-    const catCls=(o.cat||'').toLowerCase().replace(/[^a-z]/g,'');
+    const catCls=(o.cat||'').normalize('NFD').replace(/[^a-zA-Z]/g,'').toLowerCase();
     return '<div class="oc-item '+(o.tipo||'atencao')+'">'
       +'<div class="oc-data">'+dt+'</div><div class="oc-cat '+catCls+'">'+esc(o.cat||'')+'</div>'
       +'<div class="oc-pessoa"><b>'+esc(o.pessoa||'')+'</b></div>'
@@ -2427,6 +2428,36 @@ async function salvarOcorrencia(){
     window._ocorrencias=[item].concat(window._ocorrencias||[]);
     renderOcorrencias(); fecharModal('modal-rapido');
   }catch(e){ console.warn('salvarOcorrencia',e); alert('Não consegui salvar agora.'); }
+}
+
+/* Registro automático de ausência (vindo do card "Quem está na loja") no
+   histórico de Ocorrências, pra consultar depois quem falta com frequência.
+   Deduplica por pessoa+dia+origem, então reeditar o status do dia só atualiza. */
+function _ocPresenca(nome, dataISO){ return (window._ocorrencias||[]).find(o=>o&&o.origem==='presenca'&&o.pessoa===nome&&o.data===dataISO); }
+async function registrarOcorrenciaPresenca(nome, status, obsMotivo, cobre){
+  const dataISO=_hojeStr();
+  const motLbl = status==='atestado'?'Atestado':(status==='ferias'?'Férias':(status==='folga'?'Folga':'Ausência'));
+  let obs=motLbl+' — registrado pelo card "Quem está na loja".';
+  if(cobre) obs+=' Cobertura: '+cobre+'.';
+  if(obsMotivo) obs+=' Motivo: '+obsMotivo;
+  const ex=_ocPresenca(nome,dataISO);
+  if(ex){
+    ex.cat='Ausência'; ex.tipo='atencao'; ex.obs=obs; ex.motivo=motLbl;
+    if(typeof renderOcorrencias==='function') renderOcorrencias();
+    if(DB){ try{ await DB.collection('ls_ocorrencias').doc(ex.id).set({cat:'Ausência',tipo:'atencao',obs:obs,motivo:motLbl,atualizadoEm:new Date().toISOString()},{merge:true}); }catch(e){ console.warn('ocPresenca upd',e); } }
+    return;
+  }
+  const item={pessoa:nome,data:dataISO,cat:'Ausência',tipo:'atencao',obs:obs,motivo:motLbl,origem:'presenca',autor:(window._usuario||'Jhennifer'),criadoEm:new Date().toISOString()};
+  if(DB){ try{ const ref=await DB.collection('ls_ocorrencias').add(item); item.id=ref.id; }catch(e){ console.warn('ocPresenca add',e); item.id='local_'+Date.now(); } }
+  else item.id='local_'+Date.now();
+  window._ocorrencias=[item].concat(window._ocorrencias||[]);
+  if(typeof renderOcorrencias==='function') renderOcorrencias();
+}
+async function removerOcorrenciaPresenca(nome){
+  const ex=_ocPresenca(nome,_hojeStr()); if(!ex) return;
+  window._ocorrencias=(window._ocorrencias||[]).filter(o=>o.id!==ex.id);
+  if(typeof renderOcorrencias==='function') renderOcorrencias();
+  if(DB){ try{ await DB.collection('ls_ocorrencias').doc(ex.id).delete(); }catch(e){ console.warn('ocPresenca del',e); } }
 }
 
 /* ═════════ AVALIAÇÕES (ls_avaliacoes/{ano_MM}) ═════════ */
@@ -3106,8 +3137,8 @@ function stRenderBody(){
     +obsCampo
     +'<button class="st-save" onclick="salvarStatus()">Salvar</button>'
     +'<div class="st-hint">'+(ausente
-        ? 'Marca a ausência de <b>'+s.nome+'</b> só pra hoje e já registra a cobertura no painel de <b>Cobertura de Ausências</b>.'
-        : 'Confirma <b>'+s.nome+'</b> presente hoje — remove qualquer ausência lançada pra hoje.')+'</div>';
+        ? 'Marca a ausência de <b>'+s.nome+'</b> só pra hoje, já registra a cobertura em <b>Cobertura de Ausências</b> e guarda no histórico de <b>Ocorrências</b> (pra consultar depois).'
+        : 'Confirma <b>'+s.nome+'</b> presente hoje — remove a ausência e a ocorrência lançadas pra hoje.')+'</div>';
 }
 async function salvarStatus(){
   const s=window._stEdit; if(!s)return;
@@ -3135,6 +3166,11 @@ async function salvarStatus(){
       }
     }catch(e){ console.warn('salvarStatus/cobertura',e); }
   }
+  // registra (ou remove) a mudança no histórico de Ocorrências pra consulta futura
+  try{
+    if(s.status==='presente') await removerOcorrenciaPresenca(nome);
+    else await registrarOcorrenciaPresenca(nome, s.status, obs, s.cobre);
+  }catch(e){ console.warn('salvarStatus/ocorrencia',e); }
   fecharModal('modal-status');
   // re-renderiza tudo que depende de presença/ausência
   const dados=presencaCardData(); window._ausentes=dados;
