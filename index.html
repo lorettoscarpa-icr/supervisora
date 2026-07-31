@@ -578,6 +578,9 @@ body{zoom:1.1;}
 }
 #colab-doc{display:none;}
 /* ─── Histórico do Ano (padrão painel do gestor) ─── */
+.ha-topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--oud2);}
+.ha-topbar-lbl{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--cr3);}
+.ha-select{background:var(--v1);border:1px solid var(--oud);color:var(--cr);font-family:inherit;font-size:13px;padding:8px 12px;cursor:pointer;min-width:160px;}
 .ha-sec-tit{font-family:'Playfair Display',serif;font-size:20px;color:var(--ou2);margin:0 0 2px;}
 .ha-sec-sub{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cr3);margin-bottom:12px;}
 .ha-cards{display:grid;gap:10px;margin-bottom:26px;}
@@ -2879,39 +2882,59 @@ async function carregarHistoricoAno(force){
   if(!force && window._histAno && window._histAno.ano===ano){ if(typeof renderHistoricoAno==='function')renderHistoricoAno(); return window._histAno; }
   const hj=mesHoje();
   const ultimoFechado=(ano<hj.a)?12:(ano>hj.a?0:(hj.m-1)); // mês corrente não conta (ainda aberto)
-  const tot={}, comp26={}, comp25={}; HIST_CATS.forEach(c=>{tot[c]=0;comp26[c]=0;comp25[c]=0;});
-  const meses=[];
+  const scopes=['Equipe'].concat(VENDS);
+  const dados={};
+  scopes.forEach(sc=>{ dados[sc]={tot:{},comp26:{},comp25:{},meses:[]}; HIST_CATS.forEach(c=>{dados[sc].tot[c]=0;dados[sc].comp26[c]=0;dados[sc].comp25[c]=0;}); });
   for(let m=1;m<=ultimoFechado;m++){
     let R=null; try{ R=await montarRel(ano,m); }catch(_){}
-    const cur={}; HIST_CATS.forEach(c=>cur[c]=Number((R&&R.total&&R.total[c])||0));
-    let has25=false; const b={}; HIST_CATS.forEach(c=>b[c]=0);
-    VENDS.forEach(vn=>{ const h=HIST_2025[vn]&&HIST_2025[vn][m]; if(h){ has25=true; HIST_CATS.forEach(c=>b[c]+=Number(h[HIST_F[c]]||0)); } });
-    HIST_CATS.forEach(c=>{ tot[c]+=cur[c]; if(has25){ comp26[c]+=cur[c]; comp25[c]+=b[c]; } });
-    meses.push({m, s26:cur.sapatos, s25: has25? b.sapatos : null});
+    scopes.forEach(sc=>{
+      const cur={}, b={}; let has25=false; HIST_CATS.forEach(c=>b[c]=0);
+      if(sc==='Equipe'){
+        HIST_CATS.forEach(c=>cur[c]=Number((R&&R.total&&R.total[c])||0));
+        VENDS.forEach(vn=>{ const h=HIST_2025[vn]&&HIST_2025[vn][m]; if(h){ has25=true; HIST_CATS.forEach(c=>b[c]+=Number(h[HIST_F[c]]||0)); } });
+      }else{
+        const cv=(R&&R.cur&&R.cur[sc])||{}; HIST_CATS.forEach(c=>cur[c]=Number(cv[c]||0));
+        const h=HIST_2025[sc]&&HIST_2025[sc][m]; if(h){ has25=true; HIST_CATS.forEach(c=>b[c]+=Number(h[HIST_F[c]]||0)); }
+      }
+      const d=dados[sc];
+      HIST_CATS.forEach(c=>{ d.tot[c]+=cur[c]; if(has25){ d.comp26[c]+=cur[c]; d.comp25[c]+=b[c]; } });
+      d.meses.push({m, s26:cur.sapatos, s25: has25? b.sapatos : null});
+    });
   }
-  window._histAno={ano, ultimoFechado, tot, comp26, comp25, meses};
+  window._histAno={ano, ultimoFechado, dados};
+  if(!window._histScope || (window._histScope!=='Equipe' && VENDS.indexOf(window._histScope)<0)) window._histScope='Equipe';
   if(typeof renderHistoricoAno==='function') renderHistoricoAno();
   return window._histAno;
 }
+function mudarHistScope(v){ window._histScope=v; if(typeof renderHistoricoAno==='function') renderHistoricoAno(); }
 function renderHistoricoAno(){
   const el=document.getElementById('hist-real'); if(!el)return;
   const H=window._histAno;
   if(!H){ el.innerHTML='<div class="rel-load">Carregando histórico do ano…</div>'; return; }
-  if(!H.ultimoFechado){ el.innerHTML='<div class="rel-load">Nenhum mês fechado ainda em '+H.ano+'.</div>'; return; }
+  const scope=window._histScope||'Equipe';
+  // seletor equipe / vendedora
+  const seletor='<div class="ha-topbar"><span class="ha-topbar-lbl">Histórico Anual</span>'
+    +'<select class="ha-select" onchange="mudarHistScope(this.value)">'
+    +'<option value="Equipe"'+(scope==='Equipe'?' selected':'')+'>Equipe (total)</option>'
+    +VENDS.map(v=>'<option value="'+v+'"'+(scope===v?' selected':'')+'>'+v+'</option>').join('')
+    +'</select></div>';
+  if(!H.ultimoFechado){ el.innerHTML=seletor+'<div class="rel-load">Nenhum mês fechado ainda em '+H.ano+'.</div>'; return; }
+  const D=(H.dados&&H.dados[scope])||(H.dados&&H.dados['Equipe']); if(!D){ el.innerHTML=seletor+'<div class="rel-load">Sem dados.</div>'; return; }
   const fmt=n=>Number(Math.round(n)||0).toLocaleString('pt-BR');
   const ic=c=>(typeof CAT_ICONS!=='undefined'&&CAT_ICONS[c])?CAT_ICONS[c]:'';
   const trendIc='<svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 8"></polyline><polyline points="21 13 21 8 16 8"></polyline></svg>';
   const periodoTot='Janeiro–'+MESES[H.ultimoFechado-1]+' '+H.ano;
+  const escopoTxt = scope==='Equipe' ? '' : ' · '+scope;
 
   // ── Total do ano ──
-  const acess=H.tot.meias+H.tot.cintos+H.tot.limpeza;
-  const conv=H.tot.sapatos?Math.round(acess/H.tot.sapatos*100):0;
+  const acess=D.tot.meias+D.tot.cintos+D.tot.limpeza;
+  const conv=D.tot.sapatos?Math.round(acess/D.tot.sapatos*100):0;
   const cardTot=(icon,lbl,val,sub)=>'<div class="ha-card"><div class="ha-ic">'+icon+'</div><div class="ha-lbl">'+lbl+'</div><div class="ha-num">'+val+'</div>'+(sub?'<div class="ha-sub2">'+sub+'</div>':'')+'</div>';
-  let totCards=HIST_CATS.map(c=>cardTot(ic(c),HIST_NOMES[c],fmt(H.tot[c]))).join('');
+  let totCards=HIST_CATS.map(c=>cardTot(ic(c),HIST_NOMES[c],fmt(D.tot[c]))).join('');
   totCards+=cardTot(trendIc,'Acessórios',fmt(acess),'total')+cardTot(trendIc,'Conversão',conv+'%','acess./sapato');
 
   // ── Crescimento vs 2025 (período comparável) ──
-  const compM=H.meses.filter(x=>x.s25!==null).map(x=>x.m);
+  const compM=D.meses.filter(x=>x.s25!==null).map(x=>x.m);
   let compHtml='';
   if(compM.length){
     const periodoComp=MESES[compM[0]-1]+'–'+MESES[compM[compM.length-1]-1];
@@ -2923,29 +2946,31 @@ function renderHistoricoAno(){
         +'<div class="ha-cyr">'+periodoComp+' 2025</div><div class="ha-cval">'+(isRatio?v25.toFixed(2):fmt(v25))+'</div>'
         +'<div class="ha-arrow">↓</div>'
         +'<div class="ha-cyr">'+periodoComp+' '+H.ano+'</div><div class="ha-cval">'+(isRatio?v26.toFixed(2):fmt(v26))+'</div>'
-        +'<div class="ha-delta"><div><b>'+du+'</b><span>unidades</span></div><div><b>'+(pct>=0?'+':'')+pct+'%</b><span>variação</span></div></div></div>';
+        +'<div class="ha-delta"><div><b>'+du+'</b><span>'+(isRatio?'diferença':'pares')+'</span></div><div><b>'+(pct>=0?'+':'')+pct+'%</b><span>variação</span></div></div></div>';
     };
-    let cc=HIST_CATS.map(c=>compCard(ic(c),HIST_NOMES[c],H.comp25[c],H.comp26[c],false)).join('');
-    const acc25=H.comp25.meias+H.comp25.cintos+H.comp25.limpeza, acc26=H.comp26.meias+H.comp26.cintos+H.comp26.limpeza;
-    const cv25=H.comp25.sapatos?acc25/H.comp25.sapatos:0, cv26=H.comp26.sapatos?acc26/H.comp26.sapatos:0;
+    let cc=HIST_CATS.map(c=>compCard(ic(c),HIST_NOMES[c],D.comp25[c],D.comp26[c],false)).join('');
+    const acc25=D.comp25.meias+D.comp25.cintos+D.comp25.limpeza, acc26=D.comp26.meias+D.comp26.cintos+D.comp26.limpeza;
+    const cv25=D.comp25.sapatos?acc25/D.comp25.sapatos:0, cv26=D.comp26.sapatos?acc26/D.comp26.sapatos:0;
     cc+=compCard(trendIc,'Conversão',cv25,cv26,true);
     compHtml='<div class="ha-sec-tit">Crescimento vs 2025</div><div class="ha-sec-sub">Período comparável: '+periodoComp+' · 2025 vs '+H.ano+'</div><div class="ha-cards ha-cards-5">'+cc+'</div>';
   }
 
-  // ── Sapatos mês a mês ──
-  const deltaCell=(a,b)=>{ if(b===null) return '<span class="ha-nobase">sem base 25</span>'; const p=b?Math.round((a-b)/b*100):0; return '<span class="'+(p>=0?'ha-up':'ha-dn')+'">'+(p>=0?'▲ ':'▼ ')+Math.abs(p)+'%</span>'; };
-  const rows=H.meses.map(x=>'<tr><td>'+MESES[x.m-1]+'</td><td class="ha-r">'+fmt(x.s26)+'</td><td class="ha-r">'+(x.s25===null?'—':fmt(x.s25))+'</td><td class="ha-r">'+deltaCell(x.s26,x.s25)+'</td></tr>').join('');
-  const totS25=H.meses.reduce((s,x)=>s+(x.s25||0),0);
+  // ── Sapatos mês a mês · ordem: 2025 → ano → diferença em pares ──
+  const difCell=(v25,v26)=>{ if(v25===null) return '<span class="ha-nobase">sem base 25</span>'; const d=v26-v25, p=v25?Math.round(d/v25*100):0;
+    return '<span class="'+(d>=0?'ha-up':'ha-dn')+'">'+(d>=0?'+':'−')+fmt(Math.abs(d))+' <small style="opacity:.7">('+(p>=0?'+':'')+p+'%)</small></span>'; };
+  const rows=D.meses.map(x=>'<tr><td>'+MESES[x.m-1]+'</td><td class="ha-r">'+(x.s25===null?'—':fmt(x.s25))+'</td><td class="ha-r">'+fmt(x.s26)+'</td><td class="ha-r">'+difCell(x.s25,x.s26)+'</td></tr>').join('');
+  const totS25=D.meses.reduce((s,x)=>s+(x.s25||0),0);
   const compLbl=compM.length?(MESES[compM[0]-1]+'–'+MESES[compM[compM.length-1]-1]):'—';
-  const compPct=H.comp25.sapatos?Math.round((H.comp26.sapatos-H.comp25.sapatos)/H.comp25.sapatos*100):0;
-  const tableHtml='<div class="ha-sec-tit" style="margin-top:24px">Sapatos mês a mês</div><div class="ha-sec-sub">'+H.ano+' vs 2025</div>'
-    +'<table class="ha-table"><thead><tr><th>Mês</th><th class="ha-r">'+H.ano+'</th><th class="ha-r">2025</th><th class="ha-r">Δ</th></tr></thead><tbody>'+rows+'</tbody>'
-    +'<tfoot><tr class="ha-tot"><td>Total · Janeiro–'+MESES[H.ultimoFechado-1]+'</td><td class="ha-r">'+fmt(H.tot.sapatos)+'</td><td class="ha-r">'+fmt(totS25)+'</td><td class="ha-r">—</td></tr>'
-    +'<tr class="ha-tot"><td>Comparável · '+compLbl+'</td><td class="ha-r">'+fmt(H.comp26.sapatos)+'</td><td class="ha-r">'+fmt(H.comp25.sapatos)+'</td><td class="ha-r">'+(compM.length?'<span class="'+(compPct>=0?'ha-up':'ha-dn')+'">'+(compPct>=0?'▲ ':'▼ ')+Math.abs(compPct)+'%</span>':'—')+'</td></tr></tfoot></table>';
+  const compDif=D.comp26.sapatos-D.comp25.sapatos, compPct=D.comp25.sapatos?Math.round(compDif/D.comp25.sapatos*100):0;
+  const tableHtml='<div class="ha-sec-tit" style="margin-top:24px">Sapatos mês a mês</div><div class="ha-sec-sub">2025 vs '+H.ano+' · diferença em pares</div>'
+    +'<table class="ha-table"><thead><tr><th>Mês</th><th class="ha-r">2025</th><th class="ha-r">'+H.ano+'</th><th class="ha-r">± Pares</th></tr></thead><tbody>'+rows+'</tbody>'
+    +'<tfoot><tr class="ha-tot"><td>Total · Janeiro–'+MESES[H.ultimoFechado-1]+'</td><td class="ha-r">'+fmt(totS25)+'</td><td class="ha-r">'+fmt(D.tot.sapatos)+'</td><td class="ha-r">—</td></tr>'
+    +'<tr class="ha-tot"><td>Comparável · '+compLbl+'</td><td class="ha-r">'+fmt(D.comp25.sapatos)+'</td><td class="ha-r">'+fmt(D.comp26.sapatos)+'</td><td class="ha-r">'+(compM.length?'<span class="'+(compDif>=0?'ha-up':'ha-dn')+'">'+(compDif>=0?'+':'−')+fmt(Math.abs(compDif))+' <small style="opacity:.7">('+(compPct>=0?'+':'')+compPct+'%)</small></span>':'—')+'</td></tr></tfoot></table>';
 
-  el.innerHTML='<div class="ha-sec-tit">Total do ano · '+H.ano+'</div><div class="ha-sec-sub">Meses fechados: '+periodoTot+'</div>'
+  el.innerHTML=seletor
+    +'<div class="ha-sec-tit">Total do ano · '+H.ano+escopoTxt+'</div><div class="ha-sec-sub">Meses fechados: '+periodoTot+'</div>'
     +'<div class="ha-cards ha-cards-6">'+totCards+'</div>'+compHtml+tableHtml
-    +'<div class="ha-foot">Categorias comparáveis com 2025: sapatos, meias, cintos e limpeza · Acessórios = meias + cintos + limpeza · Conversão = acessórios ÷ sapatos · Janeiro de 2025 não tem base (regra do painel de Metas).</div>';
+    +'<div class="ha-foot">Categorias comparáveis com 2025: sapatos, meias, cintos e limpeza · Acessórios = meias + cintos + limpeza · Conversão = acessórios ÷ sapatos · Janeiro de 2025 não tem base · A tabela cresce conforme os meses vão fechando.</div>';
 }
 function renderComparativos(){
   const el=document.getElementById('comp-real'); if(!el)return;
