@@ -522,6 +522,23 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .pauta-btn{flex:1;background:var(--ou);color:var(--bg);border:none;padding:12px;font-family:inherit;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;cursor:pointer;}
 .pauta-btn.sec{background:transparent;color:var(--cr3);border:1px solid var(--oud2);}
 .pauta-print-only{display:none;}
+/* follow-up do último 1:1 */
+.pauta-followup{background:rgba(122,155,191,.06);border:1px solid var(--oud2);padding:11px 13px;}
+.pauta-cumpriu{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.pauta-chip{background:transparent;border:1px solid var(--oud2);color:var(--cr3);font-family:inherit;font-size:11px;padding:5px 12px;cursor:pointer;border-radius:20px;}
+.pauta-chip.on-ok{border-color:var(--verde);color:var(--verde);background:rgba(127,191,127,.12);}
+.pauta-chip.on-no{border-color:var(--vermelho);color:var(--vermelho);background:rgba(217,117,96,.12);}
+/* tendência (últimos 3 meses) */
+.pauta-trend{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;}
+.pauta-trend-bars{display:flex;gap:10px;align-items:flex-end;height:72px;}
+.pauta-tb{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;}
+.pauta-tb-bar{width:26px;background:linear-gradient(180deg,var(--ou2),var(--ou));border-radius:2px 2px 0 0;}
+.pauta-tb-v{font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--ou2);margin-top:3px;}
+.pauta-tb-l{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--cr3);}
+.pauta-trend-info{font-size:12px;color:var(--cr);line-height:1.8;flex:1;min-width:180px;}
+.pauta-perguntas{margin-top:8px;}
+.pauta-perg{font-size:12px;color:var(--cr2);font-style:italic;padding:3px 0 3px 14px;position:relative;}
+.pauta-perg::before{content:'“';position:absolute;left:0;color:var(--ou);}
 
 body{zoom:1.1;}
 /* ─── Impressão / PDF: só a pauta, em tema claro ─── */
@@ -1437,6 +1454,37 @@ function abrirFicha(nome){
 }
 
 // ════════ Pauta de Reunião 1:1 ════════
+// estatísticas de vendas de uma pessoa num mês (pra tendência e comparativo 2025)
+async function _statsPessoaMes(nome, ano, mes){
+  const R = await montarRel(ano, mes);
+  const cur=(R.cur&&R.cur[nome])||{};
+  const sap=Number(cur.sapatos||0);
+  const ACC=['meias','cintos','carteiras','prendedor','limpeza'];
+  const acc=ACC.reduce((a,c)=>a+Number(cur[c]||0),0);
+  const conv=sap>0?acc/sap:0;
+  const base2025=(R.base&&R.base[nome]&&Number(R.base[nome].sapatos))||0;
+  return {ano,mes,sap,conv,acc,base2025};
+}
+// roteiro e perguntas adaptados ao tom da conversa
+const PAUTA_ROTEIRO={
+  rec:['Abra celebrando: nomeie os resultados concretos do mês e o esforço por trás deles.',
+       'Pergunte o que ela credita esse bom momento — ajuda a repetir o que funciona.',
+       'Proponha um próximo desafio/estica: algo que faça ela crescer mais.',
+       'Combine 1 ação de desenvolvimento e reforce a confiança.'],
+  ali:['Abra reconhecendo os pontos fortes acima — isso abre a pessoa pra ouvir.',
+       'Traga <b>um</b> ponto de desenvolvimento com exemplo concreto e o impacto. Fale do comportamento e do resultado, nunca da pessoa.',
+       'Ouça: pergunte a visão dela e o que precisa de apoio. Deixe ela falar mais do que você.',
+       'Combine 1–2 ações claras e a meta até a próxima 1:1.'],
+  cri:['Comece com cuidado e direto: contexto rápido do que precisa mudar, sem rodeios.',
+       'Mostre <b>fatos</b> (números/ocorrências), fale do comportamento e do impacto — nunca ataque a pessoa.',
+       'Ouça o lado dela antes de concluir: pode haver algo que você não sabe.',
+       'Combine ações claras, prazo curto e diga que você vai acompanhar de perto — com apoio.'],
+};
+const PAUTA_PERGUNTAS={
+  rec:['O que te deixou mais orgulhosa nesse mês?','O que você gostaria de aprender ou assumir de novo?'],
+  ali:['Como você avalia o seu próprio mês?','O que mais te ajudaria a render melhor?'],
+  cri:['Como você enxerga esse ponto que eu trouxe?','O que precisa mudar — e o que você precisa de mim pra isso?'],
+};
 async function abrirPauta(nome){
   const p = PESSOAS[nome];
   if(!p) return;
@@ -1532,6 +1580,65 @@ async function abrirPauta(nome){
       <div class="pauta-li vazio">Ainda não avaliado — registre em RH › Avaliações Mensais.</div>
     </div>`;
 
+  // ── carrega o registro da 1:1 (histórico por mês) ──
+  const mesKey=_pa+'_'+String(_pm).padStart(2,'0');
+  let _pautaDoc={};
+  if(DB){ try{ const d=await DB.collection('ls_pautas').doc(nome).get(); if(d.exists)_pautaDoc=d.data()||{}; }catch(e){ console.warn('pauta load',e); } }
+  const _hist=_pautaDoc.hist||{};
+  const _atual=_hist[mesKey]||{};
+  const _prevKey=Object.keys(_hist).filter(k=>k<mesKey).sort().pop();
+  const _prev=_prevKey?_hist[_prevKey]:((!Object.keys(_hist).length&&_pautaDoc.combinado)?{combinado:_pautaDoc.combinado,acompanhar:_pautaDoc.acompanhar,cumprido:_pautaDoc.legacyCumprido}:null);
+  const _prevLbl=_prevKey?(MESES[(+_prevKey.slice(5,7))-1]+' '+_prevKey.slice(0,4)):'anterior';
+  const _prevRef=_prevKey||'legacy';
+
+  // #1 — follow-up do último 1:1
+  let followupHtml='';
+  if(_prev && (_prev.combinado||_prev.foco)){
+    const cp=_prev.cumprido;
+    followupHtml=`<div class="pauta-sec pauta-followup">
+      <div class="pauta-sec-tit">↩ Do último 1:1 · ${_prevLbl}</div>
+      ${_prev.combinado?`<div class="pauta-li"><span class="mk">•</span><span><b>Combinado:</b> ${esc(_prev.combinado)}</span></div>`:''}
+      ${_prev.foco?`<div class="pauta-li"><span class="mk">•</span><span><b>Foco:</b> ${esc(_prev.foco)}</span></div>`:''}
+      ${_prev.acompanhar?`<div class="pauta-li"><span><small>acompanhar em ${String(_prev.acompanhar).split('-').reverse().join('/')}</small></span></div>`:''}
+      <div class="pauta-cumpriu">
+        <span class="pauta-comb-lbl" style="margin:0">Cumpriu o combinado?</span>
+        <button class="pauta-chip ${cp===true?'on-ok':''}" onclick="marcarCumprido(this,'${nome}','${_prevRef}',true)">✓ Sim</button>
+        <button class="pauta-chip ${cp===false?'on-no':''}" onclick="marcarCumprido(this,'${nome}','${_prevRef}',false)">✗ Não</button>
+      </div>
+    </div>`;
+  }
+
+  // #2 e #3 — evolução (últimos 3 meses) + comparativo com 2025 (só vendedoras)
+  let evolHtml='';
+  if(VENDS.indexOf(nome)>=0){
+    try{
+      const _m1=mesSoma({a:_pa,m:_pm},-2), _m2=mesSoma({a:_pa,m:_pm},-1);
+      const s0=await _statsPessoaMes(nome,_m1.a,_m1.m), s1=await _statsPessoaMes(nome,_m2.a,_m2.m), s2=await _statsPessoaMes(nome,_pa,_pm);
+      const serie=[s0,s1,s2], maxS=Math.max(1,...serie.map(s=>s.sap));
+      const bars=serie.map(s=>`<div class="pauta-tb"><div class="pauta-tb-bar" style="height:${Math.max(Math.round(s.sap/maxS*54),3)}px"></div><div class="pauta-tb-v">${s.sap}</div><div class="pauta-tb-l">${MESES[s.mes-1].slice(0,3)}</div></div>`).join('');
+      const dSap=s2.sap-s1.sap, dConv=Math.round((s2.conv-s1.conv)*100);
+      const arw=d=>d>0?`<span style="color:var(--verde)">↑ +${d}</span>`:(d<0?`<span style="color:var(--vermelho)">↓ ${d}</span>`:`<span style="color:var(--cr3)">→ 0</span>`);
+      const p25=s2.base2025?Math.round((s2.sap-s2.base2025)/s2.base2025*100):null;
+      evolHtml=`<div class="pauta-sec">
+        <div class="pauta-sec-tit">Evolução · últimos 3 meses</div>
+        <div class="pauta-trend">
+          <div class="pauta-trend-bars">${bars}</div>
+          <div class="pauta-trend-info">
+            <div>Sapatos: <b>${s2.sap}</b> ${arw(dSap)} <small style="color:var(--cr3)">vs ${MESES[s1.mes-1].slice(0,3)}</small></div>
+            <div>Conversão: <b>${Math.round(s2.conv*100)}%</b> ${arw(dConv)}</div>
+            ${p25!==null?`<div>vs 2025: <b>${s2.sap}</b> × ${s2.base2025} em ${MESES[_pm-1].slice(0,3)}/25 <span style="color:${p25>=0?'var(--verde)':'var(--vermelho)'}">(${p25>=0?'+':''}${p25}%)</span></div>`:'<div style="color:var(--cr3)">Sem base de 2025 pra este mês.</div>'}
+          </div>
+        </div>
+      </div>`;
+    }catch(e){ console.warn('evolução pauta',e); }
+  }
+
+  // #8 — roteiro adaptado ao tom + perguntas abertas
+  const _rot=(PAUTA_ROTEIRO[tom.cls]||PAUTA_ROTEIRO.ali);
+  const _perg=(PAUTA_PERGUNTAS[tom.cls]||PAUTA_PERGUNTAS.ali);
+  const roteiroHtml=_rot.map(t=>`<div class="pauta-rot">${t}</div>`).join('')
+    +`<div class="pauta-perguntas"><div class="pauta-comb-lbl" style="margin:6px 0 2px">Perguntas pra abrir a conversa</div>${_perg.map(q=>`<div class="pauta-perg">${q}”</div>`).join('')}</div>`;
+
   const html = `
     <div class="pauta-print-only">Loretto Scarpa · Pauta de Reunião 1:1 · ${_mesRef}</div>
     <div class="pauta-hd">
@@ -1542,7 +1649,9 @@ async function abrirPauta(nome){
       </div>
       <div class="pauta-tom ${tom.cls}">${tom.t}<small>${tom.s}</small></div>
     </div>
+    ${followupHtml}
     ${perf}
+    ${evolHtml}
     ${avBloco}
     <div class="pauta-sec">
       <div class="pauta-sec-tit">✓ Pra reconhecer</div>
@@ -1553,55 +1662,87 @@ async function abrirPauta(nome){
       ${liHtml(dev,'dev','→')}
     </div>
     <div class="pauta-sec">
-      <div class="pauta-sec-tit">Roteiro sugerido da conversa</div>
-      <div class="pauta-roteiro">
-        <div class="pauta-rot">Abra reconhecendo: comece pelos pontos fortes acima — isso abre a pessoa pra ouvir.</div>
-        <div class="pauta-rot">Traga <b>um</b> ponto de desenvolvimento com exemplo concreto e o impacto. Fale do comportamento e do resultado, nunca da pessoa.</div>
-        <div class="pauta-rot">Ouça: pergunte a visão dela e o que precisa de apoio. Deixe ela falar mais do que você.</div>
-        <div class="pauta-rot">Combine 1–2 ações claras e a meta até a próxima 1:1.</div>
-        <div class="pauta-rot">Feche reforçando a confiança e marque o acompanhamento.</div>
-      </div>
+      <div class="pauta-sec-tit">Roteiro sugerido · ${tom.t}</div>
+      <div class="pauta-roteiro">${roteiroHtml}</div>
     </div>
     <div class="pauta-sec">
       <div class="pauta-sec-tit">Combinados desta conversa</div>
       <div class="pauta-comb-lbl">O que foi acordado</div>
-      <textarea class="pauta-comb-inp" id="pauta-comb-inp" placeholder="Anote aqui o que vocês combinaram..."></textarea>
+      <textarea class="pauta-comb-inp" id="pauta-comb-inp" placeholder="Anote aqui o que vocês combinaram...">${esc(_atual.combinado||'')}</textarea>
+      <div class="pauta-comb-lbl">🎯 Foco pro próximo mês</div>
+      <textarea class="pauta-comb-inp" id="pauta-foco-inp" style="min-height:48px" placeholder="No que essa pessoa precisa focar até a próxima 1:1...">${esc(_atual.foco||'')}</textarea>
       <div class="pauta-comb-lbl">Acompanhar em</div>
-      <input type="date" class="pauta-comb-data" id="pauta-comb-data">
+      <input type="date" class="pauta-comb-data" id="pauta-comb-data" value="${_atual.acompanhar||''}">
     </div>
     <div class="pauta-acoes">
-      <button class="pauta-btn" onclick="salvarPauta('${nome}')">💾 Salvar combinados</button>
+      <button class="pauta-btn" onclick="salvarPauta('${nome}')">💾 Salvar 1:1</button>
       <span id="pauta-status" class="pauta-status"></span>
-      <button class="pauta-btn" onclick="window.print()">⬇ Baixar PDF / Imprimir</button>
+      <button class="pauta-btn" onclick="enviarPautaWpp('${nome}')">📱 Enviar resumo</button>
+      <button class="pauta-btn" onclick="window.print()">⬇ PDF</button>
       <button class="pauta-btn sec" onclick="fecharModal('modal-pauta')">Fechar</button>
     </div>`;
 
   document.getElementById('pauta-content').innerHTML = html;
   abrirModal('modal-pauta');
-  carregarPauta(nome);
+  const _st=document.getElementById('pauta-status');
+  if(_st && _atual.realizadaEm){ _st.textContent='1:1 registrada em '+new Date(_atual.realizadaEm).toLocaleDateString('pt-BR'); }
 }
 
-async function carregarPauta(nome){
-  const inp=document.getElementById('pauta-comb-inp'), dt=document.getElementById('pauta-comb-data');
-  const st=document.getElementById('pauta-status');
-  if(!DB||!inp) return;
+async function marcarCumprido(btn, nome, key, val){
+  const box=btn.closest('.pauta-cumpriu');
+  if(box){ box.querySelectorAll('.pauta-chip').forEach(b=>b.classList.remove('on-ok','on-no')); btn.classList.add(val?'on-ok':'on-no'); }
+  // reflete no cache local
+  const pd=(window._pautas=window._pautas||{})[nome]=(window._pautas||{})[nome]||{};
+  if(key==='legacy'){ pd.legacyCumprido=val; }
+  else { (pd.hist=pd.hist||{})[key]=Object.assign({},pd.hist&&pd.hist[key],{cumprido:val}); }
+  if(!DB) return;
   try{
-    const doc=await DB.collection('ls_pautas').doc(nome).get();
-    if(doc.exists){ const d=doc.data(); inp.value=d.combinado||''; if(dt)dt.value=d.acompanhar||'';
-      if(st&&d.atualizadoEm)st.textContent='Salvo em '+new Date(d.atualizadoEm).toLocaleDateString('pt-BR'); }
-  }catch(e){ console.warn('carregarPauta',e); }
+    if(key==='legacy') await DB.collection('ls_pautas').doc(nome).set({legacyCumprido:val},{merge:true});
+    else await DB.collection('ls_pautas').doc(nome).set({hist:{[key]:{cumprido:val}}},{merge:true});
+  }catch(e){ console.warn('marcarCumprido',e); }
+}
+
+function enviarPautaWpp(nome){
+  const comb=(document.getElementById('pauta-comb-inp')||{}).value||'';
+  const foco=(document.getElementById('pauta-foco-inp')||{}).value||'';
+  const dt=(document.getElementById('pauta-comb-data')||{}).value||'';
+  let msg='Oi '+nome+'! Resumo do nosso 1:1:';
+  if(comb.trim()) msg+='\n\n📌 Combinados:\n'+comb.trim();
+  if(foco.trim()) msg+='\n\n🎯 Foco pro próximo mês:\n'+foco.trim();
+  if(dt) msg+='\n\n📅 A gente acompanha em '+String(dt).split('-').reverse().join('/');
+  msg+='\n\nQualquer coisa me chama! 💛';
+  const tel=(typeof TEL_EQUIPE!=='undefined')?TEL_EQUIPE[nome]:null;
+  if(tel) window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(msg),'_blank');
+  else alert('Sem número cadastrado pra '+nome+'.\n\nCopie e envie no WhatsApp:\n\n'+msg);
 }
 
 async function salvarPauta(nome){
-  const inp=document.getElementById('pauta-comb-inp'), dt=document.getElementById('pauta-comb-data');
+  const inp=document.getElementById('pauta-comb-inp'), dt=document.getElementById('pauta-comb-data'), foco=document.getElementById('pauta-foco-inp');
   const st=document.getElementById('pauta-status');
-  if(!DB){ if(st)st.textContent='Sem conexão'; return; }
+  const _alvoP=window._pMes||mesSoma(mesHoje(),-1);
+  const mesKey=_alvoP.a+'_'+String(_alvoP.m).padStart(2,'0');
+  const entry={combinado:inp?inp.value:'', foco:foco?foco.value:'', acompanhar:dt?dt.value:'', realizadaEm:new Date().toISOString()};
+  // cache local (pra pendência da Home)
+  const pd=(window._pautas=window._pautas||{})[nome]=(window._pautas||{})[nome]||{};
+  (pd.hist=pd.hist||{})[mesKey]=Object.assign({},pd.hist[mesKey],entry);
+  pd.ultimaRealizadaMes=mesKey; pd.ultimaRealizadaEm=entry.realizadaEm;
+  if(typeof renderPendencias==='function') renderPendencias();
+  if(!DB){ if(st)st.textContent='Salvo localmente (sem conexão)'; return; }
   try{
     await DB.collection('ls_pautas').doc(nome).set({
-      combinado:inp?inp.value:'', acompanhar:dt?dt.value:'', atualizadoEm:Date.now()
+      hist:{[mesKey]:entry}, ultimaRealizadaMes:mesKey, ultimaRealizadaEm:entry.realizadaEm, atualizadoEm:Date.now()
     },{merge:true});
-    if(st){ st.textContent='✓ Salvo'; st.classList.add('ok'); setTimeout(()=>st.classList.remove('ok'),2000); }
+    if(st){ st.textContent='✓ 1:1 salva e registrada'; st.classList.add('ok'); setTimeout(()=>st.classList.remove('ok'),2500); }
   }catch(e){ console.warn('salvarPauta',e); if(st)st.textContent='Erro ao salvar'; }
+}
+async function carregarPautasResumo(){
+  if(!DB){ window._pautas=window._pautas||{}; return; }
+  try{
+    const snap=await DB.collection('ls_pautas').get();
+    const map={}; snap.forEach(d=>{ map[d.id]=d.data()||{}; });
+    window._pautas=map;
+  }catch(e){ console.warn('carregarPautasResumo',e); window._pautas=window._pautas||{}; }
+  if(typeof renderPendencias==='function') renderPendencias();
 }
 
 function abrirFichaSec(s, btn){
@@ -1871,7 +2012,7 @@ if(AUTH){
     SESSION = user;
     ROLE = (email === GESTOR_EMAIL) ? 'gestor' : 'supervisora';
     aplicarSessao(ROLE);
-    carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); carregarEventos(); montarSeletorMesPauta(); });
+    carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); carregarEventos(); carregarPautasResumo(); montarSeletorMesPauta(); });
   });
 }
 
@@ -2953,6 +3094,18 @@ function renderPendencias(){
   if(window._avalPend>0){
     its.push({ico:'⭐',txt:'Fazer a avaliação de <b>'+window._avalPend+' colaborador'+(window._avalPend>1?'es':'')+'</b> · '+(window._avalMesLabel||'mês anterior'),btn:'Avaliar',act:"var b=document.querySelectorAll('.tabnav-btn')[2]; abrirTab('rh',b); if(window.abrirRh)abrirRh('avaliacoes');"});
   }
+  // 1:1 atrasada — quem está há 2+ meses (ou nunca) sem reunião registrada
+  const _pautas=window._pautas||{}; const _hd=new Date(); const _sem11=[];
+  (typeof AV_COLABS!=='undefined'?AV_COLABS:[]).forEach(n=>{
+    const um=(_pautas[n]||{}).ultimaRealizadaMes; let meses;
+    if(um){ const p=String(um).split('_'); meses=(_hd.getFullYear()-(+p[0]))*12+(_hd.getMonth()+1-(+p[1])); }
+    else meses=null;
+    if(meses===null||meses>=2) _sem11.push({n,meses});
+  });
+  _sem11.sort((a,b)=>(b.meses===null?999:b.meses)-(a.meses===null?999:a.meses)).slice(0,2).forEach(x=>{
+    const quando = x.meses===null?'ainda não registrou nenhuma <b>1:1</b>':('faz <b>'+x.meses+' meses</b> sem <b>1:1</b>');
+    its.push({ico:'🗣️',txt:'Você '+quando+' com <b class="nome-clic" onclick="abrirFicha(\''+x.n+'\')">'+x.n+'</b>',btn:'Fazer 1:1',act:"abrirPauta('"+x.n+"')"});
+  });
   if(!its.length){ el.style.display='none'; return; }
   el.style.display='';
   el.innerHTML='<div class="pend-tit">⚡ Pra você resolver</div>'+its.map(i=>'<div class="pend-item"><span class="pend-ico">'+i.ico+'</span><span class="pend-txt">'+i.txt+'</span>'+(i.btn?'<button class="pend-btn" onclick="'+i.act.replace(/"/g,'&quot;')+'">'+i.btn+'</button>':'')+'</div>').join('');
