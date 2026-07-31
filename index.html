@@ -2161,6 +2161,10 @@ const CATS = [
   {id:'limpeza',  nome:'Limpeza'}
 ];
 const VENDS = ['Jhennifer','Ialey','Michelly','Natália'];
+// Vendedoras que NÃO estão cadastradas no time, mas cujas vendas lançadas devem
+// entrar no TOTAL da equipe (ex.: quem passou pela loja por pouco tempo).
+// Os lançamentos ficam em ls_historico com a chave "Nome_ANO_MM" (ex.: Joice_2026_01).
+const VENDS_EX = ['Joice'];
 const ACESS=['meias','cintos','carteiras','prendedor','limpeza'];
 /* Histórico 2025 por vendedora (igual ao painel de Metas) — sap/ace/mei/lim; carteiras/prendedor sem 2025 */
 const HIST_2025 = {
@@ -2796,7 +2800,14 @@ async function montarRel(ano,mes){
       if(iso&&(!last||iso>last)) last=iso; });
     lastSale[v]=last;
   }));
-  const R={total,metas,cur,base,decorridos,totalDU,restantes:restMeta,duMeta,restMeta,ano,mes,lastSale,fechado:!ehMesAtual(ano,mes)&&!ehMesFuturo(ano,mes)};
+  // Ex-vendedoras (não cadastradas): somam só no TOTAL da equipe.
+  let exTotal={}; CATS.forEach(c=>exTotal[c.id]=0);
+  await Promise.all((typeof VENDS_EX!=='undefined'?VENDS_EX:[]).map(async v=>{
+    let doc=null; try{ if(DB) doc=await DB.collection('ls_historico').doc(keyHist(v,ano,mes)).get(); }catch(_){}
+    const regs=(doc&&doc.exists)?(doc.data().registros||[]):[];
+    regs.forEach(r=>CATS.forEach(c=>{ const n=Number(r[c.id]||0); total[c.id]+=n; exTotal[c.id]+=n; }));
+  }));
+  const R={total,metas,cur,base,exTotal,decorridos,totalDU,restantes:restMeta,duMeta,restMeta,ano,mes,lastSale,fechado:!ehMesAtual(ano,mes)&&!ehMesFuturo(ano,mes)};
   window._relCache[ck]=R; return R;
 }
 
@@ -2885,8 +2896,10 @@ async function carregarHistoricoAno(force){
   const scopes=['Equipe'].concat(VENDS);
   const dados={};
   scopes.forEach(sc=>{ dados[sc]={tot:{},comp26:{},comp25:{},meses:[]}; HIST_CATS.forEach(c=>{dados[sc].tot[c]=0;dados[sc].comp26[c]=0;dados[sc].comp25[c]=0;}); });
+  const exAno={}; HIST_CATS.forEach(c=>exAno[c]=0); // contribuição das ex-vendedoras (Joice etc.)
   for(let m=1;m<=ultimoFechado;m++){
     let R=null; try{ R=await montarRel(ano,m); }catch(_){}
+    HIST_CATS.forEach(c=>exAno[c]+=Number((R&&R.exTotal&&R.exTotal[c])||0));
     scopes.forEach(sc=>{
       const cur={}, b={}; let has25=false; HIST_CATS.forEach(c=>b[c]=0);
       if(sc==='Equipe'){
@@ -2901,7 +2914,7 @@ async function carregarHistoricoAno(force){
       d.meses.push({m, s26:cur.sapatos, s25: has25? b.sapatos : null});
     });
   }
-  window._histAno={ano, ultimoFechado, dados};
+  window._histAno={ano, ultimoFechado, dados, exAno};
   if(!window._histScope || (window._histScope!=='Equipe' && VENDS.indexOf(window._histScope)<0)) window._histScope='Equipe';
   if(typeof renderHistoricoAno==='function') renderHistoricoAno();
   return window._histAno;
@@ -2967,9 +2980,14 @@ function renderHistoricoAno(){
     +'<tfoot><tr class="ha-tot"><td>Total · Janeiro–'+MESES[H.ultimoFechado-1]+'</td><td class="ha-r">'+fmt(totS25)+'</td><td class="ha-r">'+fmt(D.tot.sapatos)+'</td><td class="ha-r">—</td></tr>'
     +'<tr class="ha-tot"><td>Comparável · '+compLbl+'</td><td class="ha-r">'+fmt(D.comp25.sapatos)+'</td><td class="ha-r">'+fmt(D.comp26.sapatos)+'</td><td class="ha-r">'+(compM.length?'<span class="'+(compDif>=0?'ha-up':'ha-dn')+'">'+(compDif>=0?'+':'−')+fmt(Math.abs(compDif))+' <small style="opacity:.7">('+(compPct>=0?'+':'')+compPct+'%)</small></span>':'—')+'</td></tr></tfoot></table>';
 
+  // aviso de vendas avulsas (ex-vendedoras) já incluídas no total da Equipe
+  const ex=H.exAno||{}; const exSap=Number(ex.sapatos||0);
+  const exNota=(scope==='Equipe'&&exSap>0)
+    ? '<div class="ha-foot" style="color:var(--ou2)">✓ O total da equipe já inclui '+fmt(exSap)+' sapatos de vendas avulsas ('+VENDS_EX.join(', ')+') — quem passou pela loja sem cadastro.</div>'
+    : '';
   el.innerHTML=seletor
     +'<div class="ha-sec-tit">Total do ano · '+H.ano+escopoTxt+'</div><div class="ha-sec-sub">Meses fechados: '+periodoTot+'</div>'
-    +'<div class="ha-cards ha-cards-6">'+totCards+'</div>'+compHtml+tableHtml
+    +'<div class="ha-cards ha-cards-6">'+totCards+'</div>'+compHtml+tableHtml+exNota
     +'<div class="ha-foot">Categorias comparáveis com 2025: sapatos, meias, cintos e limpeza · Acessórios = meias + cintos + limpeza · Conversão = acessórios ÷ sapatos · Janeiro de 2025 não tem base · A tabela cresce conforme os meses vão fechando.</div>';
 }
 function renderComparativos(){
