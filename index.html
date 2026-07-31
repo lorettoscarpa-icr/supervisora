@@ -577,6 +577,43 @@ body{zoom:1.1;}
   #colab-doc .colab-foot{margin-top:24px;font-size:10px;color:#8a8f7a;font-style:italic;border-top:1px solid #d8cda0;padding-top:8px;}
 }
 #colab-doc{display:none;}
+/* ─── Histórico do Ano (padrão painel do gestor) ─── */
+.ha-sec-tit{font-family:'Playfair Display',serif;font-size:20px;color:var(--ou2);margin:0 0 2px;}
+.ha-sec-sub{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cr3);margin-bottom:12px;}
+.ha-cards{display:grid;gap:10px;margin-bottom:26px;}
+.ha-cards-6{grid-template-columns:repeat(6,1fr);}
+.ha-cards-5{grid-template-columns:repeat(5,1fr);}
+@media(max-width:900px){.ha-cards-6,.ha-cards-5{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:560px){.ha-cards-6,.ha-cards-5{grid-template-columns:repeat(2,1fr);}}
+.ha-card{border:1px solid var(--oud2);background:var(--bg2);padding:16px 12px;text-align:center;}
+.ha-ic{height:28px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;}
+.ha-ic svg{width:26px;height:26px;stroke:var(--ou);fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;}
+.ha-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--cr3);margin-bottom:8px;}
+.ha-num{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--ou2);line-height:1;}
+.ha-sub2{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cr3);margin-top:7px;}
+.ha-comp{border:1px solid var(--oud2);background:var(--bg2);padding:14px 10px;text-align:center;display:flex;flex-direction:column;align-items:center;}
+.ha-comp .ha-cyr{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--cr3);margin-top:9px;}
+.ha-comp .ha-cval{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--cr);line-height:1;margin-top:2px;}
+.ha-comp .ha-arrow{color:var(--cr3);font-size:13px;margin-top:6px;}
+.ha-delta{display:flex;width:100%;margin-top:13px;border:1px solid var(--oud2);}
+.ha-comp.up .ha-delta{border-color:rgba(109,191,109,.4);background:rgba(109,191,109,.08);}
+.ha-comp.down .ha-delta{border-color:rgba(224,112,112,.4);background:rgba(224,112,112,.08);}
+.ha-delta>div{flex:1;padding:7px 4px;}
+.ha-delta>div+div{border-left:1px solid var(--oud2);}
+.ha-delta b{display:block;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;}
+.ha-comp.up .ha-delta b{color:var(--verde);}
+.ha-comp.down .ha-delta b{color:var(--vermelho);}
+.ha-delta span{font-size:7px;letter-spacing:1px;text-transform:uppercase;color:var(--cr3);}
+.ha-table{width:100%;border-collapse:collapse;font-size:13px;}
+.ha-table th{text-align:left;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cr3);padding:8px 12px;border-bottom:1px solid var(--oud2);font-weight:400;}
+.ha-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.05);color:var(--cr);}
+.ha-table .ha-r{text-align:right;}
+.ha-table tbody td:first-child{letter-spacing:1px;text-transform:uppercase;font-size:11px;color:var(--cr3);}
+.ha-table tfoot .ha-tot td{font-weight:700;color:var(--ou2);border-top:1px solid var(--oud);border-bottom:none;padding-top:13px;letter-spacing:1px;text-transform:uppercase;font-size:11px;}
+.ha-up{color:var(--verde);}
+.ha-dn{color:var(--vermelho);}
+.ha-nobase{color:var(--cr3);font-size:11px;}
+.ha-foot{font-size:10px;color:var(--cr3);margin-top:14px;line-height:1.5;}
 .pauta-status{font-family:'DM Mono',monospace;font-size:11px;color:#8a8f7a;align-self:center;margin-right:auto;}.pauta-status.ok{color:#6f8c3f;}
 .rel-load{color:var(--cr3);font-size:13px;padding:16px;text-align:center;}
 .rel-mes{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:14px;text-align:center;}
@@ -2831,28 +2868,28 @@ function renderAlertas(){
   el.innerHTML=html||'<div class="acao-item"><div class="acao-texto">✓ Nenhum alerta no momento — equipe no ritmo.</div></div>';
 }
 
-/* Histórico do ano (aba própria): total por categoria no ano atual vs mesmo
-   período do ano passado (2025). Mês a mês acumulado nas categorias com base. */
-const HIST_F={sapatos:'sap',meias:'mei',cintos:'ace',limpeza:'lim'}; // carteiras/prendedor não têm base 2025
+/* Histórico do ano (aba própria) — layout no padrão do painel do gestor:
+   Total do ano (meses fechados) + Crescimento vs 2025 (período comparável) +
+   Sapatos mês a mês. Categorias com base 2025: sapatos, meias, cintos, limpeza. */
+const HIST_F={sapatos:'sap',meias:'mei',cintos:'ace',limpeza:'lim'};
+const HIST_CATS=['sapatos','meias','cintos','limpeza'];
+const HIST_NOMES={sapatos:'Sapatos',meias:'Meias',cintos:'Cintos',limpeza:'Limpeza'};
 async function carregarHistoricoAno(force){
   const ano=(window._vMes||mesHoje()).a;
   if(!force && window._histAno && window._histAno.ano===ano){ if(typeof renderHistoricoAno==='function')renderHistoricoAno(); return window._histAno; }
-  const hj=mesHoje(); const ultimoMes=(ano<hj.a)?12:(ano>hj.a?0:hj.m);
-  const perCat={}; CATS.forEach(c=>perCat[c.id]={atual:0,base:0,meta:0,temBase:!!HIST_F[c.id]});
+  const hj=mesHoje();
+  const ultimoFechado=(ano<hj.a)?12:(ano>hj.a?0:(hj.m-1)); // mês corrente não conta (ainda aberto)
+  const tot={}, comp26={}, comp25={}; HIST_CATS.forEach(c=>{tot[c]=0;comp26[c]=0;comp25[c]=0;});
   const meses=[];
-  for(let m=1;m<=ultimoMes;m++){
+  for(let m=1;m<=ultimoFechado;m++){
     let R=null; try{ R=await montarRel(ano,m); }catch(_){}
-    let mAtual=0, mBase=0;
-    CATS.forEach(c=>{
-      const v=Number((R&&R.total&&R.total[c.id])||0);
-      perCat[c.id].atual+=v; perCat[c.id].meta+=Number((R&&R.metas&&R.metas[c.id])||0);
-      if(HIST_F[c.id]) mAtual+=v;
-      let b=0; VENDS.forEach(vn=>{ const h=HIST_2025[vn]&&HIST_2025[vn][m]; if(h&&HIST_F[c.id]) b+=Number(h[HIST_F[c.id]]||0); });
-      perCat[c.id].base+=b; mBase+=b;
-    });
-    meses.push({m,atual:mAtual,base:mBase});
+    const cur={}; HIST_CATS.forEach(c=>cur[c]=Number((R&&R.total&&R.total[c])||0));
+    let has25=false; const b={}; HIST_CATS.forEach(c=>b[c]=0);
+    VENDS.forEach(vn=>{ const h=HIST_2025[vn]&&HIST_2025[vn][m]; if(h){ has25=true; HIST_CATS.forEach(c=>b[c]+=Number(h[HIST_F[c]]||0)); } });
+    HIST_CATS.forEach(c=>{ tot[c]+=cur[c]; if(has25){ comp26[c]+=cur[c]; comp25[c]+=b[c]; } });
+    meses.push({m, s26:cur.sapatos, s25: has25? b.sapatos : null});
   }
-  window._histAno={ano,ultimoMes,perCat,meses};
+  window._histAno={ano, ultimoFechado, tot, comp26, comp25, meses};
   if(typeof renderHistoricoAno==='function') renderHistoricoAno();
   return window._histAno;
 }
@@ -2860,48 +2897,55 @@ function renderHistoricoAno(){
   const el=document.getElementById('hist-real'); if(!el)return;
   const H=window._histAno;
   if(!H){ el.innerHTML='<div class="rel-load">Carregando histórico do ano…</div>'; return; }
-  const ano=H.ano, y2=String(ano).slice(2), ateMes=MESES[(H.ultimoMes||1)-1]||'—';
-  let totAtual=0, totBase=0;
-  CATS.forEach(c=>{ totAtual+=H.perCat[c.id].atual; if(H.perCat[c.id].temBase) totBase+=H.perCat[c.id].base; });
-  const pctTot=totBase?Math.round((totAtual-totBase)/totBase*100):0;
-  // linha por categoria
-  const maxCat=Math.max(1,...CATS.map(c=>Math.max(H.perCat[c.id].atual,H.perCat[c.id].base)));
-  const linhaCat=c=>{ const pc=H.perCat[c.id]; const p=pc.temBase&&pc.base?Math.round((pc.atual-pc.base)/pc.base*100):0;
-    const cor=p>=0?'var(--verde)':'var(--vermelho)'; const hA=Math.round(pc.atual/maxCat*100), hB=Math.round(pc.base/maxCat*100);
-    return '<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);">'
-      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">'
-        +'<span style="font-size:13px;color:var(--cr);">'+c.nome+'</span>'
-        +'<span style="font-family:Cormorant Garamond,serif;font-size:16px;color:var(--ou2);">'+pc.atual+' <span style="font-size:11px;color:var(--cr3);">un</span></span></div>'
-      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><div style="height:9px;width:'+Math.max(hA,1)+'%;background:linear-gradient(90deg,var(--ou2),var(--ou));"></div><span style="font-size:10px;color:var(--cr2);white-space:nowrap;">'+y2+': '+pc.atual+'</span></div>'
-      +'<div style="display:flex;align-items:center;gap:8px;"><div style="height:9px;width:'+Math.max(hB,1)+'%;background:rgba(201,168,76,.35);"></div><span style="font-size:10px;color:var(--cr3);white-space:nowrap;">'+(pc.temBase?('25: '+pc.base):'sem base 2025')+'</span></div>'
-      +(pc.temBase?('<div style="text-align:right;font-family:Cormorant Garamond,serif;font-size:14px;color:'+cor+';margin-top:2px;">'+(p>=0?'+':'')+p+'% vs 2025</div>'):'')
-      +'</div>'; };
-  // mês a mês (total das categorias com base)
-  const maxV=Math.max(1,...H.meses.map(x=>Math.max(x.atual,x.base)));
-  const linhaMes=x=>{ const hA=Math.round(x.atual/maxV*100), hB=Math.round(x.base/maxV*100);
-    const p=x.base?Math.round((x.atual-x.base)/x.base*100):0; const cor=p>=0?'var(--verde)':'var(--vermelho)';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);">'
-      +'<div style="width:34px;font-size:10px;letter-spacing:1px;color:var(--cr3);text-transform:uppercase;">'+MESES[x.m-1].slice(0,3)+'</div>'
-      +'<div style="flex:1;display:flex;flex-direction:column;gap:3px;">'
-        +'<div style="display:flex;align-items:center;gap:6px;"><div style="height:8px;width:'+Math.max(hA,1)+'%;background:linear-gradient(90deg,var(--ou2),var(--ou));"></div><span style="font-size:10px;color:var(--cr2);">'+y2+': '+x.atual+'</span></div>'
-        +'<div style="display:flex;align-items:center;gap:6px;"><div style="height:8px;width:'+Math.max(hB,1)+'%;background:rgba(201,168,76,.35);"></div><span style="font-size:10px;color:var(--cr3);">25: '+x.base+'</span></div>'
-      +'</div>'
-      +'<div style="width:52px;text-align:right;font-family:Cormorant Garamond,serif;font-size:15px;color:'+cor+';">'+(p>=0?'+':'')+p+'%</div></div>'; };
-  el.innerHTML=
-    '<div class="slbl">Histórico do Ano · '+ano+' vs 2025</div>'
-    +'<div class="mc-cap">Total já vendido em '+ano+' (até '+ateMes+') por categoria, comparado ao mesmo período de 2025</div>'
-    +'<div style="background:var(--bg2);border:1px solid var(--oud);padding:16px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">'
-      +'<div><div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;">Total no ano (categorias com base 2025)</div>'
-        +'<div style="font-family:Cormorant Garamond,serif;font-size:30px;color:var(--ou2);margin-top:2px;">'+totAtual+' <span style="font-size:13px;color:var(--cr3);">un</span></div></div>'
-      +'<div style="text-align:right;"><div style="font-size:10px;letter-spacing:1.5px;color:var(--cr3);text-transform:uppercase;">Mesmo período 2025</div>'
-        +'<div style="font-family:Cormorant Garamond,serif;font-size:22px;color:var(--cr2);margin-top:2px;">'+totBase+' un</div>'
-        +'<div style="font-family:Cormorant Garamond,serif;font-size:18px;color:'+(pctTot>=0?'var(--verde)':'var(--vermelho)')+';">'+(pctTot>=0?'⬆ +':'⬇ ')+pctTot+'%</div></div>'
-    +'</div>'
-    +'<div class="slbl" style="margin-top:6px;">Por Categoria · '+y2+' vs 25</div>'
-    +'<div style="background:var(--bg2);border:1px solid var(--oud2);padding:8px 16px;margin-bottom:14px;">'+CATS.map(linhaCat).join('')+'</div>'
-    +'<div class="slbl">Mês a Mês · '+y2+' (dourado) vs 2025 (claro)</div>'
-    +'<div style="background:var(--bg2);border:1px solid var(--oud2);padding:14px 16px;">'+(H.meses.length?H.meses.map(linhaMes).join(''):'<div style="font-size:11px;color:var(--cr3);">Sem meses fechados ainda neste ano.</div>')+'</div>'
-    +'<div style="font-size:10px;color:var(--cr3);margin-top:8px;">Carteiras e prendedor não têm base de 2025 (regra do painel de Metas) — aparecem só com o total deste ano. Cintos concentra os acessórios de 2025.</div>';
+  if(!H.ultimoFechado){ el.innerHTML='<div class="rel-load">Nenhum mês fechado ainda em '+H.ano+'.</div>'; return; }
+  const fmt=n=>Number(Math.round(n)||0).toLocaleString('pt-BR');
+  const ic=c=>(typeof CAT_ICONS!=='undefined'&&CAT_ICONS[c])?CAT_ICONS[c]:'';
+  const trendIc='<svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 8"></polyline><polyline points="21 13 21 8 16 8"></polyline></svg>';
+  const periodoTot='Janeiro–'+MESES[H.ultimoFechado-1]+' '+H.ano;
+
+  // ── Total do ano ──
+  const acess=H.tot.meias+H.tot.cintos+H.tot.limpeza;
+  const conv=H.tot.sapatos?Math.round(acess/H.tot.sapatos*100):0;
+  const cardTot=(icon,lbl,val,sub)=>'<div class="ha-card"><div class="ha-ic">'+icon+'</div><div class="ha-lbl">'+lbl+'</div><div class="ha-num">'+val+'</div>'+(sub?'<div class="ha-sub2">'+sub+'</div>':'')+'</div>';
+  let totCards=HIST_CATS.map(c=>cardTot(ic(c),HIST_NOMES[c],fmt(H.tot[c]))).join('');
+  totCards+=cardTot(trendIc,'Acessórios',fmt(acess),'total')+cardTot(trendIc,'Conversão',conv+'%','acess./sapato');
+
+  // ── Crescimento vs 2025 (período comparável) ──
+  const compM=H.meses.filter(x=>x.s25!==null).map(x=>x.m);
+  let compHtml='';
+  if(compM.length){
+    const periodoComp=MESES[compM[0]-1]+'–'+MESES[compM[compM.length-1]-1];
+    const compCard=(icon,lbl,v25,v26,isRatio)=>{
+      const dif=v26-v25, pos=dif>=0;
+      const du=isRatio?((pos?'+':'')+dif.toFixed(2)):((pos?'+':'−')+fmt(Math.abs(dif)));
+      const pct=v25?Math.round(dif/v25*100):0;
+      return '<div class="ha-comp '+(pos?'up':'down')+'"><div class="ha-ic">'+icon+'</div><div class="ha-lbl">'+lbl+'</div>'
+        +'<div class="ha-cyr">'+periodoComp+' 2025</div><div class="ha-cval">'+(isRatio?v25.toFixed(2):fmt(v25))+'</div>'
+        +'<div class="ha-arrow">↓</div>'
+        +'<div class="ha-cyr">'+periodoComp+' '+H.ano+'</div><div class="ha-cval">'+(isRatio?v26.toFixed(2):fmt(v26))+'</div>'
+        +'<div class="ha-delta"><div><b>'+du+'</b><span>unidades</span></div><div><b>'+(pct>=0?'+':'')+pct+'%</b><span>variação</span></div></div></div>';
+    };
+    let cc=HIST_CATS.map(c=>compCard(ic(c),HIST_NOMES[c],H.comp25[c],H.comp26[c],false)).join('');
+    const acc25=H.comp25.meias+H.comp25.cintos+H.comp25.limpeza, acc26=H.comp26.meias+H.comp26.cintos+H.comp26.limpeza;
+    const cv25=H.comp25.sapatos?acc25/H.comp25.sapatos:0, cv26=H.comp26.sapatos?acc26/H.comp26.sapatos:0;
+    cc+=compCard(trendIc,'Conversão',cv25,cv26,true);
+    compHtml='<div class="ha-sec-tit">Crescimento vs 2025</div><div class="ha-sec-sub">Período comparável: '+periodoComp+' · 2025 vs '+H.ano+'</div><div class="ha-cards ha-cards-5">'+cc+'</div>';
+  }
+
+  // ── Sapatos mês a mês ──
+  const deltaCell=(a,b)=>{ if(b===null) return '<span class="ha-nobase">sem base 25</span>'; const p=b?Math.round((a-b)/b*100):0; return '<span class="'+(p>=0?'ha-up':'ha-dn')+'">'+(p>=0?'▲ ':'▼ ')+Math.abs(p)+'%</span>'; };
+  const rows=H.meses.map(x=>'<tr><td>'+MESES[x.m-1]+'</td><td class="ha-r">'+fmt(x.s26)+'</td><td class="ha-r">'+(x.s25===null?'—':fmt(x.s25))+'</td><td class="ha-r">'+deltaCell(x.s26,x.s25)+'</td></tr>').join('');
+  const totS25=H.meses.reduce((s,x)=>s+(x.s25||0),0);
+  const compLbl=compM.length?(MESES[compM[0]-1]+'–'+MESES[compM[compM.length-1]-1]):'—';
+  const compPct=H.comp25.sapatos?Math.round((H.comp26.sapatos-H.comp25.sapatos)/H.comp25.sapatos*100):0;
+  const tableHtml='<div class="ha-sec-tit" style="margin-top:24px">Sapatos mês a mês</div><div class="ha-sec-sub">'+H.ano+' vs 2025</div>'
+    +'<table class="ha-table"><thead><tr><th>Mês</th><th class="ha-r">'+H.ano+'</th><th class="ha-r">2025</th><th class="ha-r">Δ</th></tr></thead><tbody>'+rows+'</tbody>'
+    +'<tfoot><tr class="ha-tot"><td>Total · Janeiro–'+MESES[H.ultimoFechado-1]+'</td><td class="ha-r">'+fmt(H.tot.sapatos)+'</td><td class="ha-r">'+fmt(totS25)+'</td><td class="ha-r">—</td></tr>'
+    +'<tr class="ha-tot"><td>Comparável · '+compLbl+'</td><td class="ha-r">'+fmt(H.comp26.sapatos)+'</td><td class="ha-r">'+fmt(H.comp25.sapatos)+'</td><td class="ha-r">'+(compM.length?'<span class="'+(compPct>=0?'ha-up':'ha-dn')+'">'+(compPct>=0?'▲ ':'▼ ')+Math.abs(compPct)+'%</span>':'—')+'</td></tr></tfoot></table>';
+
+  el.innerHTML='<div class="ha-sec-tit">Total do ano · '+H.ano+'</div><div class="ha-sec-sub">Meses fechados: '+periodoTot+'</div>'
+    +'<div class="ha-cards ha-cards-6">'+totCards+'</div>'+compHtml+tableHtml
+    +'<div class="ha-foot">Categorias comparáveis com 2025: sapatos, meias, cintos e limpeza · Acessórios = meias + cintos + limpeza · Conversão = acessórios ÷ sapatos · Janeiro de 2025 não tem base (regra do painel de Metas).</div>';
 }
 function renderComparativos(){
   const el=document.getElementById('comp-real'); if(!el)return;
