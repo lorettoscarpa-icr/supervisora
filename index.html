@@ -80,6 +80,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .hoje-linha .r.folga{color:var(--azul);}
 .hoje-linha .r.ferias{color:var(--ou2);}
 .hoje-linha .r.atestado{color:var(--vermelho);}
+.hoje-linha .r.falta{color:#e07b2e;}
 .st-legenda{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.04);}
 .st-legenda span{display:inline-flex;align-items:center;gap:5px;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--cr3);}
 .st-legenda i{width:7px;height:7px;border-radius:50%;display:inline-block;}
@@ -87,6 +88,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .st-legenda i.folga{background:var(--azul);}
 .st-legenda i.ferias{background:var(--ou2);}
 .st-legenda i.atestado{background:var(--vermelho);}
+.st-legenda i.falta{background:#e07b2e;}
 /* editar status direto no card + quem cobre */
 .hoje-right{display:flex;align-items:center;gap:5px;}
 .hoje-edit{background:transparent;border:none;color:var(--cr3);cursor:pointer;font-size:13px;padding:2px 4px;font-family:inherit;opacity:.45;transition:opacity .15s,color .15s;flex-shrink:0;line-height:1;}
@@ -120,6 +122,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .st-opt .dot.folga{background:var(--azul);}
 .st-opt .dot.ferias{background:var(--ou2);}
 .st-opt .dot.atestado{background:var(--vermelho);}
+.st-opt .dot.falta{background:#e07b2e;}
 .st-field{margin-bottom:16px;}
 .st-lbl{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--cr3);margin-bottom:7px;display:block;}
 .st-inp,.st-selc{width:100%;background:var(--v1);border:1px solid var(--oud);color:var(--cr);font-family:inherit;font-size:13px;padding:9px 11px;box-sizing:border-box;}
@@ -748,6 +751,7 @@ body{zoom:1.1;}
         <span><i class="folga"></i>Folga</span>
         <span><i class="ferias"></i>Férias</span>
         <span><i class="atestado"></i>Atestado</span>
+        <span><i class="falta"></i>Falta</span>
       </div>
     </div>
 
@@ -817,7 +821,7 @@ body{zoom:1.1;}
   .cob-head{display:flex;align-items:center;gap:11px;margin-bottom:12px;}
   .cob-nome{font-size:13px;font-weight:600;color:var(--cr);}
   .cob-motivo{font-size:10px;letter-spacing:.5px;text-transform:uppercase;}
-  .cob-motivo.ferias{color:#5aa9d4;}.cob-motivo.folga{color:var(--ou);}.cob-motivo.atestado{color:var(--er);}
+  .cob-motivo.ferias{color:#5aa9d4;}.cob-motivo.folga{color:var(--ou);}.cob-motivo.atestado{color:var(--er);}.cob-motivo.falta{color:#e07b2e;}
   .cob-linha{font-size:12px;color:var(--cr2);margin-bottom:8px;}
   .cob-assign{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--cr3);font-size:13px;}
   .cob-sel{flex:1;background:var(--v1);border:1px solid var(--oud);color:var(--cr);font-family:inherit;font-size:12px;padding:7px 10px;cursor:pointer;}
@@ -847,7 +851,7 @@ function renderCobertura(){
   grid.innerHTML=aus.map(a=>{
     const id=_cobId(a.nome,a.inicio); const escolhido=cob[id]||'';
     const opcoes=Object.keys(GRUPO).filter(n=>n!==a.nome&&GRUPO[n]===GRUPO[a.nome]&&foraNomes.indexOf(n)<0);
-    const motCls=/f[ée]rias/i.test(a.mot.txt)?'ferias':(/atestado/i.test(a.mot.txt)?'atestado':'folga');
+    const motCls=/f[ée]rias/i.test(a.mot.txt)?'ferias':(/atestado/i.test(a.mot.txt)?'atestado':(/falta/i.test(a.mot.txt)?'falta':'folga'));
     const sel=opcoes.length?('<select class="cob-sel" onchange="cobrir(this,\''+id+'\',\''+a.nome+'\')">'
       +'<option value="">escolher quem cobre…</option>'
       +opcoes.map(n=>'<option value="'+n+'"'+(n===escolhido?' selected':'')+'>'+n+' · '+GRUPO[n]+'</option>').join('')
@@ -2436,7 +2440,7 @@ async function salvarOcorrencia(){
 function _ocPresenca(nome, dataISO){ return (window._ocorrencias||[]).find(o=>o&&o.origem==='presenca'&&o.pessoa===nome&&o.data===dataISO); }
 async function registrarOcorrenciaPresenca(nome, status, obsMotivo, cobre){
   const dataISO=_hojeStr();
-  const motLbl = status==='atestado'?'Atestado':(status==='ferias'?'Férias':(status==='folga'?'Folga':'Ausência'));
+  const motLbl = status==='atestado'?'Atestado':(status==='ferias'?'Férias':(status==='folga'?'Folga':(status==='falta'?'Falta':'Ausência')));
   let obs=motLbl+' — registrado pelo card "Quem está na loja".';
   if(cobre) obs+=' Cobertura: '+cobre+'.';
   if(obsMotivo) obs+=' Motivo: '+obsMotivo;
@@ -2829,6 +2833,7 @@ function renderPainelVendedora(cur,base,restantes,fechado){
 function motivoDe(t){ t=(t||'').toLowerCase();
   if(t.indexOf('feria')>-1||t.indexOf('férri')>-1||t.indexOf('férias')>-1) return {cls:'ferias',txt:'Férias'};
   if(t.indexOf('atestado')>-1) return {cls:'atestado',txt:'Atestado'};
+  if(t.indexOf('falta')>-1||t==='falta') return {cls:'falta',txt:'Falta'};
   return {cls:'folga',txt:'Folga'};
 }
 
@@ -3073,7 +3078,7 @@ function renderPresenca(ausentes){
       +'<div class="hoje-subgrupo">Operação</div>'
       +linha('Edson')+linha('Yuri')+linha('Gustavo')
       +'<div class="st-legenda"><span><i class="presente"></i>Presente</span><span><i class="folga"></i>Folga</span>'
-      +'<span><i class="ferias"></i>Férias</span><span><i class="atestado"></i>Atestado</span></div>';
+      +'<span><i class="ferias"></i>Férias</span><span><i class="atestado"></i>Atestado</span><span><i class="falta"></i>Falta</span></div>';
     if(typeof aplicarFotos==='function') aplicarFotos();
   }
   // O grid "Cobertura de Ausências" (#cob-grid) é sempre montado por renderCobertura(),
@@ -3085,7 +3090,8 @@ const ST_OPCOES=[
   {v:'presente',cls:'presente',txt:'Presente'},
   {v:'folga',   cls:'folga',   txt:'Folga'},
   {v:'atestado',cls:'atestado',txt:'Atestado'},
-  {v:'ferias',  cls:'ferias',  txt:'Férias'}
+  {v:'ferias',  cls:'ferias',  txt:'Férias'},
+  {v:'falta',   cls:'falta',   txt:'Falta'}
 ];
 function abrirStatus(nome){
   const atual=listaAusentesHoje().filter(a=>a.nome===nome)[0];
@@ -3234,7 +3240,7 @@ function renderCalendario(items){
   (items||[]).forEach(l=>{
     const nome=FUNC_MAP[l.funcId]||'?', mot=motivoDe(l.tipo);
     const cls=mot.cls==='atestado'?'reun':mot.cls;
-    const ic=mot.cls==='ferias'?'🌴':mot.cls==='atestado'?'🩺':'🏖';
+    const ic=mot.cls==='ferias'?'🌴':mot.cls==='atestado'?'🩺':mot.cls==='falta'?'⛔':'🏖';
     const ini=l.inicio||'', fim=l.fim||ini;
     for(let day=1; day<=totalDias; day++){
       const iso=ano+'-'+String(mes).padStart(2,'0')+'-'+String(day).padStart(2,'0');
