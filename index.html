@@ -559,7 +559,24 @@ body{zoom:1.1;}
   #modal-pauta .pauta-perf .cel .v,#modal-pauta .pauta-tom{color:#8a6c10 !important;}
   #modal-pauta .pauta-hd,#modal-pauta .pauta-sec-tit{border-bottom-color:#d8cda0 !important;}
   #modal-pauta .pauta-comb-inp,#modal-pauta .pauta-comb-data{border-color:#d8cda0 !important;color:#23310f !important;background:#fff !important;}
+  /* via da pessoa: quando .print-colab, imprime só o #colab-doc */
+  body.print-colab #pauta-content{display:none !important;}
+  body.print-colab #colab-doc{display:block !important;visibility:visible !important;}
+  body.print-colab #colab-doc *{visibility:visible !important;}
+  #colab-doc{color:#23310f;font-family:'DM Sans',system-ui,Arial;}
+  #colab-doc .colab-top{font-family:'Playfair Display',serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#8a6c10;}
+  #colab-doc .colab-h1{font-family:'Playfair Display',serif;font-size:23px;color:#23310f;margin-top:4px;}
+  #colab-doc .colab-sub{font-size:12px;color:#5a5436;margin:3px 0 18px;border-bottom:1px solid #d8cda0;padding-bottom:10px;}
+  #colab-doc .colab-sec{margin-bottom:15px;}
+  #colab-doc .colab-sec h3{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#8a6c10;margin-bottom:5px;}
+  #colab-doc .colab-sec p{font-size:13px;line-height:1.55;color:#23310f;white-space:pre-wrap;}
+  #colab-doc .colab-sec ul{margin:4px 0 0 18px;}
+  #colab-doc .colab-sec li{font-size:13px;line-height:1.5;color:#23310f;margin-bottom:3px;}
+  #colab-doc .colab-assinatura{display:flex;gap:44px;margin-top:40px;}
+  #colab-doc .colab-linha{flex:1;border-top:1px solid #23310f;padding-top:6px;font-size:11px;color:#5a5436;}
+  #colab-doc .colab-foot{margin-top:24px;font-size:10px;color:#8a8f7a;font-style:italic;border-top:1px solid #d8cda0;padding-top:8px;}
 }
+#colab-doc{display:none;}
 .pauta-status{font-family:'DM Mono',monospace;font-size:11px;color:#8a8f7a;align-self:center;margin-right:auto;}.pauta-status.ok{color:#6f8c3f;}
 .rel-load{color:var(--cr3);font-size:13px;padding:16px;text-align:center;}
 .rel-mes{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;color:var(--cr3);text-transform:uppercase;margin-bottom:14px;text-align:center;}
@@ -1282,6 +1299,7 @@ async function cobrir(sel,id,nome){
   <div class="modal-box" style="max-width:640px;">
     <button class="modal-close" onclick="fecharModal('modal-pauta')">×</button>
     <div id="pauta-content"></div>
+    <div id="colab-doc"></div>
   </div>
 </div>
 
@@ -1677,10 +1695,14 @@ async function abrirPauta(nome){
     <div class="pauta-acoes">
       <button class="pauta-btn" onclick="salvarPauta('${nome}')">💾 Salvar 1:1</button>
       <span id="pauta-status" class="pauta-status"></span>
-      <button class="pauta-btn" onclick="enviarPautaWpp('${nome}')">📱 Enviar resumo</button>
-      <button class="pauta-btn" onclick="window.print()">⬇ PDF</button>
+      <button class="pauta-btn" onclick="enviarPautaWpp('${nome}')">📱 WhatsApp</button>
+      <button class="pauta-btn" onclick="window.print()">⬇ Minha via</button>
+      <button class="pauta-btn" onclick="imprimirColab()">📄 Via da pessoa</button>
       <button class="pauta-btn sec" onclick="fecharModal('modal-pauta')">Fechar</button>
     </div>`;
+
+  // dados pra "via da pessoa" (documento de entrega)
+  window._pautaColab={nome:nome,funcao:p.funcao,mesRef:_mesRef,positivos:(AV&&AV.positivos)||'',melhorar:(AV&&AV.melhorar)||'',rec:rec.map(x=>x.t)};
 
   document.getElementById('pauta-content').innerHTML = html;
   abrirModal('modal-pauta');
@@ -1714,6 +1736,36 @@ function enviarPautaWpp(nome){
   const tel=(typeof TEL_EQUIPE!=='undefined')?TEL_EQUIPE[nome]:null;
   if(tel) window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(msg),'_blank');
   else alert('Sem número cadastrado pra '+nome+'.\n\nCopie e envie no WhatsApp:\n\n'+msg);
+}
+
+// Via da pessoa: documento limpo pra imprimir/entregar (a pessoa fica ciente e assina)
+function imprimirColab(){
+  const c=window._pautaColab; if(!c){ window.print(); return; }
+  const comb=((document.getElementById('pauta-comb-inp')||{}).value||'').trim();
+  const foco=((document.getElementById('pauta-foco-inp')||{}).value||'').trim();
+  const dt=(document.getElementById('pauta-comb-data')||{}).value||'';
+  const dtBr=dt?String(dt).split('-').reverse().join('/'):'';
+  const li=arr=>(arr&&arr.length)?('<ul>'+arr.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>'):'';
+  const box=document.getElementById('colab-doc'); if(!box) return;
+  box.innerHTML=`
+    <div class="colab-top">Loretto Scarpa</div>
+    <div class="colab-h1">Resumo da nossa conversa 1:1</div>
+    <div class="colab-sub">${esc(c.nome)} · ${esc(c.funcao||'')} · ${esc(c.mesRef||'')}</div>
+    <div class="colab-sec"><h3>O que reconhecemos no seu trabalho</h3>
+      ${c.positivos?`<p>${esc(c.positivos)}</p>`:''}${li(c.rec)}${(!c.positivos&&!(c.rec&&c.rec.length))?'<p>—</p>':''}</div>
+    ${c.melhorar?`<div class="colab-sec"><h3>Onde você pode evoluir</h3><p>${esc(c.melhorar)}</p></div>`:''}
+    <div class="colab-sec"><h3>O que combinamos</h3><p>${comb?esc(comb):'—'}</p></div>
+    ${foco?`<div class="colab-sec"><h3>Foco pro próximo mês</h3><p>${esc(foco)}</p></div>`:''}
+    ${dtBr?`<div class="colab-sec"><h3>Vamos acompanhar em</h3><p>${dtBr}</p></div>`:''}
+    <div class="colab-assinatura">
+      <div class="colab-linha">Ciente — ${esc(c.nome)}</div>
+      <div class="colab-linha">Data</div>
+    </div>
+    <div class="colab-foot">Registro da nossa conversa 1:1 — pra alinhar expectativas e apoiar o seu desenvolvimento.</div>`;
+  document.body.classList.add('print-colab');
+  window.onafterprint=function(){ document.body.classList.remove('print-colab'); window.onafterprint=null; };
+  window.print();
+  document.body.classList.remove('print-colab');
 }
 
 async function salvarPauta(nome){
