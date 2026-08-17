@@ -902,25 +902,38 @@ body{zoom:1.1;}
   .cob-status{font-size:12px;padding:8px 12px;border:1px solid var(--oud2);background:var(--oud2);}
   .cob-status.ok{color:var(--ou);border-color:var(--oud);}
   .cob-status.pend{color:var(--cr3);}
+  .cob-fut{font-size:11px;color:var(--ou);margin-top:3px;}
   </style>
   <div class="cob-sec">
     <div class="slbl">Cobertura de Ausências</div>
-    <div class="mc-cap">Quem está fora e quem assume o <b>celular de vendas</b> + as <b>funções</b> · vale pra folga, férias ou atestado</div>
-    <div class="cob-grid" id="cob-grid"><div class="cob-status pend" style="border:none;background:transparent;">Ninguém ausente hoje.</div></div>
+    <div class="mc-cap">Quem está fora e quem assume o <b>celular de vendas</b> + as <b>funções</b> · vale pra folga, férias ou atestado · aparece aqui já na véspera da ausência</div>
+    <div class="cob-grid" id="cob-grid"><div class="cob-status pend" style="border:none;background:transparent;">Ninguém ausente hoje nem amanhã.</div></div>
     </div>
 </div>
 
 <script>
 const GRUPO={'Ialey':'vendas','Michelly':'vendas','Natália':'vendas','Jhennifer':'supervisao','Yuri':'operacao','Edson':'operacao','Gustavo':'operacao','Lorrayne':'marketing'};
 function _cobId(nome,inicio){ return 'cb_'+String(nome).normalize('NFD').replace(/[^a-zA-Z]/g,'').toLowerCase()+'_'+String(inicio||'').replace(/[^0-9]/g,''); }
-function ausentesAgora(){
-  // Ausências programadas do RH + edições avulsas do dia (ls_presenca). Fonte única: listaAusentesHoje().
-  return (typeof listaAusentesHoje==='function') ? listaAusentesHoje() : [];
+function _amanhaStr(){ const d=new Date(); d.setDate(d.getDate()+1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+// Ausências que pedem cobertura organizada: quem já está fora hoje (RH + edições
+// avulsas do dia, via listaAusentesHoje) + quem ENTRA de ausência amanhã — assim a
+// supervisora consegue deixar a cobertura definida com 1 dia de antecedência.
+function ausenciasPraCobrir(){
+  const base={};
+  if(typeof listaAusentesHoje==='function') listaAusentesHoje().forEach(a=>{ base[a.nome]=a; });
+  const hj=(typeof _hojeStr==='function')?_hojeStr():'';
+  const am=_amanhaStr();
+  (window._lancItems||[]).filter(l=>l.inicio&&l.fim&&l.inicio>hj&&l.inicio<=am&&l.fim>=l.inicio).forEach(l=>{
+    const nome=(typeof FUNC_MAP!=='undefined'&&FUNC_MAP[l.funcId])||'?'; if(nome==='?'||base[nome])return;
+    base[nome]={nome,mot:motivoDe(l.tipo),inicio:l.inicio,fim:l.fim,futura:true};
+  });
+  return Object.keys(base).map(n=>base[n]);
 }
+function _cobPeriodoTxt(a){ return (a.inicio&&a.fim&&a.inicio!==a.fim)?('de '+fmtData(a.inicio)+' até '+fmtData(a.fim)):('em '+fmtData(a.fim||a.inicio)); }
 function renderCobertura(){
   const grid=document.getElementById('cob-grid'); if(!grid)return;
-  const aus=ausentesAgora(); const cob=window._cob||{};
-  if(!aus.length){ grid.innerHTML='<div class="cob-status pend" style="border:none;background:transparent;">Ninguém ausente hoje.</div>'; return; }
+  const aus=ausenciasPraCobrir(); const cob=window._cob||{};
+  if(!aus.length){ grid.innerHTML='<div class="cob-status pend" style="border:none;background:transparent;">Ninguém ausente hoje nem amanhã.</div>'; return; }
   const foraNomes=aus.map(a=>a.nome);
   grid.innerHTML=aus.map(a=>{
     const id=_cobId(a.nome,a.inicio); const escolhido=cob[id]||'';
@@ -930,11 +943,13 @@ function renderCobertura(){
       +'<option value="">escolher quem cobre…</option>'
       +opcoes.map(n=>'<option value="'+n+'"'+(n===escolhido?' selected':'')+'>'+n+' · '+GRUPO[n]+'</option>').join('')
       +'</select>'):'<span style="font-size:12px;color:var(--cr3);">sem colega do mesmo grupo disponível</span>';
+    const periodo=_cobPeriodoTxt(a);
     return '<div class="cob-card">'
-      +'<div class="cob-head"><span class="mini-av" data-foto="'+a.nome+'">'+a.nome[0]+'</span><div><div class="cob-nome">'+a.nome+'</div><div class="cob-motivo '+motCls+'">'+a.mot.txt+' · até '+fmtData(a.fim)+'</div></div></div>'
+      +'<div class="cob-head"><span class="mini-av" data-foto="'+a.nome+'">'+a.nome[0]+'</span><div><div class="cob-nome">'+a.nome+'</div><div class="cob-motivo '+motCls+'">'+a.mot.txt+' · '+periodo+'</div>'
+      +(a.futura?'<div class="cob-fut">⏳ sai amanhã — deixe a cobertura definida</div>':'')+'</div></div>'
       +'<div class="cob-linha">📱 Celular de vendas + funções de '+a.nome+'</div>'
       +'<div class="cob-assign">Assume → '+sel+'</div>'
-      +'<div class="cob-status '+(escolhido?'ok':'pend')+'" id="st-'+id+'">'+(escolhido?('📱 Celular + funções com <b>'+escolhido+'</b>'):'Sem cobertura definida ainda')+'</div></div>';
+      +'<div class="cob-status '+(escolhido?'ok':'pend')+'" id="st-'+id+'">'+(escolhido?('📱 Celular + funções com <b>'+escolhido+'</b> · '+periodo):'Sem cobertura definida ainda')+'</div></div>';
   }).join('');
   if(typeof aplicarFotos==='function') aplicarFotos();
 }
@@ -942,22 +957,28 @@ async function carregarCoberturas(){
   if(!DB){ renderCobertura(); return; }
   try{
     window._cob={};
-    await Promise.all(ausentesAgora().map(async a=>{
+    await Promise.all(ausenciasPraCobrir().map(async a=>{
       const id=_cobId(a.nome,a.inicio);
       try{ const doc=await DB.collection('ls_coberturas').doc(id).get(); if(doc.exists) window._cob[id]=doc.data().cobre||''; }catch(_){}}));
   }catch(e){ console.warn('carregarCoberturas',e); }
   renderCobertura();
   // agora que a cobertura salva foi carregada, atualiza o card "Quem está na loja" (mostra quem cobre)
+  // e refaz pendências/ações — cobertura já definida deixa de ser cobrada
   if(typeof renderPresenca==='function' && typeof presencaCardData==='function') renderPresenca(presencaCardData());
+  if(typeof renderPendencias==='function') renderPendencias();
+  if(typeof renderAcoes==='function') renderAcoes();
 }
 async function cobrir(sel,id,nome){
   const v=sel.value; window._cob=window._cob||{}; window._cob[id]=v;
+  const a=ausenciasPraCobrir().filter(x=>x.nome===nome)[0]||{};
   const el=document.getElementById('st-'+id);
-  if(el){ el.className='cob-status '+(v?'ok':'pend'); el.innerHTML=v?('📱 Celular + funções com <b>'+v+'</b>'):'Sem cobertura definida ainda'; }
-  // reflete no card "Quem está na loja Hoje"
+  if(el){ el.className='cob-status '+(v?'ok':'pend'); el.innerHTML=v?('📱 Celular + funções com <b>'+v+'</b> · '+_cobPeriodoTxt(a)):'Sem cobertura definida ainda'; }
+  // reflete no card "Quem está na loja Hoje" e tira a pendência da lista
   if(typeof renderPresenca==='function' && typeof presencaCardData==='function') renderPresenca(presencaCardData());
+  if(typeof renderPendencias==='function') renderPendencias();
+  if(typeof renderAcoes==='function') renderAcoes();
   if(!DB) return;
-  try{ await DB.collection('ls_coberturas').doc(id).set({cobre:v,ausente:nome,por:'Jhennifer',atualizadoEm:new Date().toISOString()},{merge:true}); }
+  try{ await DB.collection('ls_coberturas').doc(id).set({cobre:v,ausente:nome,inicio:a.inicio||'',fim:a.fim||'',por:'Jhennifer',atualizadoEm:new Date().toISOString()},{merge:true}); }
   catch(e){ console.warn('cobrir',e); }
 }
 </script>
@@ -2543,6 +2564,7 @@ function renderAcoes(){
   const host=document.getElementById('acoes-lista'); if(!host) return;
   const acoes=[]; const b=new Date(); const hoje=new Date(b.getFullYear(),b.getMonth(),b.getDate());
   (window._ausentes||[]).forEach(a=>{ if(!a.nome||a.nome==='?') return;
+    if(window._cob&&window._cob[_cobId(a.nome,a.inicio)]) return; // cobertura já definida — não cobra de novo
     const mot=a.mot?a.mot.txt.toLowerCase():'folga';
     acoes.push({p:1,txt:'🌴 <b class="nome-clic" onclick="abrirFicha(\''+a.nome+'\')">'+a.nome+'</b> está de '+mot+(a.ate?' até '+fmtData(a.ate):'')+' — organize a cobertura',btn:'Cobrir',act:"var g=document.getElementById('cob-grid');if(g)g.scrollIntoView({behavior:'smooth',block:'center'})"});
   });
@@ -3225,10 +3247,16 @@ function renderPendencias(){
     const _faltam=_listaDia.filter(it=>!(_confDia[it.id]&&_confDia[it.id].feito)).map(it=>it.t).join(', ');
     its.push({ico:'📋',txt:'Você ainda não atualizou as <b>tarefas do dia</b> — falta: '+_faltam,btn:'Conferir',act:"var g=document.getElementById('conf-grid');if(g)g.scrollIntoView({behavior:'smooth',block:'center'})"});
   }
-  // só cobra organizar a cobertura enquanto a ausência não terminou (fim >= hoje) — comparação por data, não por mês
-  (window._lancItems||[]).filter(l=>l.inicio&&l.fim&&l.fim>=hoje&&l.inicio.slice(0,7)<=ym).forEach(l=>{
-    const nome=FUNC_MAP[l.funcId]||'?'; if(nome==='?')return; const m=motivoDe(l.tipo);
-    its.push({ico:'🌴',txt:'Organizar a cobertura de <b class="nome-clic" onclick="abrirFicha(\''+nome+'\')">'+nome+'</b> ('+m.txt.toLowerCase()+' até '+fmtData(l.fim)+')',btn:'Cobertura',act:"var g=document.getElementById('cob-grid');if(g)g.scrollIntoView({behavior:'smooth',block:'center'})"});
+  // cobra organizar a cobertura só a partir da VÉSPERA da ausência (inicio <= amanhã),
+  // enquanto ela não terminou (fim >= hoje) e enquanto ninguém foi definido pra cobrir
+  const amanha=(typeof _amanhaStr==='function')?_amanhaStr():hoje;
+  const cobDef=window._cob||{};
+  (window._lancItems||[]).filter(l=>l.inicio&&l.fim&&l.fim>=hoje&&l.inicio<=amanha).forEach(l=>{
+    const nome=FUNC_MAP[l.funcId]||'?'; if(nome==='?')return;
+    if(cobDef[_cobId(nome,l.inicio)])return; // cobertura já definida — resolvido, não cobra mais
+    const m=motivoDe(l.tipo);
+    const per=(l.inicio>hoje?'sai amanhã, ':'')+m.txt.toLowerCase()+' de '+fmtData(l.inicio)+' até '+fmtData(l.fim);
+    its.push({ico:'🌴',txt:'Organizar a cobertura de <b class="nome-clic" onclick="abrirFicha(\''+nome+'\')">'+nome+'</b> ('+per+')',btn:'Cobertura',act:"var g=document.getElementById('cob-grid');if(g)g.scrollIntoView({behavior:'smooth',block:'center'})"});
   });
   if(window._avalPend>0){
     its.push({ico:'⭐',txt:'Fazer a avaliação de <b>'+window._avalPend+' colaborador'+(window._avalPend>1?'es':'')+'</b> · '+(window._avalMesLabel||'mês anterior'),btn:'Avaliar',act:"var b=document.querySelectorAll('.tabnav-btn')[2]; abrirTab('rh',b); if(window.abrirRh)abrirRh('avaliacoes');"});
