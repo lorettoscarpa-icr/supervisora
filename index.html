@@ -130,12 +130,6 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .st-save:hover{background:var(--ou2);}
 .st-hint{font-size:11px;color:var(--cr3);margin-top:12px;line-height:1.5;}
 .st-hint b{color:var(--ou2);}
-.acoes-card{background:linear-gradient(135deg,rgba(217,117,96,.08),rgba(217,117,96,.02));border:1px solid rgba(217,117,96,.3);padding:16px;}
-.acoes-tit{font-size:11px;letter-spacing:2px;color:var(--vermelho-c);text-transform:uppercase;margin-bottom:12px;font-weight:600;}
-.acao-item{padding:10px 12px;background:var(--bg2);border:1px solid var(--oud2);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-left:3px solid var(--vermelho-c);}
-.acao-texto{font-size:12px;color:var(--cr);line-height:1.4;flex:1;}
-.acao-texto b{color:var(--ou2);}
-.acao-btn{font-size:9px;letter-spacing:1px;color:var(--cr3);text-transform:uppercase;background:rgba(255,255,255,.04);padding:5px 10px;border:1px solid var(--oud2);cursor:pointer;font-family:inherit;white-space:nowrap;}
 
 /* VENDAS */
 .snap-card{background:linear-gradient(135deg,rgba(201,168,76,.06),rgba(201,168,76,.02));border:1px solid var(--oud);padding:18px;margin-bottom:18px;position:relative;}
@@ -395,6 +389,10 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .demo-legenda b{color:var(--ou2);}
 
 /* ─── Badge de pendências no header ─── */
+/* usados pela Central de Alertas (aba Vendas) */
+.acao-item{padding:10px 12px;background:var(--bg2);border:1px solid var(--oud2);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-left:3px solid var(--vermelho-c);}
+.acao-texto{font-size:12px;color:var(--cr);line-height:1.4;flex:1;}
+.acao-texto b{color:var(--ou2);}
 .pend-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,80,.15);border:1px solid rgba(255,107,80,.4);color:var(--vermelho-c);padding:5px 11px;border-radius:14px;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:600;cursor:pointer;margin-left:10px;transition:transform .15s;}
 .pend-badge:hover{transform:scale(1.05);}
 .pend-badge .num{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;line-height:1;}
@@ -883,11 +881,6 @@ body{zoom:1.1;}
   </div>
   <div class="conf-grid" id="conf-grid" style="margin-bottom:18px;"></div>
 
-  <div class="acoes-card">
-    <div class="acoes-tit">⚠ 3 ações sugeridas pra você hoje</div>
-    <div id="acoes-lista"></div>
-  </div>
-
   <style>
   .cob-sec{margin-top:8px;}
   .cob-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:12px;}
@@ -966,7 +959,6 @@ async function carregarCoberturas(){
   // e refaz pendências/ações — cobertura já definida deixa de ser cobrada
   if(typeof renderPresenca==='function' && typeof presencaCardData==='function') renderPresenca(presencaCardData());
   if(typeof renderPendencias==='function') renderPendencias();
-  if(typeof renderAcoes==='function') renderAcoes();
 }
 async function cobrir(sel,id,nome){
   const v=sel.value; window._cob=window._cob||{}; window._cob[id]=v;
@@ -976,7 +968,6 @@ async function cobrir(sel,id,nome){
   // reflete no card "Quem está na loja Hoje" e tira a pendência da lista
   if(typeof renderPresenca==='function' && typeof presencaCardData==='function') renderPresenca(presencaCardData());
   if(typeof renderPendencias==='function') renderPendencias();
-  if(typeof renderAcoes==='function') renderAcoes();
   if(!DB) return;
   try{ await DB.collection('ls_coberturas').doc(id).set({cobre:v,ausente:nome,inicio:a.inicio||'',fim:a.fim||'',por:'Jhennifer',atualizadoEm:new Date().toISOString()},{merge:true}); }
   catch(e){ console.warn('cobrir',e); }
@@ -2355,7 +2346,7 @@ async function carregarDadosReais(){
     window._rel=R;
     renderAtualizacoes(lastSale);
     window._lastSale=lastSale; window._cur=cur;
-    _safe('destaques',renderDestaques); _safe('alertas',renderAlertas); _safe('acoes',renderAcoes); _safe('comparativos',renderComparativos);
+    _safe('destaques',renderDestaques); _safe('alertas',renderAlertas); _safe('comparativos',renderComparativos);
     carregarHistoricoAno();
     const _tm=metas?CATS.reduce((a,c)=>a+Number(metas[c.id]||0),0):0;
     VENDS.forEach(v=>{ const p=PESSOAS[v]; if(!p) return;
@@ -2559,32 +2550,6 @@ function renderMelhorias(){
   }).join('')+'</div>';
 }
 function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function renderAcoes(){
-  const host=document.getElementById('acoes-lista'); if(!host) return;
-  const acoes=[]; const b=new Date(); const hoje=new Date(b.getFullYear(),b.getMonth(),b.getDate());
-  (window._ausentes||[]).forEach(a=>{ if(!a.nome||a.nome==='?') return;
-    if(window._cob&&window._cob[_cobId(a.nome,a.inicio)]) return; // cobertura já definida — não cobra de novo
-    const mot=a.mot?a.mot.txt.toLowerCase():'folga';
-    acoes.push({p:1,txt:'🌴 <b class="nome-clic" onclick="abrirFicha(\''+a.nome+'\')">'+a.nome+'</b> está de '+mot+(a.ate?' até '+fmtData(a.ate):'')+' — organize a cobertura',btn:'Cobrir',act:"var g=document.getElementById('cob-grid');if(g)g.scrollIntoView({behavior:'smooth',block:'center'})"});
-  });
-  const ls=window._lastSale||{};
-  VENDS.forEach(v=>{ if(v==='Jhennifer'||!ls[v])return; const d=atrasoDias(ls[v]);
-    if(d>=2) acoes.push({p:2,txt:'<b class="nome-clic" onclick="abrirFicha(\''+v+'\')">'+v+'</b> está há '+d+' dias sem lançar vendas',btn:'Enviar mensagem',act:"abrirFluxoFalar('"+v+"','vendas')"});
-  });
-  ['Yuri','Edson'].forEach(n=>{ const p=PESSOAS[n]; if(p&&/atrasad/i.test(p.statusTxt||'')) acoes.push({p:2,txt:'<b class="nome-clic" onclick="abrirFicha(\''+n+'\')">'+n+'</b> · '+p.statusTxt,btn:'Enviar mensagem',act:"abrirFluxoFalar('"+n+"','geral')"}); });
-  Object.keys(EQUIPE_INFO).forEach(n=>{ const info=EQUIPE_INFO[n]; if(!info||!info.nasc)return; const pt=String(info.nasc).split('-'); if(pt.length<3)return;
-    let prox=new Date(hoje.getFullYear(),(+pt[1])-1,+pt[2]); if(prox<hoje)prox=new Date(hoje.getFullYear()+1,(+pt[1])-1,+pt[2]);
-    const diff=Math.round((prox-hoje)/86400000);
-    if(diff>=0&&diff<=7) acoes.push({p:3,txt:'🎂 Aniversário de <b class="nome-clic" onclick="abrirFicha(\''+n+'\')">'+n+'</b> '+(diff===0?'é hoje':diff===1?'amanhã':'em '+diff+' dias'),btn:'Organizar',act:""});
-  });
-  acoes.sort((x,y)=>x.p-y.p);
-  const tit=document.querySelector('.acoes-tit');
-  if(!acoes.length){ if(tit)tit.innerHTML='✓ Nenhuma ação urgente agora'; host.innerHTML='<div class="acao-item"><div class="acao-texto">Tudo em dia por aqui.</div></div>'; return; }
-  const top=acoes.slice(0,5);
-  if(tit)tit.innerHTML='⚠ '+top.length+' aç'+(top.length===1?'ão sugerida':'ões sugeridas')+' pra você hoje';
-  host.innerHTML=top.map(a=>'<div class="acao-item"><div class="acao-texto">'+a.txt+'</div>'+(a.btn?'<button class="acao-btn" onclick="'+a.act.replace(/"/g,'&quot;')+'">'+a.btn+'</button>':'')+'</div>').join('');
-}
 
 function atrasoDias(iso){
   // Regra idêntica ao painel de Metas: a referência é o último dia útil ANTES de hoje
@@ -3205,7 +3170,8 @@ async function carregarStatusEquipe(){
     });
     if(PESSOAS['Gustavo']){ if(rota>0){PESSOAS['Gustavo'].status='ok';PESSOAS['Gustavo'].statusTxt='Em rota · '+rota+(rota>1?' entregas':' entrega');} else {PESSOAS['Gustavo'].status='ok';PESSOAS['Gustavo'].statusTxt='Sem entrega ativa';} }
     if(PESSOAS['Edson']){ if(env>0){PESSOAS['Edson'].status='warn';PESSOAS['Edson'].statusTxt=env+(env>1?' envios atrasados':' envio atrasado');} else {PESSOAS['Edson'].status='ok';PESSOAS['Edson'].statusTxt='Envios em dia';} }
-    renderAcoes();
+    // status do Yuri/Edson mudou -> a lista "Pra você resolver" precisa refazer
+    if(typeof renderPendencias==='function') renderPendencias();
   }catch(e){ console.warn('carregarStatusEquipe',e); }
 }
 
@@ -3230,7 +3196,6 @@ async function carregarPresenca(){
     renderEventos();
     renderPendencias();
     carregarCoberturas();
-    renderAcoes();
     window._hoje.aus=ausentes.length;
     atualizarStatusHoje();
     if(typeof aplicarFotos==='function') aplicarFotos();
@@ -3258,6 +3223,20 @@ function renderPendencias(){
     const per=(l.inicio>hoje?'sai amanhã, ':'')+m.txt.toLowerCase()+' de '+fmtData(l.inicio)+' até '+fmtData(l.fim);
     its.push({ico:'🌴',txt:'Organizar a cobertura de <b class="nome-clic" onclick="abrirFicha(\''+nome+'\')">'+nome+'</b> ('+per+')',btn:'Cobertura',act:"var g=document.getElementById('cob-grid');if(g)g.scrollIntoView({behavior:'smooth',block:'center'})"});
   });
+  // vendas atrasadas — a vendedora lança o dia anterior, então 2+ dias úteis
+  // sem lançar já é cobrança (a Jhennifer vende no salão e não lança, fica fora)
+  const _ls=window._lastSale||{};
+  (typeof VENDS!=='undefined'?VENDS:[]).forEach(v=>{
+    if(v==='Jhennifer'||!_ls[v]) return;
+    const dias=atrasoDias(_ls[v]);
+    if(dias>=2) its.push({ico:'💰',txt:'<b class="nome-clic" onclick="abrirFicha(\''+v+'\')">'+v+'</b> está há <b>'+dias+' dias</b> sem lançar vendas',btn:'Enviar mensagem',act:"abrirFluxoFalar('"+v+"','vendas')"});
+  });
+  // estoque e e-commerce com pendência marcada no card da equipe
+  ['Yuri','Edson'].forEach(n=>{
+    const pe=(typeof PESSOAS!=='undefined')?PESSOAS[n]:null;
+    if(pe && /atrasad/i.test(pe.statusTxt||'')) its.push({ico:'⏳',txt:'<b class="nome-clic" onclick="abrirFicha(\''+n+'\')">'+n+'</b> · '+pe.statusTxt,btn:'Enviar mensagem',act:"abrirFluxoFalar('"+n+"','geral')"});
+  });
+
   if(window._avalPend>0){
     its.push({ico:'⭐',txt:'Fazer a avaliação de <b>'+window._avalPend+' colaborador'+(window._avalPend>1?'es':'')+'</b> · '+(window._avalMesLabel||'mês anterior'),btn:'Avaliar',act:"var b=document.querySelectorAll('.tabnav-btn')[2]; abrirTab('rh',b); if(window.abrirRh)abrirRh('avaliacoes');"});
   }
@@ -3273,6 +3252,17 @@ function renderPendencias(){
     const quando = x.meses===null?'ainda não registrou nenhuma <b>1:1</b>':('faz <b>'+x.meses+' meses</b> sem <b>1:1</b>');
     its.push({ico:'🗣️',txt:'Você '+quando+' com <b class="nome-clic" onclick="abrirFicha(\''+x.n+'\')">'+x.n+'</b>',btn:'Fazer 1:1',act:"abrirPauta('"+x.n+"')"});
   });
+  // aniversário da semana entra por último — é lembrete, não cobrança
+  const _hj=new Date(); const _h0=new Date(_hj.getFullYear(),_hj.getMonth(),_hj.getDate());
+  Object.keys(typeof EQUIPE_INFO!=='undefined'?EQUIPE_INFO:{}).forEach(n=>{
+    const info=EQUIPE_INFO[n]; if(!info||!info.nasc) return;
+    const pt=String(info.nasc).split('-'); if(pt.length<3) return;
+    let prox=new Date(_h0.getFullYear(),(+pt[1])-1,+pt[2]);
+    if(prox<_h0) prox=new Date(_h0.getFullYear()+1,(+pt[1])-1,+pt[2]);
+    const dif=Math.round((prox-_h0)/86400000);
+    if(dif>=0&&dif<=7) its.push({ico:'🎂',txt:'Aniversário de <b class="nome-clic" onclick="abrirFicha(\''+n+'\')">'+n+'</b> '+(dif===0?'é <b>hoje</b>':dif===1?'é <b>amanhã</b>':'em <b>'+dif+' dias</b>'),btn:'',act:''});
+  });
+
   if(!its.length){ el.style.display='none'; return; }
   el.style.display='';
   el.innerHTML='<div class="pend-tit">⚡ Pra você resolver</div>'+its.map(i=>'<div class="pend-item"><span class="pend-ico">'+i.ico+'</span><span class="pend-txt">'+i.txt+'</span>'+(i.btn?'<button class="pend-btn" onclick="'+i.act.replace(/"/g,'&quot;')+'">'+i.btn+'</button>':'')+'</div>').join('');
@@ -3506,7 +3496,6 @@ async function salvarStatus(){
   if(typeof renderCalendario==='function') renderCalendario(window._lancItems);
   if(typeof renderAusenciasMes==='function') renderAusenciasMes(window._lancItems);
   if(typeof renderEventos==='function') renderEventos();
-  if(typeof renderAcoes==='function') renderAcoes();
   if(typeof atualizarStatusHoje==='function'){ window._hoje.aus=dados.length; atualizarStatusHoje(); }
 }
 function renderAniversarios(){
