@@ -959,7 +959,61 @@ async function carregarCoberturas(){
   // e refaz pendências/ações — cobertura já definida deixa de ser cobrada
   if(typeof renderPresenca==='function' && typeof presencaCardData==='function') renderPresenca(presencaCardData());
   if(typeof renderPendencias==='function') renderPendencias();
+  publicarEscala();
 }
+// ════════════════════════════════════════════════════════════════
+//  ESCALA DA EQUIPE · versão higienizada de lancamentos
+//
+//  lancamentos é RH: carrega CPF, salário e atestado, e as regras do
+//  Firestore só liberam pra diretoria + Ávia + Jhennifer. Está certo
+//  assim, então o time NUNCA lê essa coleção.
+//
+//  Aqui a gente publica um resumo em ls_escala, que o time pode ler:
+//  só nome, período e quem cobre. Férias e folga vão com o nome certo,
+//  porque são escala. Atestado e falta viram só "Ausente" — o time
+//  precisa saber que a pessoa não vem pra se organizar, mas motivo de
+//  saúde e questão disciplinar não são da conta de todo mundo.
+// ════════════════════════════════════════════════════════════════
+let _escalaPub = null;   // hash do que já foi publicado — evita reescrever igual
+
+function escalaSanitizada(){
+  const d = new Date();
+  const desde = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';
+  const cob = window._cob || {};
+  return (window._lancItems||[])
+    .filter(l => l.inicio && l.fim && l.fim >= desde)
+    .map(function(l){
+      const nome = FUNC_MAP[l.funcId] || '?';
+      if(nome === '?') return null;
+      const cls = motivoDe(l.tipo).cls;
+      // atestado e falta saem daqui como "ausente", sem o motivo
+      const tipo = (cls === 'ferias' || cls === 'folga') ? cls : 'ausente';
+      const rot  = tipo === 'ferias' ? 'Férias' : tipo === 'folga' ? 'Folga' : 'Ausente';
+      return { nome:nome, tipo:tipo, rotulo:rot, inicio:l.inicio, fim:l.fim,
+               cobre: cob[_cobId(nome, l.inicio)] || '' };
+    })
+    .filter(Boolean)
+    .sort((a,b) => a.inicio.localeCompare(b.inicio) || a.nome.localeCompare(b.nome,'pt-BR'));
+}
+
+async function publicarEscala(){
+  if(!DB) return;
+  // sem acesso aos lançamentos (ou ainda carregando) a lista viria vazia e
+  // apagaria a escala boa que já está publicada — melhor não escrever nada
+  if(window._lancErro || !Array.isArray(window._lancItems)) return;
+  try{
+    const itens = escalaSanitizada();
+    const hash  = JSON.stringify(itens);
+    if(hash === _escalaPub) return;          // nada mudou, não gasta escrita
+    await DB.collection('ls_escala').doc('_publicado').set({
+      items: itens,
+      atualizadoEm: new Date().toISOString(),
+      por: window._usuario || ''
+    });
+    _escalaPub = hash;
+  }catch(e){ console.warn('publicarEscala', e); }
+}
+
 async function cobrir(sel,id,nome){
   const v=sel.value; window._cob=window._cob||{}; window._cob[id]=v;
   const a=ausenciasPraCobrir().filter(x=>x.nome===nome)[0]||{};
@@ -971,6 +1025,7 @@ async function cobrir(sel,id,nome){
   if(!DB) return;
   try{ await DB.collection('ls_coberturas').doc(id).set({cobre:v,ausente:nome,inicio:a.inicio||'',fim:a.fim||'',por:'Jhennifer',atualizadoEm:new Date().toISOString()},{merge:true}); }
   catch(e){ console.warn('cobrir',e); }
+  publicarEscala();
 }
 </script>
 
