@@ -3214,17 +3214,63 @@ async function carregarStatusEquipe(){
     const ts=await DB.collection('ls_tarefas').get();
     ts.forEach(d=>{const t=d.data(); if(t.prazo&&t.prazo<now){ (t.paraEmails||[]).forEach(e=>{ if((t.feitosPor||[]).indexOf(e)<0) atras[e]=(atras[e]||0)+1; }); }});
     const yt=atras['yurilorettoscarpa@gmail.com']||0;
-    if(PESSOAS['Yuri']){ if(yt>0){PESSOAS['Yuri'].status='warn';PESSOAS['Yuri'].statusTxt=yt+(yt>1?' tarefas atrasadas':' tarefa atrasada');} else {PESSOAS['Yuri'].status='ok';PESSOAS['Yuri'].statusTxt='Tarefas em dia';} }
-    const hojeStr=new Date().toISOString().slice(0,10);
-    let rota=0, env=0;
+    if(PESSOAS['Yuri']){
+      PESSOAS['Yuri'].cobrar = yt>0;
+      if(yt>0){PESSOAS['Yuri'].status='warn';PESSOAS['Yuri'].statusTxt=yt+(yt>1?' tarefas atrasadas':' tarefa atrasada');}
+      else {PESSOAS['Yuri'].status='ok';PESSOAS['Yuri'].statusTxt='Tarefas em dia';}
+    }
+
+    // ─── Gustavo: entregas ───
+    // toISOString() é UTC; depois das 21h em Goiânia (UTC-3) ele já
+    // devolveria o dia seguinte. _hojeStr() é a data local.
+    const hojeStr=_hojeStr();
+    let rota=0;
     const es=await DB.collection('entregas').get();
     es.forEach(d=>{const e=d.data();
       const entg=((e.entregador||'')+' '+(e.entregadorNome||'')+' '+(e.entregadorId||''));
       if(e.status==='em_rota' && /gustavo/i.test(entg)) rota++;
-      if(e.status==='aguardando'){ const dt=String(e.dataEntrega||e.agendada||e.data||'').slice(0,10); if(dt && dt<hojeStr) env++; }
     });
     if(PESSOAS['Gustavo']){ if(rota>0){PESSOAS['Gustavo'].status='ok';PESSOAS['Gustavo'].statusTxt='Em rota · '+rota+(rota>1?' entregas':' entrega');} else {PESSOAS['Gustavo'].status='ok';PESSOAS['Gustavo'].statusTxt='Sem entrega ativa';} }
-    if(PESSOAS['Edson']){ if(env>0){PESSOAS['Edson'].status='warn';PESSOAS['Edson'].statusTxt=env+(env>1?' envios atrasados':' envio atrasado');} else {PESSOAS['Edson'].status='ok';PESSOAS['Edson'].statusTxt='Envios em dia';} }
+
+    // ─── Edson: envios ───
+    // Vinha da coleção 'entregas', contando status 'aguardando' vencido —
+    // que é fila de ENTREGA do Gustavo. 'aguardando' nem existe no fluxo de
+    // envio, que vai novo → embalado → em_rota → despachado. Resultado: se
+    // as entregas atrasavam o Edson levava a culpa, e se ele tinha envio
+    // parado de verdade não aparecia nada.
+    // Pendência dele = o que ainda não saiu: 'novo' (esperando embalagem)
+    // e 'embalado' (pronto, mas ainda na loja).
+    try{
+      let pend=0, atrasado=0;
+      const vs=await DB.collection('envios').get();
+      vs.forEach(d=>{ const v=d.data();
+        if(v.status!=='novo' && v.status!=='embalado') return;
+        pend++;
+        const dt=String(v.dataEnvio||v.data||'').slice(0,10);
+        if(dt && dt<hojeStr) atrasado++;
+      });
+      if(PESSOAS['Edson']){
+        // Só cobra o que passou do dia. Envio pendente é o fluxo normal do
+        // dia — pintar de amarelo todo dia viraria ruído e a supervisora
+        // aprenderia a ignorar o card.
+        PESSOAS['Edson'].cobrar = atrasado>0;
+        if(atrasado>0){
+          PESSOAS['Edson'].status='warn';
+          PESSOAS['Edson'].statusTxt=atrasado+(atrasado>1?' envios atrasados':' envio atrasado')
+            +(pend>atrasado?' · '+pend+' na fila':'');
+        }else if(pend>0){
+          PESSOAS['Edson'].status='ok';
+          PESSOAS['Edson'].statusTxt=pend+(pend>1?' envios na fila':' envio na fila');
+        }else{
+          PESSOAS['Edson'].status='ok';
+          PESSOAS['Edson'].statusTxt='Envios em dia';
+        }
+      }
+    }catch(e){
+      // sem acesso a envios: não inventa status, só não cobra
+      console.warn('envios do Edson',e);
+      if(PESSOAS['Edson']) PESSOAS['Edson'].cobrar=false;
+    }
     // status do Yuri/Edson mudou -> a lista "Pra você resolver" precisa refazer
     if(typeof renderPendencias==='function') renderPendencias();
   }catch(e){ console.warn('carregarStatusEquipe',e); }
@@ -3287,9 +3333,11 @@ function renderPendencias(){
     if(dias>=2) its.push({ico:'💰',txt:'<b class="nome-clic" onclick="abrirFicha(\''+v+'\')">'+v+'</b> está há <b>'+dias+' dias</b> sem lançar vendas',btn:'Enviar mensagem',act:"abrirFluxoFalar('"+v+"','vendas')"});
   });
   // estoque e e-commerce com pendência marcada no card da equipe
+  // usa o sinalizador que carregarStatusEquipe define, e não o TEXTO do
+  // status: casar /atrasad/i quebraria calado no dia em que a palavra mudasse
   ['Yuri','Edson'].forEach(n=>{
     const pe=(typeof PESSOAS!=='undefined')?PESSOAS[n]:null;
-    if(pe && /atrasad/i.test(pe.statusTxt||'')) its.push({ico:'⏳',txt:'<b class="nome-clic" onclick="abrirFicha(\''+n+'\')">'+n+'</b> · '+pe.statusTxt,btn:'Enviar mensagem',act:"abrirFluxoFalar('"+n+"','geral')"});
+    if(pe && pe.cobrar) its.push({ico:'⏳',txt:'<b class="nome-clic" onclick="abrirFicha(\''+n+'\')">'+n+'</b> · '+pe.statusTxt,btn:'Enviar mensagem',act:"abrirFluxoFalar('"+n+"','geral')"});
   });
 
   if(window._avalPend>0){
