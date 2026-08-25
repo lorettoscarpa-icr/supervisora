@@ -435,6 +435,9 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .rot-col.hoje .rot-dow{color:var(--ou2);font-weight:600;}
 .rot-num{font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--cr3);}
 .rot-col.hoje .rot-num{color:var(--ou2);}
+.rot-cheg{background:transparent;border:1px solid transparent;color:var(--cr3);font-size:11px;line-height:1;padding:2px 4px;cursor:pointer;border-radius:2px;opacity:.35;transition:.15s;}
+.rot-cheg:hover{opacity:1;border-color:var(--oud2);}
+.rot-cheg.on{opacity:1;border-color:var(--ou);background:rgba(212,180,90,.15);}
 .rot-itens{padding:8px;display:flex;flex-direction:column;gap:6px;flex:1;}
 
 .rot-card{background:var(--bgd);border:1px solid var(--oud2);border-left:2px solid var(--ou3);border-radius:2px;padding:8px 9px;cursor:grab;transition:border-color .15s,transform .1s;}
@@ -1429,7 +1432,10 @@ async function cobrir(sel,id,nome){
 <div class="tab-content" id="tab-rotina">
   <div class="rot-topo">
     <div class="slbl" style="margin:0;border:none;padding:0;">Rotina da equipe</div>
-    <span class="rot-sem" id="rot-sem"></span>
+    <span style="display:flex;align-items:center;gap:12px;">
+      <button class="bt-ouro-mini" id="rot-imp" style="display:none" onclick="rotImportarYuri()">Carregar cronograma do Yuri</button>
+      <span class="rot-sem" id="rot-sem"></span>
+    </span>
   </div>
 
   <div class="rot-pessoas" id="rot-pessoas"></div>
@@ -1463,6 +1469,10 @@ async function cobrir(sel,id,nome){
     <div class="modal-sub" id="rot-m-sub"></div>
     <div class="campo"><label>O que é</label><input type="text" id="rot-f-txt" placeholder="Ex.: Conferir vitrine e repor manequins"></div>
     <div class="campo"><label>De quem</label><select class="ev-inp" id="rot-f-quem"></select></div>
+    <div class="campo"><label>Vale em que dia</label><select class="ev-inp" id="rot-f-modelo">
+      <option value="normal">Dia normal</option>
+      <option value="chegada">Só em dia de chegada de sapato</option>
+    </select></div>
     <div class="campo"><label>Horário (opcional)</label><input type="text" id="rot-f-hora" placeholder="Ex.: 09:00 — deixe vazio se não tem hora certa"></div>
     <div class="campo"><label>Turno</label><select class="ev-inp" id="rot-f-turno">
       <option value="dia">Durante o dia</option><option value="manha">Manhã</option><option value="tarde">Tarde</option>
@@ -1597,6 +1607,71 @@ async function rotLimpar(){
   }
 }
 
+// ════════════════════════════════════════════════════════════════
+//  Cronograma do Yuri, transcrito dos 4 PDFs do estoquista.
+//  Botão de carga única: some assim que ele tiver qualquer rotina.
+//  Onde o PDF não dava o dia, usei a sugestão do próprio documento
+//  ("defina dias fixos: planilhas seg/qui, caixas ter/sex"). Está
+//  marcado abaixo — é arrastar na tela pra mudar.
+// ════════════════════════════════════════════════════════════════
+const UTEIS=[1,2,3,4,5];
+const ROT_YURI=[
+  // ── dia normal, Seg a Sex (08:40 às 17:40) ──
+  {h:'08:40', t:'Verificar calçada / varrer',                 d:[2,3,5]},   // PDF: Ter, Qua, Sex
+  {h:'09:00', t:'Abrir as portas da loja',                    d:UTEIS},
+  {h:'09:10', t:'Preparar o café',                            d:UTEIS},
+  {h:'09:30', t:'Guardar sapatos do salão de vendas',         d:UTEIS},
+  {h:'11:00', t:'Guardar sapatos das entregas',               d:UTEIS},
+  {h:'12:00', t:'Verificar, identificar e organizar defeitos',d:[1,4]},     // 2x/sem — dia escolhido por mim
+  {h:'12:30', t:'Verificar sapatos para arrumação',           d:[2,5]},     // 2x/sem — dia escolhido por mim
+  {h:'13:00', t:'Arrumação geral de itens bagunçados',        d:UTEIS},
+  {h:'13:30', t:'Almoço',                                     d:UTEIS},
+  {h:'16:00', t:'Verificação final / pendências do dia',      d:UTEIS},
+  {h:'17:40', t:'Saída',                                      d:UTEIS},
+
+  // ── variáveis da tarde, com dia fixo (o PDF pede que se defina) ──
+  {h:'14:30', t:'Ajustar planilha das meninas',               d:[1,4]},     // sugestão do próprio PDF
+  {h:'14:30', t:'Mexer / reorganizar caixas do estoque',      d:[2,5]},     // sugestão do próprio PDF
+  {h:'14:30', t:'Reposição de vitrine / prateleiras',         d:[3]},       // PDF: quarta
+  {h:'15:30', t:'Saída para compras da loja (avisar antes)',  d:[4]},       // 1x/sem — dia escolhido por mim
+  {h:'16:20', t:'Amassar e descartar caixas',                 d:[2,5]},     // 2x/sem — dia escolhido por mim
+
+  // ── sábado (09:00 às 13:00, sem almoço) ──
+  {h:'09:10', t:'Abrir as portas da loja',                    d:[6]},
+  {h:'09:30', t:'Guardar sapatos – salão de vendas',          d:[6]},
+  {h:'10:00', t:'Guardar sapatos – entregas',                 d:[6]},
+  {h:'11:00', t:'Tempo livre / demandas extras',              d:[6]},
+  {h:'13:00', t:'Saída',                                      d:[6]},
+
+  // ── dia de chegada de sapato: substitui o dia normal quando marcado ──
+  {h:'08:40', t:'Verificar calçada / varrer',                 d:UTEIS, m:'chegada'},
+  {h:'09:00', t:'Abrir as portas da loja',                    d:UTEIS, m:'chegada'},
+  {h:'09:10', t:'Preparar o café',                            d:UTEIS, m:'chegada'},
+  {h:'09:30', t:'Retirar os sapatos (desembalar)',            d:UTEIS, m:'chegada'},
+  {h:'10:00', t:'Conferir sapatos e lançar no sistema',       d:UTEIS, m:'chegada'},
+  {h:'11:00', t:'Etiquetar todas as caixas',                  d:UTEIS, m:'chegada'},
+  {h:'12:30', t:'Abrir espaço no estoque',                    d:UTEIS, m:'chegada'},
+  {h:'13:30', t:'Almoço',                                     d:UTEIS, m:'chegada'},
+  {h:'14:30', t:'Guardar sapatos – salão de vendas',          d:UTEIS, m:'chegada'},
+  {h:'15:30', t:'Guardar sapatos – entregas',                 d:UTEIS, m:'chegada'},
+  {h:'16:30', t:'Organizar sapatos com defeito',              d:UTEIS, m:'chegada'},
+  {h:'16:40', t:'Resolver demandas aleatórias do dia',        d:UTEIS, m:'chegada'},
+  {h:'17:40', t:'Saída',                                      d:UTEIS, m:'chegada'}
+];
+
+async function rotImportarYuri(){
+  if(!DB) return;
+  if(!confirm('Carregar o cronograma do Yuri (' + ROT_YURI.length + ' atividades) a partir dos PDFs?')) return;
+  const bt=document.getElementById('rot-imp'); if(bt){ bt.disabled=true; bt.textContent='Carregando…'; }
+  try{
+    for(const r of ROT_YURI){
+      await DB.collection('ls_rotina').add({tipo:'fixa', pessoa:'Yuri', texto:r.t, hora:r.h,
+        turno:'dia', modelo:r.m||'normal', dias:r.d.slice(), criadoEm:Date.now(), criadoPor:window._usuario||''});
+    }
+  }catch(e){ console.warn('rotImportarYuri',e); alert('Não consegui carregar tudo. Veja o que entrou e tente de novo.'); }
+  if(bt){ bt.disabled=false; bt.textContent='Carregar cronograma do Yuri'; }
+}
+
 function carregarRotina(){
   if(!DB || _unsubRot) return;
   _unsubRot = DB.collection('ls_rotina').onSnapshot(function(snap){
@@ -1608,12 +1683,35 @@ function carregarRotina(){
   });
 }
 
+// Dia de chegada de sapato troca o roteiro inteiro do dia e não tem data
+// fixa — chega quando chega. Então a rotina guarda os dois roteiros, e a
+// supervisora marca o dia: as fixas de 'chegada' entram no lugar das
+// normais, sem ninguém apagar e recadastrar nada.
+function rotModelo(pessoa, iso){
+  const m=ROT_ITENS.filter(function(r){ return r.tipo==='modelodia'&&r.pessoa===pessoa&&r.data===iso; })[0];
+  return m ? m.modelo : 'normal';
+}
+async function rotMarcarChegada(iso){
+  if(!DB) return;
+  const atual=rotModelo(ROT_QUEM, iso);
+  const doc=ROT_ITENS.filter(function(r){ return r.tipo==='modelodia'&&r.pessoa===ROT_QUEM&&r.data===iso; })[0];
+  try{
+    if(atual==='chegada'){ if(doc) await DB.collection('ls_rotina').doc(doc.id).delete(); }
+    else if(doc) await DB.collection('ls_rotina').doc(doc.id).update({modelo:'chegada'});
+    else await DB.collection('ls_rotina').add({tipo:'modelodia', pessoa:ROT_QUEM, data:iso, modelo:'chegada', criadoEm:Date.now()});
+  }catch(e){ console.warn('rotMarcarChegada',e); alert('Não consegui marcar agora.'); }
+}
+
 // o que vale numa data, já com as coberturas daquele dia aplicadas
 function rotDoDia(iso, dow){
   const ov={}; ROT_ITENS.forEach(function(r){ if(r.tipo==='realoc'&&r.data===iso) ov[r.refId]=r.pessoa; });
   return ROT_ITENS.filter(function(i){
     if(i.tipo==='extra') return i.data===iso;
-    if(i.tipo==='fixa')  return (i.dias||[]).indexOf(dow)>=0;
+    if(i.tipo==='fixa'){
+      if((i.dias||[]).indexOf(dow)<0) return false;
+      // cada dono tem o seu modelo naquela data; a cobertura não muda isso
+      return (i.modelo||'normal') === rotModelo(i.pessoa, iso);
+    }
     return false;
   }).map(function(i){
     const dono=ov[i.id];
@@ -1636,6 +1734,10 @@ function renderRotina(){
   const sem=document.getElementById('rot-sem');
   if(sem) sem.textContent='Semana de '+rotBr(semana[0].iso)+' a '+rotBr(semana[5].iso);
 
+  // atalho de primeira carga: some assim que o Yuri tiver qualquer rotina
+  const imp=document.getElementById('rot-imp');
+  if(imp) imp.style.display = (ROT_QUEM==='Yuri' && !ROT_ITENS.some(function(i){ return i.tipo==='fixa'&&i.pessoa==='Yuri'; })) ? '' : 'none';
+
   // dias da semana já resolvidos, reaproveitados pelas duas listas abaixo
   const dias=semana.map(function(d){ return {d:d, itens:rotDoDia(d.iso,d.dow)}; });
 
@@ -1654,7 +1756,10 @@ function renderRotina(){
     const meus=x.itens.filter(function(i){ return i.pessoa===ROT_QUEM; }).sort(rotOrdena);
     return '<div class="rot-col'+(x.d.iso===hoje?' hoje':'')+'" data-dow="'+x.d.dow+'" data-iso="'+x.d.iso+'"'
       + ' ondragover="rotSobre(event,this)" ondragleave="this.classList.remove(\'alvo\')" ondrop="rotSolta(event,this)">'
-      + '<div class="rot-col-hd"><span class="rot-dow">'+ROT_DOW[x.d.dow]+'</span><span class="rot-num">'+String(x.d.dia).padStart(2,'0')+'</span></div>'
+      + '<div class="rot-col-hd"><span class="rot-dow">'+ROT_DOW[x.d.dow]+'</span>'
+        + '<span style="display:flex;align-items:center;gap:6px;">'
+          + (x.d.dow!==0&&x.d.dow!==6 ? '<button class="rot-cheg'+(rotModelo(ROT_QUEM,x.d.iso)==='chegada'?' on':'')+'" title="Dia de chegada de sapato" onclick="rotMarcarChegada(\''+x.d.iso+'\')">📦</button>' : '')
+          + '<span class="rot-num">'+String(x.d.dia).padStart(2,'0')+'</span></span></div>'
       + '<div class="rot-itens">'
         + (meus.length?meus.map(rotCard).join(''):'<div class="rot-vazio">—</div>')
         + '<button class="rot-add" onclick="rotNova('+x.d.dow+',\''+x.d.iso+'\')" title="Adicionar neste dia">+</button>'
@@ -1761,6 +1866,7 @@ function rotNova(dow, iso){
   document.getElementById('rot-f-txt').value='';
   document.getElementById('rot-f-hora').value='';
   document.getElementById('rot-f-turno').value='dia';
+  document.getElementById('rot-f-modelo').value = iso&&rotModelo(ROT_QUEM,iso)==='chegada' ? 'chegada' : 'normal';
   rotPreencheQuem('rot-f-quem', ROT_QUEM);
   rotRenderFDias(); abrirModal('mov-rot');
 }
@@ -1774,6 +1880,7 @@ function rotEditar(id){
   document.getElementById('rot-f-txt').value=it.texto||'';
   document.getElementById('rot-f-hora').value=it.hora||'';
   document.getElementById('rot-f-turno').value=it.turno||'dia';
+  document.getElementById('rot-f-modelo').value=it.modelo||'normal';
   rotPreencheQuem('rot-f-quem', it.pessoa);
   rotRenderFDias(); abrirModal('mov-rot');
 }
@@ -1799,14 +1906,15 @@ async function rotSalvar(){
   const hora=(document.getElementById('rot-f-hora').value||'').trim();
   const pessoa=document.getElementById('rot-f-quem').value;
   const turno=document.getElementById('rot-f-turno').value;
+  const modelo=document.getElementById('rot-f-modelo').value;
   try{
     if(_rotEdit){
       const it=ROT_ITENS.filter(function(x){ return x.id===_rotEdit; })[0]||{};
       const campos={texto:texto, pessoa:pessoa, turno:turno, hora:hora};
-      if(it.tipo==='fixa') campos.dias=_rotFDias.slice();
+      if(it.tipo==='fixa'){ campos.dias=_rotFDias.slice(); campos.modelo=modelo; }
       await DB.collection('ls_rotina').doc(_rotEdit).update(campos);
     }else if(_rotFDias.length){
-      await DB.collection('ls_rotina').add({tipo:'fixa', texto:texto, pessoa:pessoa, turno:turno, hora:hora, dias:_rotFDias.slice(), criadoEm:Date.now(), criadoPor:window._usuario||''});
+      await DB.collection('ls_rotina').add({tipo:'fixa', texto:texto, pessoa:pessoa, turno:turno, hora:hora, modelo:modelo, dias:_rotFDias.slice(), criadoEm:Date.now(), criadoPor:window._usuario||''});
     }else{
       await DB.collection('ls_rotina').add({tipo:'extra', texto:texto, pessoa:pessoa, turno:turno, hora:hora, data:_rotISO, criadoEm:Date.now(), criadoPor:window._usuario||''});
     }
