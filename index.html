@@ -407,6 +407,53 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .fab-item:hover{background:var(--ou);color:var(--bg);border-color:var(--ou);}
 .fab-item-ico{font-size:14px;}
 
+.bt-ouro-mini{background:var(--ou);border:1px solid var(--ou);color:var(--bg);padding:9px 15px;font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;font-weight:600;cursor:pointer;border-radius:2px;}
+.bt-ouro-mini:hover{background:var(--ou2);border-color:var(--ou2);}
+
+/* ─── ROTINA DA EQUIPE ─── */
+.rot-topo{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.rot-dias{display:flex;gap:3px;flex-wrap:wrap;}
+.rot-dia{background:transparent;border:1px solid var(--oud2);color:var(--cr3);padding:8px 14px;font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;border-radius:2px;}
+.rot-dia:hover{border-color:var(--oud);color:var(--cr2);}
+.rot-dia.on{background:var(--ou);border-color:var(--ou);color:var(--bg);font-weight:600;}
+.rot-dia .hj{display:block;font-size:7.5px;letter-spacing:.8px;opacity:.7;margin-top:2px;}
+
+.rot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;align-items:start;}
+.rot-col{background:var(--bg2);border:1px solid var(--oud2);border-radius:3px;display:flex;flex-direction:column;transition:border-color .15s,background .15s;}
+.rot-col.alvo{border-color:var(--ou);background:rgba(212,180,90,.07);}
+.rot-col.ausente{opacity:.62;}
+.rot-col-hd{display:flex;align-items:center;gap:10px;padding:12px 13px;border-bottom:1px solid var(--oud2);}
+.rot-av{width:32px;height:32px;border-radius:50%;background:var(--bgd);border:1px solid var(--oud);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--ou);flex:none;}
+.rot-quem{flex:1;min-width:0;}
+.rot-nome{font-size:14px;color:var(--cr);font-weight:600;line-height:1.2;}
+.rot-func{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.1px;text-transform:uppercase;color:var(--cr3);margin-top:3px;}
+.rot-qtd{font-family:'DM Mono',monospace;font-size:9px;color:var(--cr3);flex:none;}
+.rot-fora{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--vermelho);border:1px solid var(--vermelho);padding:2px 6px;border-radius:2px;}
+
+.rot-itens{padding:9px;display:flex;flex-direction:column;gap:7px;min-height:64px;}
+.rot-card{background:var(--bgd);border:1px solid var(--oud2);border-left:2px solid var(--ou3);border-radius:2px;padding:9px 10px;cursor:grab;transition:border-color .15s,transform .1s;}
+.rot-card:hover{border-color:var(--oud);}
+.rot-card:active{cursor:grabbing;}
+.rot-card.arrastando{opacity:.4;transform:scale(.97);}
+.rot-card.extra{border-left-color:var(--azul);border-style:dashed;}
+.rot-card.movido{border-left-color:var(--verde);}
+.rot-card-txt{font-size:13px;color:var(--cr2);line-height:1.4;word-break:break-word;}
+.rot-card-pe{display:flex;align-items:center;gap:7px;margin-top:6px;flex-wrap:wrap;}
+.rot-turno{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--cr3);border:1px solid var(--oud2);padding:2px 6px;border-radius:2px;}
+.rot-selo{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:2px;}
+.rot-selo.extra{color:var(--azul);border:1px solid var(--azul);}
+.rot-selo.movido{color:var(--verde);border:1px solid var(--verde);}
+.rot-acts{margin-left:auto;display:flex;gap:2px;}
+.rot-ic{background:transparent;border:none;color:var(--cr3);cursor:pointer;font-size:12px;line-height:1;padding:2px 4px;font-family:inherit;}
+.rot-ic:hover{color:var(--ou2);}
+.rot-ic.del:hover{color:var(--vermelho);}
+.rot-vazio{color:var(--cr3);font-size:12px;font-style:italic;padding:10px 4px;text-align:center;}
+.rot-add{background:transparent;border:1px dashed var(--oud2);color:var(--cr3);width:100%;padding:8px;font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:2px;}
+.rot-add:hover{border-color:var(--ou);color:var(--ou2);}
+
+.rot-ajuda{margin-top:22px;border-top:1px solid var(--oud2);padding-top:14px;font-size:12px;color:var(--cr3);line-height:1.6;}
+.rot-ajuda b{color:var(--cr2);font-weight:500;}
+
 /* ─── Modal overlay genérico ─── */
 .mov{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
 .mov.open{display:flex;}
@@ -788,6 +835,7 @@ body{zoom:1.1;}
   <button class="tabnav-btn active" onclick="abrirTab('hoje',this)">Hoje</button>
   <button class="tabnav-btn" onclick="abrirTab('vendas',this)">Vendas</button>
   <button class="tabnav-btn" onclick="abrirTab('rh',this)">RH</button>
+  <button class="tabnav-btn" onclick="abrirTab('rotina',this)">Rotina</button>
   <button class="tabnav-btn" onclick="abrirTab('relatorio',this)">Relatório</button>
   <button class="tabnav-btn" onclick="abrirTab('melhorias',this)">Melhorias</button>
 </div>
@@ -1367,6 +1415,24 @@ async function cobrir(sel,id,nome){
   <div id="mel-lista"><div class="rel-load">Carregando ideias…</div></div>
 </div>
 
+<!-- ROTINA -->
+<div class="tab-content" id="tab-rotina">
+  <div class="slbl">Rotina da equipe</div>
+
+  <div class="rot-topo">
+    <div class="rot-dias" id="rot-dias"></div>
+    <button class="bt-ouro-mini" onclick="rotNova()">+ Atividade de hoje</button>
+  </div>
+
+  <div class="rot-grid" id="rot-grid"></div>
+
+  <div class="rot-ajuda">
+    <b>Arraste um cartão</b> de uma pessoa para outra para realocar — o painel pergunta se vale só para o dia
+    escolhido ou daqui pra frente. No celular, use o <b>⇄</b> do cartão.<br>
+    <b>Atividade de hoje</b> é provisória: existe só no dia em que foi criada e some sozinha depois.
+  </div>
+</div>
+
 </main>
 
 <!-- ╔════════════ FLOATING ACTION BUTTON ════════════╗ -->
@@ -1378,6 +1444,49 @@ async function cobrir(sel,id,nome){
 <button class="fab" id="fab" onclick="toggleFab()" title="Ações rápidas">+</button>
 
 <!-- ╔════════════ MODAL: FICHA DE PESSOA ════════════╗ -->
+<!-- Rotina · nova/editar atividade -->
+<div class="mov" id="mov-rot">
+  <div class="modal-box" style="max-width:520px;">
+    <button class="modal-close" onclick="fecharModal('mov-rot')">&times;</button>
+    <div class="modal-tit" id="rot-m-tit">Nova atividade</div>
+    <div class="modal-sub" id="rot-m-sub"></div>
+    <div class="campo"><label>O que é</label><input type="text" id="rot-f-txt" placeholder="Ex.: Conferir vitrine e repor manequins"></div>
+    <div class="campo"><label>De quem</label><select class="ev-inp" id="rot-f-quem"></select></div>
+    <div class="campo"><label>Turno</label><select class="ev-inp" id="rot-f-turno">
+      <option value="dia">Durante o dia</option><option value="manha">Manhã</option><option value="tarde">Tarde</option>
+    </select></div>
+    <div class="campo">
+      <label>Quando se repete</label>
+      <div class="rot-dias" id="rot-f-dias"></div>
+      <div class="dica">Marque os dias da semana. Sem nenhum marcado, vale só no dia escolhido — é a atividade provisória.</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="bt" onclick="fecharModal('mov-rot')">Cancelar</button>
+      <button class="bt ouro" onclick="rotSalvar()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rotina · realocar -->
+<div class="mov" id="mov-rot-mov">
+  <div class="modal-box" style="max-width:460px;">
+    <button class="modal-close" onclick="fecharModal('mov-rot-mov')">&times;</button>
+    <div class="modal-tit">Passar para outra pessoa</div>
+    <div class="modal-sub" id="rot-mv-sub"></div>
+    <div class="campo" id="rot-mv-quem-c"><label>Para quem</label><select class="ev-inp" id="rot-mv-quem"></select></div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
+      <button class="bt" style="text-align:left;padding:13px 15px;" onclick="rotMover('hoje')">
+        <b style="color:var(--ou2);">Só neste dia</b><br>
+        <span style="font-family:Barlow,sans-serif;font-size:11.5px;letter-spacing:0;text-transform:none;color:var(--cr3);">Cobertura pontual. A rotina normal volta no próximo.</span>
+      </button>
+      <button class="bt" style="text-align:left;padding:13px 15px;" onclick="rotMover('sempre')">
+        <b style="color:var(--ou2);">Daqui pra frente</b><br>
+        <span style="font-family:Barlow,sans-serif;font-size:11.5px;letter-spacing:0;text-transform:none;color:var(--cr3);">A responsabilidade muda de dono de vez.</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="mov" id="modal-ficha">
   <div class="modal-box">
     <button class="modal-close" onclick="fecharModal('modal-ficha')">×</button>
@@ -1432,6 +1541,258 @@ const PESSOAS = {
 
 /* ocorrências agora vêm do Firestore (ls_ocorrencias) — ver carregarOcorrencias() */
 
+
+// ════════════════════════════════════════════════════════════════
+//  ROTINA DA EQUIPE
+//
+//  Três tipos de documento na mesma coleção (ls_rotina):
+//   fixa   {texto, pessoa, dias:[1..6], turno}   → a rotina de sempre
+//   extra  {texto, pessoa, data:'AAAA-MM-DD', turno} → provisória, do dia
+//   realoc {refId, data, pessoa}                 → cobertura de UM dia
+//
+//  Realocar "daqui pra frente" só muda o campo pessoa da fixa. Realocar
+//  "só neste dia" grava um realoc, e a fixa fica intacta — no dia
+//  seguinte a rotina volta ao dono original sem ninguém desfazer nada.
+// ════════════════════════════════════════════════════════════════
+const ROT_DOW  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const ROT_TURNO= {dia:'Durante o dia', manha:'Manhã', tarde:'Tarde'};
+const ROT_ORD  = {manha:0, dia:1, tarde:2};
+let ROT_ITENS=[], ROT_DATA=null, _rotEdit=null, _rotMv=null, _rotFDias=[], _unsubRot=null;
+
+function rotHoje(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function rotD(iso){ const p=String(iso||'').split('-'); return new Date(+p[0],(+p[1])-1,+p[2]); }
+// segunda a sábado da semana da data escolhida (domingo a loja não abre)
+function rotSemana(iso){
+  const d=rotD(iso), dow=d.getDay();
+  const seg=new Date(d); seg.setDate(d.getDate()-(dow===0?6:dow-1));
+  return Array.from({length:6},(_,i)=>{ const x=new Date(seg); x.setDate(seg.getDate()+i);
+    return {iso:x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'), dow:x.getDay(), dia:x.getDate()}; });
+}
+function rotEquipe(){ return Object.keys(PESSOAS).filter(n=>n!=='Jhennifer'); }
+
+// Cobertura de um dia e atividade provisória são de uso único: cumprido o
+// dia, viram lixo. Sem isto elas se acumulariam pra sempre e seriam
+// recarregadas a cada leitura. Roda uma vez por sessão, depois da primeira
+// leitura, e só olha o que já passou de 60 dias — recente fica, pra
+// supervisora poder rever a semana.
+let _rotLimpou=false;
+async function rotLimpar(){
+  if(_rotLimpou || !DB) return; _rotLimpou=true;
+  const lim=new Date(); lim.setDate(lim.getDate()-60);
+  const corte=lim.getFullYear()+'-'+String(lim.getMonth()+1).padStart(2,'0')+'-'+String(lim.getDate()).padStart(2,'0');
+  const velhas=ROT_ITENS.filter(function(i){ return (i.tipo==='realoc'||i.tipo==='extra') && i.data && i.data<corte; });
+  for(const v of velhas){
+    try{ await DB.collection('ls_rotina').doc(v.id).delete(); }
+    catch(e){ console.warn('rotLimpar',e); break; }   // sem permissão: para, não insiste
+  }
+}
+
+function carregarRotina(){
+  if(!DB || _unsubRot) return;
+  _unsubRot = DB.collection('ls_rotina').onSnapshot(function(snap){
+    ROT_ITENS = snap.docs.map(function(d){ const o=d.data(); o.id=d.id; return o; });
+    renderRotina();
+    rotLimpar();
+  }, function(e){ console.warn('rotina',e);
+    const g=document.getElementById('rot-grid');
+    if(g) g.innerHTML='<div class="rot-vazio">Não consegui ler a rotina agora. ('+esc(e.code||e.message)+')</div>';
+  });
+}
+
+// o que vale na data escolhida, já com as coberturas do dia aplicadas
+function rotDoDia(iso){
+  const dow=rotD(iso).getDay();
+  const ov={}; ROT_ITENS.forEach(function(r){ if(r.tipo==='realoc'&&r.data===iso) ov[r.refId]=r.pessoa; });
+  return ROT_ITENS.filter(function(i){
+    if(i.tipo==='extra') return i.data===iso;
+    if(i.tipo==='fixa')  return (i.dias||[]).indexOf(dow)>=0;
+    return false;
+  }).map(function(i){
+    const dono=ov[i.id];
+    return Object.assign({}, i, {pessoa: dono||i.pessoa, movidoDe: dono?i.pessoa:null});
+  });
+}
+
+function renderRotina(){
+  const iso = ROT_DATA || rotHoje();
+  ROT_DATA = iso;
+
+  // seletor de dias da semana
+  const hoje=rotHoje();
+  document.getElementById('rot-dias').innerHTML = rotSemana(iso).map(function(d){
+    return '<button class="rot-dia'+(d.iso===iso?' on':'')+'" onclick="rotDia(\''+d.iso+'\')">'
+         + ROT_DOW[d.dow]+' '+String(d.dia).padStart(2,'0')
+         + (d.iso===hoje?'<span class="hj">hoje</span>':'')+'</button>';
+  }).join('');
+
+  const itens = rotDoDia(iso);
+  const ausentes = {}; (window._ausentes||[]).forEach(function(a){ ausentes[a.nome]=a; });
+
+  document.getElementById('rot-grid').innerHTML = rotEquipe().map(function(nome){
+    const p = PESSOAS[nome]||{};
+    const meus = itens.filter(function(i){ return i.pessoa===nome; })
+                      .sort(function(a,b){ return (ROT_ORD[a.turno]||1)-(ROT_ORD[b.turno]||1); });
+    const fora = ausentes[nome];
+    return '<div class="rot-col'+(fora?' ausente':'')+'" data-quem="'+esc(nome)+'"'
+      + ' ondragover="rotSobre(event,this)" ondragleave="this.classList.remove(\'alvo\')" ondrop="rotSolta(event,this)">'
+      + '<div class="rot-col-hd">'
+        + '<div class="rot-av" data-foto="'+esc(nome)+'">'+esc(nome[0])+'</div>'
+        + '<div class="rot-quem"><div class="rot-nome">'+esc(nome)+'</div>'
+          + '<div class="rot-func">'+esc(p.funcao||'')+'</div></div>'
+        + (fora ? '<span class="rot-fora">fora</span>' : '<span class="rot-qtd">'+meus.length+'</span>')
+      + '</div>'
+      + '<div class="rot-itens">'
+        + (meus.length ? meus.map(rotCard).join('') : '<div class="rot-vazio">Sem rotina neste dia.</div>')
+        + '<button class="rot-add" onclick="rotNova(\''+esc(nome)+'\')">+ Atividade</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+  if(typeof aplicarFotos==='function') aplicarFotos();
+}
+
+function rotCard(i){
+  const cls = i.tipo==='extra' ? ' extra' : (i.movidoDe ? ' movido' : '');
+  return '<div class="rot-card'+cls+'" draggable="true" data-id="'+esc(i.id)+'"'
+    + ' ondragstart="rotPega(event,\''+esc(i.id)+'\')" ondragend="this.classList.remove(\'arrastando\')">'
+    + '<div class="rot-card-txt">'+esc(i.texto)+'</div>'
+    + '<div class="rot-card-pe">'
+      + '<span class="rot-turno">'+esc(ROT_TURNO[i.turno]||'Durante o dia')+'</span>'
+      + (i.tipo==='extra' ? '<span class="rot-selo extra">só hoje</span>' : '')
+      + (i.movidoDe ? '<span class="rot-selo movido">de '+esc(i.movidoDe)+'</span>' : '')
+      + '<span class="rot-acts">'
+        + '<button class="rot-ic" title="Passar para outra pessoa" onclick="rotAbrirMover(\''+esc(i.id)+'\')">⇄</button>'
+        + (i.tipo==='fixa' ? '<button class="rot-ic" title="Editar" onclick="rotEditar(\''+esc(i.id)+'\')">✎</button>' : '')
+        + '<button class="rot-ic del" title="Excluir" onclick="rotExcluir(\''+esc(i.id)+'\')">×</button>'
+      + '</span>'
+    + '</div></div>';
+}
+
+function rotDia(iso){ ROT_DATA=iso; renderRotina(); }
+
+/* ── arrastar e soltar ── */
+let _rotDrag=null;
+function rotPega(ev,id){
+  _rotDrag=id;
+  ev.dataTransfer.effectAllowed='move';
+  try{ ev.dataTransfer.setData('text/plain',id); }catch(e){}
+  const el=ev.target.closest('.rot-card'); if(el) el.classList.add('arrastando');
+}
+function rotSobre(ev,col){ if(!_rotDrag) return; ev.preventDefault(); ev.dataTransfer.dropEffect='move'; col.classList.add('alvo'); }
+function rotSolta(ev,col){
+  ev.preventDefault(); col.classList.remove('alvo');
+  const id=_rotDrag||ev.dataTransfer.getData('text/plain'); _rotDrag=null;
+  if(!id) return;
+  const para=col.getAttribute('data-quem');
+  const it=rotDoDia(ROT_DATA).filter(function(x){ return x.id===id; })[0];
+  if(!it || it.pessoa===para) return;   // soltou na mesma coluna: nada a fazer
+  rotAbrirMover(id, para);
+}
+
+/* ── realocar ── */
+function rotAbrirMover(id, para){
+  const it=rotDoDia(ROT_DATA).filter(function(x){ return x.id===id; })[0];
+  if(!it) return;
+  _rotMv={id:id, de:it.pessoa, tipo:it.tipo};
+  const sel=document.getElementById('rot-mv-quem');
+  sel.innerHTML=rotEquipe().filter(function(n){ return n!==it.pessoa; })
+    .map(function(n){ return '<option value="'+esc(n)+'"'+(n===para?' selected':'')+'>'+esc(n)+'</option>'; }).join('');
+  // veio do arrasto: o destino já está definido, não faz escolher de novo
+  document.getElementById('rot-mv-quem-c').style.display = para ? 'none' : '';
+  document.getElementById('rot-mv-sub').innerHTML =
+    '<b style="color:var(--cr2);">'+esc(it.texto)+'</b><br>Hoje é de <b style="color:var(--ou2);">'+esc(it.pessoa)+'</b>'
+    + (para?', passando para <b style="color:var(--ou2);">'+esc(para)+'</b>':'')+'.';
+  abrirModal('mov-rot-mov');
+}
+
+async function rotMover(quando){
+  if(!_rotMv || !DB) return;
+  const para=document.getElementById('rot-mv-quem').value;
+  const {id, tipo}=_rotMv;
+  try{
+    if(quando==='sempre' || tipo==='extra'){
+      // atividade provisória não tem "daqui pra frente": ela só existe hoje
+      await DB.collection('ls_rotina').doc(id).update({pessoa:para});
+      // some a cobertura do dia, senão ela sobrescreveria o novo dono
+      const ov=ROT_ITENS.filter(function(r){ return r.tipo==='realoc'&&r.refId===id&&r.data===ROT_DATA; })[0];
+      if(ov) await DB.collection('ls_rotina').doc(ov.id).delete();
+    }else{
+      const ov=ROT_ITENS.filter(function(r){ return r.tipo==='realoc'&&r.refId===id&&r.data===ROT_DATA; })[0];
+      if(ov) await DB.collection('ls_rotina').doc(ov.id).update({pessoa:para});
+      else   await DB.collection('ls_rotina').add({tipo:'realoc', refId:id, data:ROT_DATA, pessoa:para, criadoEm:Date.now()});
+    }
+    fecharModal('mov-rot-mov'); _rotMv=null;
+  }catch(e){ console.warn('rotMover',e); alert('Não consegui mover agora.'); }
+}
+
+/* ── criar e editar ── */
+function rotNova(quem){
+  _rotEdit=null; _rotFDias=[];
+  document.getElementById('rot-m-tit').textContent='Nova atividade';
+  document.getElementById('rot-m-sub').textContent='Sem dia marcado, ela vale só em '+rotBr(ROT_DATA)+' e some depois.';
+  document.getElementById('rot-f-txt').value='';
+  document.getElementById('rot-f-turno').value='dia';
+  rotPreencheQuem('rot-f-quem', quem);
+  rotRenderFDias();
+  abrirModal('mov-rot');
+}
+function rotEditar(id){
+  const it=ROT_ITENS.filter(function(x){ return x.id===id; })[0]; if(!it) return;
+  _rotEdit=id; _rotFDias=(it.dias||[]).slice();
+  document.getElementById('rot-m-tit').textContent='Editar atividade';
+  document.getElementById('rot-m-sub').textContent='Muda a rotina de sempre, em todos os dias marcados.';
+  document.getElementById('rot-f-txt').value=it.texto||'';
+  document.getElementById('rot-f-turno').value=it.turno||'dia';
+  rotPreencheQuem('rot-f-quem', it.pessoa);
+  rotRenderFDias();
+  abrirModal('mov-rot');
+}
+function rotPreencheQuem(id, sel){
+  document.getElementById(id).innerHTML=rotEquipe()
+    .map(function(n){ return '<option value="'+esc(n)+'"'+(n===sel?' selected':'')+'>'+esc(n)+'</option>'; }).join('');
+}
+function rotRenderFDias(){
+  document.getElementById('rot-f-dias').innerHTML=[1,2,3,4,5,6].map(function(d){
+    return '<button type="button" class="rot-dia'+(_rotFDias.indexOf(d)>=0?' on':'')+'" onclick="rotToggleDia('+d+')">'+ROT_DOW[d]+'</button>';
+  }).join('');
+}
+function rotToggleDia(d){
+  const k=_rotFDias.indexOf(d);
+  if(k>=0) _rotFDias.splice(k,1); else _rotFDias.push(d);
+  rotRenderFDias();
+}
+function rotBr(iso){ const p=String(iso||'').split('-'); return p.length===3?p[2]+'/'+p[1]:iso; }
+
+async function rotSalvar(){
+  if(!DB) return;
+  const texto=(document.getElementById('rot-f-txt').value||'').trim();
+  if(!texto){ alert('Escreva o que é a atividade.'); return; }
+  const pessoa=document.getElementById('rot-f-quem').value;
+  const turno=document.getElementById('rot-f-turno').value;
+  try{
+    if(_rotEdit){
+      await DB.collection('ls_rotina').doc(_rotEdit).update({texto:texto, pessoa:pessoa, turno:turno, dias:_rotFDias.slice()});
+    }else if(_rotFDias.length){
+      await DB.collection('ls_rotina').add({tipo:'fixa', texto:texto, pessoa:pessoa, turno:turno, dias:_rotFDias.slice(), criadoEm:Date.now(), criadoPor:window._usuario||''});
+    }else{
+      await DB.collection('ls_rotina').add({tipo:'extra', texto:texto, pessoa:pessoa, turno:turno, data:ROT_DATA, criadoEm:Date.now(), criadoPor:window._usuario||''});
+    }
+    fecharModal('mov-rot'); _rotEdit=null;
+  }catch(e){ console.warn('rotSalvar',e); alert('Não consegui salvar agora.'); }
+}
+
+async function rotExcluir(id){
+  const it=ROT_ITENS.filter(function(x){ return x.id===id; })[0]; if(!it || !DB) return;
+  const aviso = it.tipo==='fixa'
+    ? 'Excluir "'+it.texto+'" da rotina?\n\nSai de todos os dias, pra sempre.'
+    : 'Excluir "'+it.texto+'"?';
+  if(!confirm(aviso)) return;
+  try{
+    await DB.collection('ls_rotina').doc(id).delete();
+    // leva junto as coberturas que apontavam pra ela, senão viram lixo órfão
+    const orfas=ROT_ITENS.filter(function(r){ return r.tipo==='realoc'&&r.refId===id; });
+    for(const o of orfas){ try{ await DB.collection('ls_rotina').doc(o.id).delete(); }catch(_){ } }
+  }catch(e){ console.warn('rotExcluir',e); alert('Não consegui excluir agora.'); }
+}
 
 // ════════ Tabnav principal ════════
 function abrirTab(t, btn){
@@ -2171,7 +2532,7 @@ if(AUTH){
     SESSION = user;
     ROLE = (email === GESTOR_EMAIL) ? 'gestor' : 'supervisora';
     aplicarSessao(ROLE);
-    carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); carregarEventos(); carregarPautasResumo(); montarSeletorMesPauta(); });
+    carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); carregarEventos(); carregarPautasResumo(); montarSeletorMesPauta(); carregarRotina(); });
   });
 }
 
@@ -3292,6 +3653,7 @@ async function carregarPresenca(){
     }catch(_){ window._presencaOv={}; }
     const ausentes=presencaCardData();
     window._ausentes=ausentes; renderPresenca(ausentes);
+    if(typeof renderRotina==='function' && ROT_ITENS.length) renderRotina();  // marca quem está fora
     renderCalendario(items);
     renderAusenciasMes(items);
     renderEventos();
