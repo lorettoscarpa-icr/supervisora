@@ -1825,13 +1825,32 @@ const ROT_SEED={
   {h:'14:10', t:'Conferir as entregas da tarde e planejar a 2ª rota',             d:TODOS},
   {h:'14:20', t:'Avisar os clientes no WhatsApp e compartilhar localização em tempo real', d:TODOS},
   {h:'14:30', t:'Organizar o baú e conferir nome + localização de cada pedido',   d:TODOS},
-  {h:'14:40', t:'2ª rota de entregas',                                            d:TODOS}
+  {h:'14:40', t:'2ª rota de entregas',                                            d:TODOS},
+  // Rota que acaba cedo é rota que cabe mais uma: em vez de esperar o
+  // relógio, ele pergunta às vendedoras se entrou entrega nova.
+  {h:'11:50', t:'Acabou a rota antes do almoço? Falar com as vendedoras — se entrou entrega, dá pra sair mais uma', d:TODOS},
+  {h:'18:00', t:'Encerrar as entregas do dia',                                    d:TODOS},
+  {h:'18:05', t:'Falar com as vendedoras: se entrou entrega, ainda cabe uma última rota antes das 19h', d:TODOS},
+  {h:'19:00', t:'Saída',                                                          d:TODOS}
  ]
 };
 
+// Cronograma pode ser atualizado depois de já carregado. Compara por
+// horário + texto e traz só o que falta, então o botão pode ser clicado de
+// novo sem duplicar nada.
+function rotFaltando(quem){
+  const seed=ROT_SEED[quem]||[];
+  const tem={};
+  ROT_ITENS.forEach(function(i){
+    if(i.tipo==='fixa'&&i.pessoa===quem) tem[(i.hora||'')+'|'+(i.texto||'')+'|'+(i.modelo||'normal')]=1;
+  });
+  return seed.filter(function(r){ return !tem[(r.h||'')+'|'+r.t+'|'+(r.m||'normal')]; });
+}
+
 async function rotImportar(){
   if(!DB || !ROT_SEED[ROT_QUEM]) return;
-  const lista=ROT_SEED[ROT_QUEM], quem=ROT_QUEM;
+  const quem=ROT_QUEM, lista=rotFaltando(quem);
+  if(!lista.length) return;
   if(!confirm('Carregar o cronograma d'+(ROT_FEM.indexOf(quem)>=0?'a ':'o ')+quem+' ('+lista.length+' atividades)?')) return;
   const bt=document.getElementById('rot-imp'); if(bt){ bt.disabled=true; bt.textContent='Carregando…'; }
   try{
@@ -1908,9 +1927,11 @@ function renderRotina(){
   // atalho de primeira carga: some assim que o Yuri tiver qualquer rotina
   const imp=document.getElementById('rot-imp');
   if(imp){
-    const podeImp = ROT_SEED[ROT_QUEM] && !ROT_ITENS.some(function(i){ return i.tipo==='fixa'&&i.pessoa===ROT_QUEM; });
-    imp.style.display = podeImp ? '' : 'none';
-    if(podeImp) imp.textContent='Carregar cronograma d'+(ROT_FEM.indexOf(ROT_QUEM)>=0?'a ':'o ')+ROT_QUEM;
+    const falta = ROT_SEED[ROT_QUEM] ? rotFaltando(ROT_QUEM).length : 0;
+    const tinha = ROT_ITENS.some(function(i){ return i.tipo==='fixa'&&i.pessoa===ROT_QUEM; });
+    imp.style.display = falta ? '' : 'none';
+    imp.disabled=false;
+    if(falta) imp.textContent = (tinha ? 'Completar cronograma ('+falta+' nova'+(falta>1?'s':'')+')' : 'Carregar cronograma d'+(ROT_FEM.indexOf(ROT_QUEM)>=0?'a ':'o ')+ROT_QUEM);
   }
 
   // dias da semana já resolvidos, reaproveitados pelas duas listas abaixo
