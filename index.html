@@ -524,6 +524,11 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .rot-add{background:transparent;border:1px dashed var(--oud2);color:var(--cr3);width:100%;padding:6px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;cursor:pointer;border-radius:2px;margin-top:auto;}
 .rot-add:hover{border-color:var(--ou);color:var(--ou2);}
 
+.rot-av-cx{margin-top:14px;background:var(--bg2);border:1px solid var(--oud2);border-radius:3px;padding:12px 14px;}
+.rot-av-t{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cr3);margin-bottom:10px;}
+.rot-av-g{display:flex;gap:8px;flex-wrap:wrap;}
+.rot-av-c{background:var(--bgd);border:1px solid var(--oud2);border-left:2px solid var(--azul);border-radius:2px;padding:8px 10px;max-width:340px;}
+.rot-av-f{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--azul);margin-bottom:4px;}
 .rot-ajuda{margin-top:22px;border-top:1px solid var(--oud2);padding-top:14px;font-size:12px;color:var(--cr3);line-height:1.65;}
 .rot-ajuda b{color:var(--cr2);font-weight:500;}
 .rot-vazio{color:var(--cr3);font-size:11.5px;font-style:italic;padding:8px 2px;text-align:center;}
@@ -1557,6 +1562,7 @@ async function cobrir(sel,id,nome){
 
   <div class="rot-pessoas" id="rot-pessoas"></div>
   <div class="rot-semana" id="rot-semana"></div>
+  <div id="rot-avulsas"></div>
 
   <div class="rot-ajuda">
     <b>Arraste um cartão</b> entre os dias para mudar quando a atividade acontece — vale daqui pra frente,
@@ -1596,8 +1602,14 @@ async function cobrir(sel,id,nome){
     </select></div>
     <div class="campo">
       <label>Quando se repete</label>
+      <select class="ev-inp" id="rot-f-rep" onchange="rotRepMudou()" style="margin-bottom:9px;">
+        <option value="dias">Nos dias marcados abaixo</option>
+        <option value="semanal">1x por semana, sem dia certo</option>
+        <option value="mensal">1x por mês</option>
+        <option value="necessidade">Conforme necessidade</option>
+      </select>
       <div class="rot-dias" id="rot-f-dias"></div>
-      <div class="dica">Marque os dias da semana. Sem nenhum marcado, vale só no dia escolhido — é a atividade provisória.</div>
+      <div class="dica" id="rot-f-dica">Marque os dias da semana. Sem nenhum marcado, vale só no dia escolhido — é a atividade provisória.</div>
     </div>
     <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
       <button class="bt" onclick="fecharModal('mov-rot')">Cancelar</button>
@@ -1696,6 +1708,7 @@ const PESSOAS = {
 const ROT_DOW  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const ROT_TURNO= {dia:'Durante o dia', manha:'Manhã', tarde:'Tarde'};
 const ROT_ORD  = {manha:0, dia:1, tarde:2};
+const ROT_FREQ = {mensal:'1x por mês', semanal:'1x por semana', necessidade:'Conforme necessidade'};
 let ROT_ITENS=[], ROT_QUEM=null, _rotEdit=null, _rotMv=null, _rotFDias=[], _unsubRot=null;
 
 function rotHoje(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -1757,6 +1770,9 @@ const ROT_SEED={
   {h:'14:30', t:'Reposição de vitrine / prateleiras',         d:[3]},       // PDF: quarta
   {h:'15:30', t:'Saída para compras da loja (avisar antes)',  d:[4]},       // 1x/sem — dia escolhido por mim
   {h:'16:20', t:'Amassar e descartar caixas',                 d:[2,5]},     // 2x/sem — dia escolhido por mim
+  // sem dia no PDF: "conforme necessidade" / "conforme chegada"
+  {v:'necessidade', t:'Guardar caixas do Edson (Mercado Livre) + lançar no sistema + troca de caixa'},
+  {v:'necessidade', t:'Guardar sapatos no salão de vendas (tarde)'},
   {h:'09:10', t:'Abrir as portas da loja',                    d:[6]},
   {h:'09:30', t:'Guardar sapatos – salão de vendas',          d:[6]},
   {h:'10:00', t:'Guardar sapatos – entregas',                 d:[6]},
@@ -1846,7 +1862,8 @@ const ROT_SEED={
   {h:'09:00', t:'Organizar os totens da entrada, sempre com novidades',           d:TODOS},
   {h:'09:00', t:'Verificar a vitrine externa e os totens giratórios (pedir ajuda das vendedoras)', d:TODOS},
   {h:'09:00', t:'Conferir o uniforme completo: camisa para dentro, calça preta alfaiataria, sneaker preto e relógio', d:TODOS},
-  {h:'09:00', t:'Acompanhar o checklist diário e garantir que tudo foi executado', d:TODOS}
+  {h:'09:00', t:'Acompanhar o checklist diário e garantir que tudo foi executado', d:TODOS},
+  {v:'mensal', t:'Reunião Mensal de Metas, contribuindo com ideias estratégicas'}
  ],
  'Ialey':[
   {h:'09:00', t:'Limpar com álcool e organizar o caixa',                          d:TODOS},
@@ -1881,7 +1898,13 @@ function rotFaltando(quem){
   ROT_ITENS.forEach(function(i){
     if(i.tipo==='fixa'&&i.pessoa===quem) tem[(i.hora||'')+'|'+(i.texto||'')+'|'+(i.modelo||'normal')]=1;
   });
-  return seed.filter(function(r){ return !tem[(r.h||'')+'|'+r.t+'|'+(r.m||'normal')]; });
+  ROT_ITENS.forEach(function(i){
+    if(i.tipo==='avulsa'&&i.pessoa===quem) tem['@'+(i.freq||'')+'|'+(i.texto||'')]=1;
+  });
+  return seed.filter(function(r){
+    return r.v ? !tem['@'+r.v+'|'+r.t]
+               : !tem[(r.h||'')+'|'+r.t+'|'+(r.m||'normal')];
+  });
 }
 
 async function rotImportar(){
@@ -1892,8 +1915,10 @@ async function rotImportar(){
   const bt=document.getElementById('rot-imp'); if(bt){ bt.disabled=true; bt.textContent='Carregando…'; }
   try{
     for(const r of lista){
-      await DB.collection('ls_rotina').add({tipo:'fixa', pessoa:quem, texto:r.t, hora:r.h,
-        turno:'dia', modelo:r.m||'normal', dias:r.d.slice(), criadoEm:Date.now(), criadoPor:window._usuario||''});
+      await DB.collection('ls_rotina').add(r.v
+        ? {tipo:'avulsa', pessoa:quem, texto:r.t, freq:r.v, criadoEm:Date.now(), criadoPor:window._usuario||''}
+        : {tipo:'fixa', pessoa:quem, texto:r.t, hora:r.h, turno:'dia', modelo:r.m||'normal',
+           dias:r.d.slice(), criadoEm:Date.now(), criadoPor:window._usuario||''});
     }
   }catch(e){ console.warn('rotImportar',e); alert('Não consegui carregar tudo. Veja o que entrou e tente de novo.'); }
   if(bt){ bt.disabled=false; }
@@ -1976,7 +2001,8 @@ function renderRotina(){
 
   // seletor de colaborador, com quanto cada um tem na semana
   document.getElementById('rot-pessoas').innerHTML = equipe.map(function(n){
-    const qtd=dias.reduce(function(t,x){ return t+x.itens.filter(function(i){ return i.pessoa===n; }).length; },0);
+    const qtd=dias.reduce(function(t,x){ return t+x.itens.filter(function(i){ return i.pessoa===n; }).length; },0)
+            + ROT_ITENS.filter(function(i){ return i.tipo==='avulsa'&&i.pessoa===n; }).length;
     return '<button class="rot-p'+(n===ROT_QUEM?' on':'')+'" onclick="rotQuem(\''+esc(n)+'\')">'
       + '<span class="rot-p-av" data-foto="'+esc(n)+'">'+esc(n[0])+'</span>'
       + '<span class="rot-p-n">'+esc(n)+'</span>'
@@ -1998,6 +2024,23 @@ function renderRotina(){
         + '<button class="rot-add" onclick="rotNova('+x.d.dow+',\''+x.d.iso+'\')" title="Adicionar neste dia">+</button>'
       + '</div></div>';
   }).join('');
+  // Sem dia certo: mensal, semanal sem dia definido, ou conforme
+  // necessidade. Não cabe em coluna de dia — forçar numa segunda faria
+  // aparecer TODA segunda, que é justamente o que não é.
+  const avulsas=ROT_ITENS.filter(function(i){ return i.tipo==='avulsa'&&i.pessoa===ROT_QUEM; });
+  document.getElementById('rot-avulsas').innerHTML = avulsas.length
+    ? '<div class="rot-av-cx"><div class="rot-av-t">Sem dia certo</div><div class="rot-av-g">'
+      + avulsas.map(function(i){
+          return '<div class="rot-av-c">'
+            + '<div class="rot-av-f">'+esc(ROT_FREQ[i.freq]||'Conforme necessidade')+'</div>'
+            + '<div class="rot-card-txt">'+esc(i.texto)+'</div>'
+            + '<div class="rot-card-pe"><span class="rot-acts">'
+              + '<button class="rot-ic" title="Editar" onclick="rotEditar(\''+esc(i.id)+'\')">✎</button>'
+              + '<button class="rot-ic del" title="Excluir" onclick="rotExcluir(\''+esc(i.id)+'\')">×</button>'
+            + '</span></div></div>';
+        }).join('')
+      + '</div></div>'
+    : '';
   if(typeof aplicarFotos==='function') aplicarFotos();
 }
 
@@ -2100,6 +2143,7 @@ function rotNova(dow, iso){
   document.getElementById('rot-f-hora').value='';
   document.getElementById('rot-f-turno').value='dia';
   document.getElementById('rot-f-modelo').value = iso&&rotModelo(ROT_QUEM,iso)==='chegada' ? 'chegada' : 'normal';
+  document.getElementById('rot-f-rep').value='dias'; rotRepMudou();
   rotPreencheQuem('rot-f-quem', ROT_QUEM);
   rotRenderFDias(); abrirModal('mov-rot');
 }
@@ -2114,12 +2158,21 @@ function rotEditar(id){
   document.getElementById('rot-f-hora').value=it.hora||'';
   document.getElementById('rot-f-turno').value=it.turno||'dia';
   document.getElementById('rot-f-modelo').value=it.modelo||'normal';
+  document.getElementById('rot-f-rep').value = it.tipo==='avulsa' ? (it.freq||'necessidade') : 'dias';
+  rotRepMudou();
   rotPreencheQuem('rot-f-quem', it.pessoa);
   rotRenderFDias(); abrirModal('mov-rot');
 }
 function rotPreencheQuem(id, sel){
   document.getElementById(id).innerHTML=rotEquipe()
     .map(function(n){ return '<option value="'+esc(n)+'"'+(n===sel?' selected':'')+'>'+esc(n)+'</option>'; }).join('');
+}
+function rotRepMudou(){
+  const r=document.getElementById('rot-f-rep').value, dias=r==='dias';
+  document.getElementById('rot-f-dias').style.display = dias?'':'none';
+  document.getElementById('rot-f-dica').textContent = dias
+    ? 'Marque os dias da semana. Sem nenhum marcado, vale só no dia escolhido — é a atividade provisória.'
+    : 'Fica na faixa "Sem dia certo", abaixo da semana, com o aviso da frequência.';
 }
 function rotRenderFDias(){
   document.getElementById('rot-f-dias').innerHTML=[1,2,3,4,5,6].map(function(d){
@@ -2140,12 +2193,18 @@ async function rotSalvar(){
   const pessoa=document.getElementById('rot-f-quem').value;
   const turno=document.getElementById('rot-f-turno').value;
   const modelo=document.getElementById('rot-f-modelo').value;
+  const rep=document.getElementById('rot-f-rep').value;
   try{
     if(_rotEdit){
       const it=ROT_ITENS.filter(function(x){ return x.id===_rotEdit; })[0]||{};
       const campos={texto:texto, pessoa:pessoa, turno:turno, hora:hora};
       if(it.tipo==='fixa'){ campos.dias=_rotFDias.slice(); campos.modelo=modelo; }
+      if(it.tipo==='avulsa') campos.freq=(rep==='dias'?'necessidade':rep);
       await DB.collection('ls_rotina').doc(_rotEdit).update(campos);
+    }else if(rep!=='dias'){
+      // sem dia certo: mensal, semanal solto, ou conforme necessidade
+      await DB.collection('ls_rotina').add({tipo:'avulsa', texto:texto, pessoa:pessoa, freq:rep,
+        criadoEm:Date.now(), criadoPor:window._usuario||''});
     }else if(_rotFDias.length){
       await DB.collection('ls_rotina').add({tipo:'fixa', texto:texto, pessoa:pessoa, turno:turno, hora:hora, modelo:modelo, dias:_rotFDias.slice(), criadoEm:Date.now(), criadoPor:window._usuario||''});
     }else{
