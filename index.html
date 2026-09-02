@@ -410,6 +410,70 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .bt-ouro-mini{background:var(--ou);border:1px solid var(--ou);color:var(--bg);padding:9px 15px;font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;font-weight:600;cursor:pointer;border-radius:2px;}
 .bt-ouro-mini:hover{background:var(--ou2);border-color:var(--ou2);}
 
+/* ─── PDI · Plano de Desenvolvimento Individual ─── */
+.pdi-wrap{display:grid;grid-template-columns:250px 1fr;gap:20px;align-items:start;}
+@media(max-width:820px){.pdi-wrap{grid-template-columns:1fr;}}
+
+.pdi-lista{display:flex;flex-direction:column;gap:5px;}
+.pdi-p{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--oud2);color:var(--cr2);padding:8px 11px;cursor:pointer;border-radius:3px;font-family:inherit;font-size:13px;text-align:left;transition:.15s;}
+.pdi-p:hover{border-color:var(--oud);}
+.pdi-p.on{background:rgba(212,180,90,.14);border-color:var(--ou);color:var(--cr);}
+.pdi-p-av{width:30px;height:30px;border-radius:50%;background:var(--bgd);border:1px solid var(--oud);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--ou);flex:none;overflow:hidden;}
+.pdi-p-i{flex:1;min-width:0;}
+.pdi-p-n{font-weight:600;line-height:1.2;}
+.pdi-p-f{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--cr3);margin-top:2px;}
+.pdi-p-q{font-family:'DM Mono',monospace;font-size:8.5px;color:var(--cr3);flex:none;}
+
+/* a folha: mesma cara do PDF, e é ela que sai na impressão */
+.pdi-folha{background:#f8f5ec;color:#23301a;border:1px solid var(--oud);border-radius:3px;padding:34px 38px;}
+.pdi-cab{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;border-bottom:2px solid #23301a;padding-bottom:14px;margin-bottom:22px;}
+.pdi-marca{font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:4px;text-transform:uppercase;color:#23301a;padding-top:6px;}
+.pdi-tit{font-family:'Playfair Display',serif;font-size:26px;line-height:1.12;text-align:right;color:#23301a;}
+.pdi-lin{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:baseline;margin-bottom:11px;}
+.pdi-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:#5d6b4e;}
+.pdi-in{width:100%;background:transparent;border:none;border-bottom:1px solid #b9c0aa;color:#23301a;font-family:inherit;font-size:14px;padding:4px 2px;}
+.pdi-in:focus{outline:none;border-bottom-color:#8a9470;}
+.pdi-sec{font-family:'Playfair Display',serif;font-size:17px;color:#23301a;margin:24px 0 9px;padding-bottom:5px;border-bottom:1px solid #cdd3bf;}
+.pdi-ta{width:100%;min-height:96px;background:transparent;border:1px solid #cdd3bf;border-radius:2px;color:#23301a;font-family:inherit;font-size:13.5px;line-height:1.6;padding:9px 11px;resize:vertical;}
+.pdi-ta:focus{outline:none;border-color:#8a9470;}
+.pdi-tab{width:100%;border-collapse:collapse;}
+.pdi-tab th{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.3px;text-transform:uppercase;color:#5d6b4e;text-align:left;padding:0 6px 6px;font-weight:400;}
+.pdi-tab td{padding:0 6px 7px;vertical-align:top;}
+.pdi-tab .pdi-in{border:1px solid #cdd3bf;border-radius:2px;padding:7px 9px;}
+.pdi-rm{background:transparent;border:none;color:#9aa389;cursor:pointer;font-size:15px;line-height:1;padding:6px 2px;}
+.pdi-rm:hover{color:#a8452f;}
+.pdi-mais{background:transparent;border:1px dashed #b9c0aa;color:#5d6b4e;padding:7px 12px;font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:2px;margin-top:2px;}
+.pdi-mais:hover{border-color:#8a9470;color:#23301a;}
+
+.pdi-ass{margin-top:26px;padding-top:16px;border-top:1px solid #cdd3bf;}
+.pdi-ass-img{max-width:100%;border:1px solid #cdd3bf;border-radius:2px;display:block;}
+.pdi-drop{border:1px dashed #b9c0aa;border-radius:3px;padding:22px;text-align:center;color:#5d6b4e;font-size:13px;cursor:pointer;}
+.pdi-drop:hover{border-color:#8a9470;background:rgba(0,0,0,.02);}
+
+.pdi-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;}
+.pdi-hist{margin-top:26px;border-top:1px solid var(--oud2);padding-top:14px;}
+.pdi-h-t{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cr3);margin-bottom:10px;}
+.pdi-h-l{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--oud2);font-size:13px;color:var(--cr2);flex-wrap:wrap;}
+.pdi-h-l:first-of-type{border-top:none;}
+.pdi-h-d{font-family:'DM Mono',monospace;font-size:10px;color:var(--ou2);}
+.pdi-h-a{margin-left:auto;display:flex;gap:4px;}
+.pdi-vazio{color:var(--cr3);font-size:12.5px;font-style:italic;}
+
+@media print{
+  body>*{display:none!important;}
+  body>main{display:block!important;}
+  main>*{display:none!important;}
+  main>#tab-rh{display:block!important;}
+  #tab-rh>*{display:none!important;}
+  #tab-rh>#rh-pdi{display:block!important;}
+  #rh-pdi>*{display:none!important;}
+  #rh-pdi .pdi-folha{display:block!important;}
+  .pdi-wrap{display:block!important;}
+  .pdi-folha{border:none;padding:0;background:#fff;}
+  .pdi-in,.pdi-ta{border-color:#999;}
+  .pdi-rm,.pdi-mais,.pdi-drop{display:none!important;}
+}
+
 /* ─── ROTINA DA EQUIPE ─── */
 .rot-topo{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
 .rot-sem{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.3px;text-transform:uppercase;color:var(--cr3);}
@@ -1332,6 +1396,7 @@ async function cobrir(sel,id,nome){
     <button class="rh-subnav-btn active" onclick="abrirRh('calendario',this)">Calendário do mês</button>
     <button class="rh-subnav-btn" onclick="abrirRh('ocorrencias',this)">Ocorrências</button>
     <button class="rh-subnav-btn" onclick="abrirRh('avaliacoes',this)">Avaliações Mensais</button>
+    <button class="rh-subnav-btn" onclick="abrirRh('pdi',this)">Plano de Desenvolvimento</button>
   </div>
 
   <div class="rh-sec active" id="rh-calendario">
@@ -1354,6 +1419,58 @@ async function cobrir(sel,id,nome){
     <button class="oc-novo-btn" onclick="abrirModalRapido('ocorrencia')">+ Nova Ocorrência</button>
     <div class="oc-filtros" id="oc-filtros"></div>
     <div id="oc-lista"><div class="rel-load">Carregando ocorrências…</div></div>
+  </div>
+
+  <div class="rh-sec" id="rh-pdi">
+    <div class="pdi-wrap">
+      <div>
+        <div class="slbl">Colaborador</div>
+        <div class="pdi-lista" id="pdi-lista"></div>
+      </div>
+
+      <div>
+        <div class="pdi-folha" id="pdi-folha">
+          <div class="pdi-cab">
+            <div class="pdi-marca">Loretto Scarpa</div>
+            <div class="pdi-tit">Plano de<br>Desenvolvimento<br>Individual</div>
+          </div>
+
+          <div class="pdi-lin"><span class="pdi-lbl">Funcionário</span><input class="pdi-in" id="pdi-func" readonly></div>
+          <div class="pdi-lin"><span class="pdi-lbl">Supervisor</span><input class="pdi-in" id="pdi-sup"></div>
+          <div class="pdi-lin"><span class="pdi-lbl">Data</span><input class="pdi-in" id="pdi-data" type="date"></div>
+
+          <div class="pdi-sec">Pontos a desenvolver</div>
+          <textarea class="pdi-ta" id="pdi-pontos" placeholder="O que precisa melhorar, com exemplos do dia a dia…"></textarea>
+
+          <div class="pdi-sec">Parabéns por</div>
+          <textarea class="pdi-ta" id="pdi-parabens" placeholder="O que a pessoa fez bem e merece ser dito…"></textarea>
+
+          <div class="pdi-sec">Ações de Desenvolvimento</div>
+          <table class="pdi-tab">
+            <thead><tr><th style="width:auto;">Tarefas a Fazer</th><th style="width:150px;">Prazo</th><th style="width:26px;"></th></tr></thead>
+            <tbody id="pdi-tarefas"></tbody>
+          </table>
+          <button class="pdi-mais" onclick="pdiAddTarefa()">+ Tarefa</button>
+
+          <div class="pdi-ass">
+            <div class="pdi-sec" style="margin-top:0;">Documento assinado</div>
+            <div id="pdi-ass-box"></div>
+            <input type="file" id="pdi-ass-file" accept="image/*" capture="environment" hidden onchange="pdiFoto(this)">
+          </div>
+        </div>
+
+        <div class="pdi-acoes">
+          <button class="bt ouro" onclick="pdiSalvar()">Salvar plano</button>
+          <button class="bt" onclick="window.print()">Imprimir</button>
+          <button class="bt" onclick="pdiNovo()">Novo plano</button>
+        </div>
+
+        <div class="pdi-hist">
+          <div class="pdi-h-t" id="pdi-h-t">Planos anteriores</div>
+          <div id="pdi-historico"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="rh-sec" id="rh-avaliacoes">
@@ -1934,6 +2051,222 @@ async function rotExcluir(id){
     const orfas=ROT_ITENS.filter(function(r){ return r.tipo==='realoc'&&r.refId===id; });
     for(const o of orfas){ try{ await DB.collection('ls_rotina').doc(o.id).delete(); }catch(_){ } }
   }catch(e){ console.warn('rotExcluir',e); alert('Não consegui excluir agora.'); }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PDI · Plano de Desenvolvimento Individual
+//  Coleção ls_pdi. Um documento por plano — a pessoa tem vários ao
+//  longo do tempo, e o histórico é o valor: dá pra ver o que foi
+//  combinado na conversa passada antes de abrir a próxima.
+// ════════════════════════════════════════════════════════════════
+const PDI_LIM = 700*1024;          // teto do anexo; o doc do Firestore vai até 1MB
+let PDI_ITENS=[], PDI_QUEM=null, PDI_ID=null, PDI_ASS=null, _unsubPdi=null;
+
+function pdiHoje(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function pdiBr(iso){ const p=String(iso||'').split('-'); return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:(iso||''); }
+function pdiEquipe(){ return Object.keys(PESSOAS); }
+
+function carregarPdi(){
+  if(!DB || _unsubPdi) return;
+  _unsubPdi = DB.collection('ls_pdi').onSnapshot(function(snap){
+    PDI_ITENS = snap.docs.map(function(d){ const o=d.data(); o.id=d.id; return o; });
+    renderPdi();
+  }, function(e){ console.warn('pdi',e);
+    const h=document.getElementById('pdi-historico');
+    if(h) h.innerHTML='<div class="pdi-vazio">Não consegui ler os planos. ('+esc(e.code||e.message)+')</div>';
+  });
+}
+
+function renderPdi(){
+  const eq=pdiEquipe();
+  if(!PDI_QUEM || eq.indexOf(PDI_QUEM)<0){ PDI_QUEM=eq[0]; pdiNovo(true); }
+
+  document.getElementById('pdi-lista').innerHTML = eq.map(function(n){
+    const p=PESSOAS[n]||{};
+    const q=PDI_ITENS.filter(function(x){ return x.pessoa===n; }).length;
+    return '<button class="pdi-p'+(n===PDI_QUEM?' on':'')+'" onclick="pdiQuem(\''+esc(n)+'\')">'
+      + '<span class="pdi-p-av" data-foto="'+esc(n)+'">'+esc(n[0])+'</span>'
+      + '<span class="pdi-p-i"><span class="pdi-p-n">'+esc(n)+'</span><span class="pdi-p-f">'+esc(p.funcao||'')+'</span></span>'
+      + (q?'<span class="pdi-p-q">'+q+'</span>':'')+'</button>';
+  }).join('');
+
+  const meus=PDI_ITENS.filter(function(x){ return x.pessoa===PDI_QUEM; })
+    .sort(function(a,b){ return String(b.data||'').localeCompare(String(a.data||'')); });
+  document.getElementById('pdi-h-t').textContent='Planos anteriores de '+PDI_QUEM;
+  document.getElementById('pdi-historico').innerHTML = meus.length ? meus.map(function(x){
+    return '<div class="pdi-h-l">'
+      + '<span class="pdi-h-d">'+esc(pdiBr(x.data))+(x.hora?' · '+esc(x.hora):'')+'</span>'
+      + '<span>'+esc((x.pontos||'').slice(0,60)||'(sem pontos)')+((x.pontos||'').length>60?'…':'')+'</span>'
+      + (x.assinatura?'<span class="rot-selo movido">assinado</span>':'')
+      + '<span class="pdi-h-a">'
+        + '<button class="rot-ic" title="Abrir" onclick="pdiAbrir(\''+x.id+'\')">↗</button>'
+        + '<button class="rot-ic del" title="Excluir" onclick="pdiExcluir(\''+x.id+'\')">×</button>'
+      + '</span></div>';
+  }).join('') : '<div class="pdi-vazio">Nenhum plano registrado ainda.</div>';
+
+  document.getElementById('pdi-func').value=PDI_QUEM;
+  if(typeof aplicarFotos==='function') aplicarFotos();
+}
+
+function pdiQuem(n){ PDI_QUEM=n; pdiNovo(true); renderPdi(); }
+
+function pdiAddTarefa(t,pz){
+  const tb=document.getElementById('pdi-tarefas');
+  const tr=document.createElement('tr');
+  tr.innerHTML='<td><input class="pdi-in" value="'+esc(t||'')+'" placeholder="O que fazer"></td>'
+             + '<td><input class="pdi-in" value="'+esc(pz||'')+'" placeholder="Ex.: 30/09"></td>'
+             + '<td><button class="pdi-rm" title="Tirar" onclick="this.closest(\'tr\').remove()">×</button></td>';
+  tb.appendChild(tr);
+}
+function pdiTarefas(){
+  return [].slice.call(document.querySelectorAll('#pdi-tarefas tr')).map(function(tr){
+    const i=tr.querySelectorAll('input');
+    return {tarefa:(i[0].value||'').trim(), prazo:(i[1].value||'').trim()};
+  }).filter(function(x){ return x.tarefa||x.prazo; });
+}
+
+function pdiNovo(silencioso){
+  PDI_ID=null; PDI_ASS=null;
+  document.getElementById('pdi-func').value=PDI_QUEM||'';
+  document.getElementById('pdi-sup').value=window._usuario||'Jhennifer';
+  document.getElementById('pdi-data').value=pdiHoje();
+  document.getElementById('pdi-pontos').value='';
+  document.getElementById('pdi-parabens').value='';
+  document.getElementById('pdi-tarefas').innerHTML='';
+  pdiAddTarefa(); pdiAddTarefa(); pdiAddTarefa();
+  pdiRenderAss();
+  if(!silencioso && typeof toast==='function') toast('Plano em branco.');
+}
+
+function pdiAbrir(id){
+  const x=PDI_ITENS.filter(function(i){ return i.id===id; })[0]; if(!x) return;
+  PDI_ID=id; PDI_QUEM=x.pessoa; PDI_ASS=x.assinatura||null;
+  document.getElementById('pdi-func').value=x.pessoa||'';
+  document.getElementById('pdi-sup').value=x.supervisor||'';
+  document.getElementById('pdi-data').value=x.data||pdiHoje();
+  document.getElementById('pdi-pontos').value=x.pontos||'';
+  document.getElementById('pdi-parabens').value=x.parabens||'';
+  document.getElementById('pdi-tarefas').innerHTML='';
+  (x.tarefas&&x.tarefas.length?x.tarefas:[{},{},{}]).forEach(function(t){ pdiAddTarefa(t.tarefa,t.prazo); });
+  pdiRenderAss(); renderPdi();
+}
+
+function pdiRenderAss(){
+  document.getElementById('pdi-ass-box').innerHTML = PDI_ASS
+    ? '<img class="pdi-ass-img" src="'+PDI_ASS+'" alt="Documento assinado">'
+      + '<button class="pdi-mais" style="margin-top:8px;" onclick="PDI_ASS=null;pdiRenderAss()">Trocar foto</button>'
+    : '<div class="pdi-drop" onclick="document.getElementById(\'pdi-ass-file\').click()">'
+      + '📷 Fotografar ou escolher o documento assinado<br>'
+      + '<small style="opacity:.7;">A foto é tratada como digitalização — endireita o contraste e limpa o fundo.</small></div>';
+}
+
+/* ── "escanear" a foto: o que sai da câmera é uma foto de papel, com sombra
+   e fundo cinza. Aqui vira preto no branco, como um scanner faria. ── */
+function pdiEscanear(file){
+  return new Promise(function(res, rej){
+    const img=new Image();
+    img.onload=function(){
+      const lado=1600, f=Math.min(1, lado/Math.max(img.naturalWidth, img.naturalHeight));
+      const w=Math.max(1,Math.round(img.naturalWidth*f)), h=Math.max(1,Math.round(img.naturalHeight*f));
+      const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+      const cx=cv.getContext('2d');
+      cx.fillStyle='#fff'; cx.fillRect(0,0,w,h);
+      cx.imageSmoothingQuality='high'; cx.drawImage(img,0,0,w,h);
+
+      const d=cx.getImageData(0,0,w,h), px=d.data;
+      // 1. cinza
+      for(let i=0;i<px.length;i+=4){
+        const g=(px[i]*0.299+px[i+1]*0.587+px[i+2]*0.114)|0;
+        px[i]=px[i+1]=px[i+2]=g;
+      }
+      cx.putImageData(d,0,0);
+
+      // 2. estima a ILUMINAÇÃO reduzindo a imagem a um borrão e voltando ao
+      //    tamanho. Corrigir por níveis globais não dá conta de sombra: o
+      //    canto escuro da folha virava preto. Dividindo cada pixel pelo
+      //    fundo daquele ponto, a sombra some e o traço fica.
+      const pq=document.createElement('canvas');
+      pq.width=Math.max(1,Math.round(w/24)); pq.height=Math.max(1,Math.round(h/24));
+      const pcx=pq.getContext('2d'); pcx.imageSmoothingQuality='high';
+      pcx.drawImage(cv,0,0,pq.width,pq.height);
+      const bg=document.createElement('canvas'); bg.width=w; bg.height=h;
+      const bcx=bg.getContext('2d'); bcx.imageSmoothingQuality='high';
+      bcx.drawImage(pq,0,0,w,h);
+      const bd=bcx.getImageData(0,0,w,h).data;
+
+      for(let i=0;i<px.length;i+=4){
+        const fundo=bd[i]||1;
+        // >1 seria mais claro que o próprio papel: é reflexo, prende em branco
+        let v=255*(px[i]/fundo);
+        v = v>255?255:v;
+        // 3. estica o que sobrou entre tinta e papel. Um gamma simples
+        //    clareava o traço junto com o fundo; aqui o que é mais escuro
+        //    que 90 vira preto, o que passa de 226 vira branco, e o meio
+        //    (lápis fraco, carimbo claro) fica no degradê.
+        v = (v-90) * (255/(226-90));
+        px[i]=px[i+1]=px[i+2]= v<0?0:(v>255?255:v);
+      }
+      cx.putImageData(d,0,0);
+
+      (function tenta(q){
+        cv.toBlob(function(b){
+          if(!b) return rej(new Error('Não consegui gerar a imagem.'));
+          if(b.size<=PDI_LIM || q<=0.45) return res(cv.toDataURL('image/jpeg', q));
+          tenta(q-0.1);
+        }, 'image/jpeg', q);
+      })(0.85);
+    };
+    img.onerror=function(){ rej(new Error('Imagem inválida.')); };
+    img.src=URL.createObjectURL(file);
+  });
+}
+
+function pdiFoto(inp){
+  const f=inp.files&&inp.files[0]; inp.value='';
+  if(!f) return;
+  const box=document.getElementById('pdi-ass-box');
+  box.innerHTML='<div class="pdi-drop">Digitalizando…</div>';
+  pdiEscanear(f).then(function(d){ PDI_ASS=d; pdiRenderAss(); })
+    .catch(function(e){ console.warn('pdiEscanear',e); PDI_ASS=null; pdiRenderAss(); alert('Não consegui ler essa imagem.'); });
+}
+
+async function pdiSalvar(){
+  if(!DB){ alert('Sem conexão.'); return; }
+  const pessoa=PDI_QUEM;
+  if(!pessoa){ alert('Escolha o colaborador.'); return; }
+  const agora=new Date();
+  const doc={
+    pessoa: pessoa,
+    supervisor: (document.getElementById('pdi-sup').value||'').trim(),
+    data: document.getElementById('pdi-data').value||pdiHoje(),
+    hora: String(agora.getHours()).padStart(2,'0')+':'+String(agora.getMinutes()).padStart(2,'0'),
+    pontos: (document.getElementById('pdi-pontos').value||'').trim(),
+    parabens: (document.getElementById('pdi-parabens').value||'').trim(),
+    tarefas: pdiTarefas(),
+    assinatura: PDI_ASS||null,
+    atualizadoEm: Date.now(),
+    por: window._usuario||''
+  };
+  if(!doc.pontos && !doc.parabens && !doc.tarefas.length){ alert('Escreva ao menos uma parte do plano antes de salvar.'); return; }
+  try{
+    if(PDI_ID){ await DB.collection('ls_pdi').doc(PDI_ID).set(doc); }
+    else{ const r=await DB.collection('ls_pdi').add(Object.assign({criadoEm:Date.now()}, doc)); PDI_ID=r.id; }
+    if(typeof toast==='function') toast('Plano salvo.'); else alert('Plano salvo.');
+  }catch(e){
+    console.warn('pdiSalvar',e);
+    alert(String(e.message||'').indexOf('longer than')>=0 || (e.code||'')==='invalid-argument'
+      ? 'A foto ficou grande demais pro registro. Tire de novo, mais de perto.'
+      : 'Não consegui salvar agora.');
+  }
+}
+
+async function pdiExcluir(id){
+  const x=PDI_ITENS.filter(function(i){ return i.id===id; })[0]; if(!x||!DB) return;
+  if(!confirm('Excluir o plano de '+x.pessoa+' de '+pdiBr(x.data)+'?')) return;
+  try{
+    await DB.collection('ls_pdi').doc(id).delete();
+    if(PDI_ID===id) pdiNovo(true);
+  }catch(e){ console.warn('pdiExcluir',e); alert('Não consegui excluir agora.'); }
 }
 
 // ════════ Tabnav principal ════════
@@ -2674,7 +3007,7 @@ if(AUTH){
     SESSION = user;
     ROLE = (email === GESTOR_EMAIL) ? 'gestor' : 'supervisora';
     aplicarSessao(ROLE);
-    carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); carregarEventos(); carregarPautasResumo(); montarSeletorMesPauta(); carregarRotina(); });
+    carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); carregarEventos(); carregarPautasResumo(); montarSeletorMesPauta(); carregarRotina(); carregarPdi(); });
   });
 }
 
