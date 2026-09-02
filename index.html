@@ -1708,7 +1708,9 @@ function rotSemana(){
   return Array.from({length:6},(_,i)=>{ const x=new Date(seg); x.setDate(seg.getDate()+i);
     return {iso:rotIso(x), dow:x.getDay(), dia:x.getDate()}; });
 }
-function rotEquipe(){ return Object.keys(PESSOAS).filter(n=>n!=='Jhennifer'); }
+// A Jhennifer é quem usa o painel, mas o cronograma geral dá rotina a ela
+// também (reunião diária, vitrine, uniforme) — então entra na lista.
+function rotEquipe(){ return Object.keys(PESSOAS); }
 
 let _rotLimpou=false;
 // Cobertura de um dia e atividade provisória são de uso único: cumprido o
@@ -1832,6 +1834,41 @@ const ROT_SEED={
   {h:'18:00', t:'Encerrar as entregas do dia',                                    d:TODOS},
   {h:'18:05', t:'Falar com as vendedoras: se entrou entrega, ainda cabe uma última rota antes das 19h', d:TODOS},
   {h:'19:00', t:'Saída',                                                          d:TODOS}
+ ],
+ // ── Do "Cronograma Geral por Pessoa": todas chegam às 9h e fazem as
+ //    tarefas diárias ao chegar. Ficam todas às 09:00 mesmo — é um
+ //    checklist de chegada, não uma sequência cronometrada, e dar hora
+ //    cheia a cada uma seria inventar precisão que o documento não tem. ──
+ 'Jhennifer':[
+  {h:'09:00', t:'Mini reunião diária: desempenho de ontem, meta do dia, pontos fortes, pontos de atenção e engajamento', d:TODOS},
+  {h:'09:00', t:'Arrumar os sapatos na vitrine interna',                          d:TODOS},
+  {h:'09:00', t:'Atualizar a vitrine interna com as novidades (se necessário)',   d:TODOS},
+  {h:'09:00', t:'Organizar os totens da entrada, sempre com novidades',           d:TODOS},
+  {h:'09:00', t:'Verificar a vitrine externa e os totens giratórios (pedir ajuda das vendedoras)', d:TODOS},
+  {h:'09:00', t:'Conferir o uniforme completo: camisa para dentro, calça preta alfaiataria, sneaker preto e relógio', d:TODOS},
+  {h:'09:00', t:'Acompanhar o checklist diário e garantir que tudo foi executado', d:TODOS}
+ ],
+ 'Ialey':[
+  {h:'09:00', t:'Limpar com álcool e organizar o caixa',                          d:TODOS},
+  {h:'09:00', t:'Ligar o notebook e iniciar o sistema PDV',                       d:TODOS},
+  {h:'09:00', t:'Iniciar a música ambiente (volume 16)',                          d:TODOS},
+  {h:'09:00', t:'Colocar as maquininhas de cartão para carregar',                 d:TODOS},
+  {h:'09:00', t:'Retirar o lixo do caixa',                                        d:TODOS},
+  {h:'09:00', t:'Atualizar as metas semanais com a equipe de vendas',             d:[2]}   // semanal · terça
+ ],
+ 'Michelly':[
+  {h:'09:00', t:'Checklist de fechamento do caixa, auxiliando a Larissa',         d:TODOS},
+  {h:'09:00', t:'Limpar a bancada e os utensílios do café',                       d:TODOS},
+  {h:'09:00', t:'Reabastecer os itens do café, se necessário',                    d:TODOS},
+  {h:'09:00', t:'Arrumar o cantinho do café para receber os clientes',            d:TODOS},
+  {h:'09:00', t:'Verificar estoque de café, açúcar, balinha, guardanapos e copos', d:TODOS},
+  {h:'09:00', t:'Retirar o lixo do café e descartar copos usados',                d:TODOS},
+  {h:'09:00', t:'Aplicar o aroma interno da loja',                                d:TODOS},
+  {h:'09:00', t:'Repor os cheirinhos das máquinas e da loja',                     d:[1]}   // semanal · segunda
+ ],
+ 'Natália':[
+  {h:'09:00', t:'Organizar meias, carteiras, cintos e produtos de limpeza nos expositores', d:TODOS},
+  {h:'09:00', t:'Repor sacolas de papel, sacolas de TNT e calçadeiras, se necessário',      d:TODOS}
  ]
 };
 
