@@ -1733,6 +1733,7 @@ async function rotLimpar(){
 // ════════════════════════════════════════════════════════════════
 const UTEIS=[1,2,3,4,5];
 const TODOS=[1,2,3,4,5,6];
+const ROT_FEM=['Ialey','Michelly','Natália','Jhennifer'];   // artigo do botão
 // Cronogramas transcritos dos arquivos que a gestão enviou. Botão de carga
 // única por pessoa: some assim que ela tiver qualquer rotina.
 const ROT_SEED={
@@ -1805,13 +1806,33 @@ const ROT_SEED={
   {h:'10:30', t:'Lanche',                                        d:[6]},
   {h:'10:35', t:'Atendimento telefone das vendedoras',           d:[6]},
   {h:'13:00', t:'Saída',                                         d:[6]}
+ ],
+ // ── GUSTAVO (POP do entregador + horários passados pela gestão).
+ //    O POP não traz horário: são 4 etapas de preparo que se repetem
+ //    antes de CADA saída. Os horários (entra 10h, almoço 12h ou 13h,
+ //    volta 14h no máximo) vieram da gestão. Seg a Sáb — o POP não diz
+ //    quais dias, e a loja abre de segunda a sábado. ──
+ 'Gustavo':[
+  // 1ª rota
+  {h:'10:00', t:'Conferir entregas do grupo · pedidos sem localização · prioridades', d:TODOS},
+  {h:'10:10', t:'Planejar a rota; se passar do que cabe, avisar o estoquista e postar no grupo quem vai com o outro entregador', d:TODOS},
+  {h:'10:20', t:'Avisar os clientes no WhatsApp e compartilhar localização em tempo real', d:TODOS},
+  {h:'10:30', t:'Organizar o baú e conferir nome + localização de cada pedido', d:TODOS},
+  {h:'10:40', t:'1ª rota de entregas',                                            d:TODOS},
+  {h:'12:00', t:'Almoço (12h–13h ou 13h–14h)',                                    d:TODOS},
+  // 2ª rota
+  {h:'14:00', t:'Voltar para a loja (no máximo)',                                 d:TODOS},
+  {h:'14:10', t:'Conferir as entregas da tarde e planejar a 2ª rota',             d:TODOS},
+  {h:'14:20', t:'Avisar os clientes no WhatsApp e compartilhar localização em tempo real', d:TODOS},
+  {h:'14:30', t:'Organizar o baú e conferir nome + localização de cada pedido',   d:TODOS},
+  {h:'14:40', t:'2ª rota de entregas',                                            d:TODOS}
  ]
 };
 
 async function rotImportar(){
   if(!DB || !ROT_SEED[ROT_QUEM]) return;
   const lista=ROT_SEED[ROT_QUEM], quem=ROT_QUEM;
-  if(!confirm('Carregar o cronograma d' + (quem==='Edson'?'o':'o') + ' ' + quem + ' (' + lista.length + ' atividades)?')) return;
+  if(!confirm('Carregar o cronograma d'+(ROT_FEM.indexOf(quem)>=0?'a ':'o ')+quem+' ('+lista.length+' atividades)?')) return;
   const bt=document.getElementById('rot-imp'); if(bt){ bt.disabled=true; bt.textContent='Carregando…'; }
   try{
     for(const r of lista){
@@ -1889,7 +1910,7 @@ function renderRotina(){
   if(imp){
     const podeImp = ROT_SEED[ROT_QUEM] && !ROT_ITENS.some(function(i){ return i.tipo==='fixa'&&i.pessoa===ROT_QUEM; });
     imp.style.display = podeImp ? '' : 'none';
-    if(podeImp) imp.textContent='Carregar cronograma d'+(ROT_QUEM==='Ialey'?'a ':'o ')+ROT_QUEM;
+    if(podeImp) imp.textContent='Carregar cronograma d'+(ROT_FEM.indexOf(ROT_QUEM)>=0?'a ':'o ')+ROT_QUEM;
   }
 
   // dias da semana já resolvidos, reaproveitados pelas duas listas abaixo
