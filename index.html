@@ -1550,7 +1550,7 @@ async function cobrir(sel,id,nome){
   <div class="rot-topo">
     <div class="slbl" style="margin:0;border:none;padding:0;">Rotina da equipe</div>
     <span style="display:flex;align-items:center;gap:12px;">
-      <button class="bt-ouro-mini" id="rot-imp" style="display:none" onclick="rotImportarYuri()">Carregar cronograma do Yuri</button>
+      <button class="bt-ouro-mini" id="rot-imp" style="display:none" onclick="rotImportar()">Carregar cronograma do Yuri</button>
       <span class="rot-sem" id="rot-sem"></span>
     </span>
   </div>
@@ -1732,8 +1732,12 @@ async function rotLimpar(){
 //  marcado abaixo — é arrastar na tela pra mudar.
 // ════════════════════════════════════════════════════════════════
 const UTEIS=[1,2,3,4,5];
-const ROT_YURI=[
-  // ── dia normal, Seg a Sex (08:40 às 17:40) ──
+const TODOS=[1,2,3,4,5,6];
+// Cronogramas transcritos dos arquivos que a gestão enviou. Botão de carga
+// única por pessoa: some assim que ela tiver qualquer rotina.
+const ROT_SEED={
+ // ── YURI (4 PDFs do estoquista) ──
+ 'Yuri':[
   {h:'08:40', t:'Verificar calçada / varrer',                 d:[2,3,5]},   // PDF: Ter, Qua, Sex
   {h:'09:00', t:'Abrir as portas da loja',                    d:UTEIS},
   {h:'09:10', t:'Preparar o café',                            d:UTEIS},
@@ -1745,22 +1749,16 @@ const ROT_YURI=[
   {h:'13:30', t:'Almoço',                                     d:UTEIS},
   {h:'16:00', t:'Verificação final / pendências do dia',      d:UTEIS},
   {h:'17:40', t:'Saída',                                      d:UTEIS},
-
-  // ── variáveis da tarde, com dia fixo (o PDF pede que se defina) ──
   {h:'14:30', t:'Ajustar planilha das meninas',               d:[1,4]},     // sugestão do próprio PDF
   {h:'14:30', t:'Mexer / reorganizar caixas do estoque',      d:[2,5]},     // sugestão do próprio PDF
   {h:'14:30', t:'Reposição de vitrine / prateleiras',         d:[3]},       // PDF: quarta
   {h:'15:30', t:'Saída para compras da loja (avisar antes)',  d:[4]},       // 1x/sem — dia escolhido por mim
   {h:'16:20', t:'Amassar e descartar caixas',                 d:[2,5]},     // 2x/sem — dia escolhido por mim
-
-  // ── sábado (09:00 às 13:00, sem almoço) ──
   {h:'09:10', t:'Abrir as portas da loja',                    d:[6]},
   {h:'09:30', t:'Guardar sapatos – salão de vendas',          d:[6]},
   {h:'10:00', t:'Guardar sapatos – entregas',                 d:[6]},
   {h:'11:00', t:'Tempo livre / demandas extras',              d:[6]},
   {h:'13:00', t:'Saída',                                      d:[6]},
-
-  // ── dia de chegada de sapato: substitui o dia normal quando marcado ──
   {h:'08:40', t:'Verificar calçada / varrer',                 d:UTEIS, m:'chegada'},
   {h:'09:00', t:'Abrir as portas da loja',                    d:UTEIS, m:'chegada'},
   {h:'09:10', t:'Preparar o café',                            d:UTEIS, m:'chegada'},
@@ -1774,19 +1772,54 @@ const ROT_YURI=[
   {h:'16:30', t:'Organizar sapatos com defeito',              d:UTEIS, m:'chegada'},
   {h:'16:40', t:'Resolver demandas aleatórias do dia',        d:UTEIS, m:'chegada'},
   {h:'17:40', t:'Saída',                                      d:UTEIS, m:'chegada'}
-];
+ ],
+ // ── EDSON (planilha e-commerce). Aqui as variantes batem com o dia da
+ //    semana — Seg/Qui/Sex normal, Ter/Qua e-commerce, Sáb curto — então
+ //    não precisou de modelo de dia como no Yuri. ──
+ 'Edson':[
+  // rotina de chegada, igual todos os dias inclusive sábado
+  {h:'09:00', t:'Chegada / organização comida e mochila',        d:TODOS},
+  {h:'09:10', t:'Separar sapatos vendidos do dia anterior',      d:TODOS},
+  {h:'09:20', t:'Verificar se os sapatos estão corretos',        d:TODOS},
+  {h:'09:30', t:'Emissão de notas fiscais',                      d:TODOS},
+  {h:'09:40', t:'Fazer código de envio e etiqueta',              d:TODOS},
+  {h:'10:00', t:'Embalar pedidos de envio',                      d:TODOS},
+  {h:'10:20', t:'Arrumar a mesa de envios',                      d:TODOS},
+  // comum aos dias úteis
+  {h:'10:25', t:'Responder mensagens + repescagem e-commerce',   d:UTEIS},
+  {h:'12:30', t:'Almoço',                                        d:UTEIS},
+  {h:'18:00', t:'Saída',                                         d:UTEIS},
+  // dia normal — Seg, Qui, Sex
+  {h:'10:50', t:'Organizar respostas do Direct (Instagram)',     d:[1,4,5]},
+  {h:'11:10', t:'Pós-vendas das vendedoras (dia anterior)',      d:[1,4,5]},
+  {h:'13:30', t:'Repescagem das vendedoras do mesmo dia',        d:[1,4,5]},
+  {h:'14:30', t:'Repescagem completa dia anterior (4 vendedoras)',d:[1,4,5]},
+  {h:'16:30', t:'Ajuda no fechamento de pedidos',                d:[1,4,5]},
+  // dia e-commerce — Ter, Qua
+  {h:'10:50', t:'Resolver pendências do e-commerce',             d:[2,3]},
+  {h:'13:30', t:'Organizar respostas do Direct (Instagram)',     d:[2,3]},
+  {h:'13:50', t:'Repescagem das vendedoras do mesmo dia',        d:[2,3]},
+  {h:'14:50', t:'Repescagem completa dia anterior (4 vendedoras)',d:[2,3]},
+  {h:'16:50', t:'Ajuda no fechamento / pós-venda vendedoras',    d:[2,3]},
+  // sábado
+  {h:'10:30', t:'Lanche',                                        d:[6]},
+  {h:'10:35', t:'Atendimento telefone das vendedoras',           d:[6]},
+  {h:'13:00', t:'Saída',                                         d:[6]}
+ ]
+};
 
-async function rotImportarYuri(){
-  if(!DB) return;
-  if(!confirm('Carregar o cronograma do Yuri (' + ROT_YURI.length + ' atividades) a partir dos PDFs?')) return;
+async function rotImportar(){
+  if(!DB || !ROT_SEED[ROT_QUEM]) return;
+  const lista=ROT_SEED[ROT_QUEM], quem=ROT_QUEM;
+  if(!confirm('Carregar o cronograma d' + (quem==='Edson'?'o':'o') + ' ' + quem + ' (' + lista.length + ' atividades)?')) return;
   const bt=document.getElementById('rot-imp'); if(bt){ bt.disabled=true; bt.textContent='Carregando…'; }
   try{
-    for(const r of ROT_YURI){
-      await DB.collection('ls_rotina').add({tipo:'fixa', pessoa:'Yuri', texto:r.t, hora:r.h,
+    for(const r of lista){
+      await DB.collection('ls_rotina').add({tipo:'fixa', pessoa:quem, texto:r.t, hora:r.h,
         turno:'dia', modelo:r.m||'normal', dias:r.d.slice(), criadoEm:Date.now(), criadoPor:window._usuario||''});
     }
-  }catch(e){ console.warn('rotImportarYuri',e); alert('Não consegui carregar tudo. Veja o que entrou e tente de novo.'); }
-  if(bt){ bt.disabled=false; bt.textContent='Carregar cronograma do Yuri'; }
+  }catch(e){ console.warn('rotImportar',e); alert('Não consegui carregar tudo. Veja o que entrou e tente de novo.'); }
+  if(bt){ bt.disabled=false; }
 }
 
 function carregarRotina(){
@@ -1853,7 +1886,11 @@ function renderRotina(){
 
   // atalho de primeira carga: some assim que o Yuri tiver qualquer rotina
   const imp=document.getElementById('rot-imp');
-  if(imp) imp.style.display = (ROT_QUEM==='Yuri' && !ROT_ITENS.some(function(i){ return i.tipo==='fixa'&&i.pessoa==='Yuri'; })) ? '' : 'none';
+  if(imp){
+    const podeImp = ROT_SEED[ROT_QUEM] && !ROT_ITENS.some(function(i){ return i.tipo==='fixa'&&i.pessoa===ROT_QUEM; });
+    imp.style.display = podeImp ? '' : 'none';
+    if(podeImp) imp.textContent='Carregar cronograma d'+(ROT_QUEM==='Ialey'?'a ':'o ')+ROT_QUEM;
+  }
 
   // dias da semana já resolvidos, reaproveitados pelas duas listas abaixo
   const dias=semana.map(function(d){ return {d:d, itens:rotDoDia(d.iso,d.dow)}; });
