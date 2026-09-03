@@ -1815,6 +1815,25 @@ async function rotLimpar(){
 const UTEIS=[1,2,3,4,5];
 const TODOS=[1,2,3,4,5,6];
 const ROT_FEM=['Ialey','Michelly','Natália','Jhennifer'];   // artigo do botão
+
+// Fechamento do salão. A loja fecha 18:00 nos dias úteis e 13:00 no sábado,
+// e o fechamento é sempre 5 minutos antes — então a mesma lista sai em dois
+// horários. Gerar evita repetir oito linhas em cada uma das quatro pessoas,
+// e mudar o horário da loja passa a ser mexer num lugar só.
+const FECHA_SALAO=[
+  'Organizar as mesas e deixar o salão pronto pro dia seguinte',
+  'Desligar os notebooks e tirar os cabos das tomadas',
+  'Desligar o computador do caixa',
+  'Desligar as luzes e o ar-condicionado'
+];
+function rotFechamento(extras){
+  const l=[];
+  FECHA_SALAO.concat(extras||[]).forEach(function(t){
+    l.push({h:'17:55', t:t, d:UTEIS});   // loja fecha 18:00
+    l.push({h:'12:55', t:t, d:[6]});     // sábado a loja fecha 13:00
+  });
+  return l;
+}
 // Cronogramas transcritos dos arquivos que a gestão enviou. Botão de carga
 // única por pessoa: some assim que ela tiver qualquer rotina.
 const ROT_SEED={
@@ -1933,7 +1952,7 @@ const ROT_SEED={
   {h:'09:00', t:'Conferir o uniforme completo: camisa para dentro, calça preta alfaiataria, sneaker preto e relógio', d:TODOS},
   {h:'09:00', t:'Acompanhar o checklist diário e garantir que tudo foi executado', d:TODOS},
   {v:'mensal', t:'Reunião Mensal de Metas, contribuindo com ideias estratégicas'}
- ],
+ ].concat(rotFechamento()),
  'Ialey':[
   {h:'09:00', t:'Limpar com álcool e organizar o caixa',                          d:TODOS},
   {h:'09:00', t:'Ligar o notebook e iniciar o sistema PDV',                       d:TODOS},
@@ -1941,13 +1960,7 @@ const ROT_SEED={
   {h:'09:00', t:'Colocar as maquininhas de cartão para carregar',                 d:TODOS},
   {h:'09:00', t:'Retirar o lixo do caixa',                                        d:TODOS},
   {h:'09:00', t:'Atualizar as metas semanais com a equipe de vendas',             d:[2]},  // semanal · terça
-  // ── fechamento do salão · loja fecha 18:00, então 17:55.
-  //    Só dias úteis: no sábado a loja fecha 13:00. ──
-  {h:'17:55', t:'Organizar as mesas e deixar o salão pronto pro dia seguinte', d:UTEIS},
-  {h:'17:55', t:'Desligar os notebooks e tirar os cabos das tomadas',          d:UTEIS},
-  {h:'17:55', t:'Desligar o computador do caixa',                              d:UTEIS},
-  {h:'17:55', t:'Desligar as luzes e o ar-condicionado',                       d:UTEIS}
- ],
+ ].concat(rotFechamento()),
  'Michelly':[
   {h:'09:00', t:'Checklist de fechamento do caixa, auxiliando a Larissa',         d:TODOS},
   {h:'09:00', t:'Limpar a bancada e os utensílios do café',                       d:TODOS},
@@ -1957,24 +1970,11 @@ const ROT_SEED={
   {h:'09:00', t:'Retirar o lixo do café e descartar copos usados',                d:TODOS},
   {h:'09:00', t:'Aplicar o aroma interno da loja',                                d:TODOS},
   {h:'09:00', t:'Repor os cheirinhos das máquinas e da loja',                     d:[1]},  // semanal · segunda
-  // ── fechamento do salão · loja fecha 18:00, então 17:55.
-  //    Só dias úteis: no sábado a loja fecha 13:00. ──
-  {h:'17:55', t:'Organizar as mesas e deixar o salão pronto pro dia seguinte', d:UTEIS},
-  {h:'17:55', t:'Desligar os notebooks e tirar os cabos das tomadas',          d:UTEIS},
-  {h:'17:55', t:'Desligar o computador do caixa',                              d:UTEIS},
-  {h:'17:55', t:'Desligar as luzes e o ar-condicionado',                       d:UTEIS},
-  {h:'17:55', t:'Fechar e desligar a máquina de café',                          d:UTEIS}
- ],
+ ].concat(rotFechamento(['Fechar e desligar a máquina de café'])),
  'Natália':[
   {h:'09:00', t:'Organizar meias, carteiras, cintos e produtos de limpeza nos expositores', d:TODOS},
-  {h:'09:00', t:'Repor sacolas de papel, sacolas de TNT e calçadeiras, se necessário',      d:TODOS},
-  // ── fechamento do salão · loja fecha 18:00, então 17:55.
-  //    Só dias úteis: no sábado a loja fecha 13:00. ──
-  {h:'17:55', t:'Organizar as mesas e deixar o salão pronto pro dia seguinte', d:UTEIS},
-  {h:'17:55', t:'Desligar os notebooks e tirar os cabos das tomadas',          d:UTEIS},
-  {h:'17:55', t:'Desligar o computador do caixa',                              d:UTEIS},
-  {h:'17:55', t:'Desligar as luzes e o ar-condicionado',                       d:UTEIS}
- ]
+  {h:'09:00', t:'Repor sacolas de papel, sacolas de TNT e calçadeiras, se necessário',      d:TODOS}
+ ].concat(rotFechamento())
 };
 
 // Cronograma pode ser atualizado depois de já carregado. Compara por
@@ -3369,9 +3369,16 @@ try{
 }catch(e){ console.warn('Firebase indisponível — seguindo em modo demonstração.', e); }
 
 // Quem pode abrir este painel de gestão
-const GESTOR_EMAIL  = 'lorettoscarpa@gmail.com';
-const SUPERVISORA_EMAIL = 'jhenniferlorettoscarpa@gmail.com';
-const ACESSO = [GESTOR_EMAIL, SUPERVISORA_EMAIL];
+// Quem abre este painel. Era um par de constantes com um ternário
+// decidindo o nome; com a terceira pessoa isso quebraria (a Ávia cairia
+// no "else" e apareceria como Jhennifer no cabeçalho). Agora cada conta
+// traz o próprio nome e legenda, e acrescentar gente é uma linha.
+const PERFIS = {
+  'lorettoscarpa@gmail.com':              {nome:'Gregory',   sub:'Loretto Scarpa · Painel da Gestão'},
+  'jhenniferlorettoscarpa@gmail.com':     {nome:'Jhennifer', sub:'Loretto Scarpa · Painel da Jhennifer'},
+  'aviaconsultoriaempresarial@gmail.com': {nome:'Ávia',      sub:'Loretto Scarpa · Consultoria'}
+};
+const ACESSO = Object.keys(PERFIS);
 // Produção: exige login pela Central; sem login, redireciona. Dados vêm do Firestore.
 const EXIGIR_LOGIN = true;
 
@@ -3404,8 +3411,8 @@ if(AUTH){
     const email = (user.email||'').toLowerCase();
     if(ACESSO.indexOf(email) === -1){ semAcesso(email); return; }
     SESSION = user;
-    ROLE = (email === GESTOR_EMAIL) ? 'gestor' : 'supervisora';
-    aplicarSessao(ROLE);
+    ROLE = email;
+    aplicarSessao(email);
     carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); carregarEventos(); carregarPautasResumo(); montarSeletorMesPauta(); carregarRotina(); carregarPdi(); });
   });
 }
@@ -3419,10 +3426,10 @@ setTimeout(function(){
 
 function saudacaoHora(){ const h=new Date().getHours(); return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite'; }
 
-function aplicarSessao(role){
-  const nome = role==='gestor' ? 'Gregory' : 'Jhennifer';
+function aplicarSessao(email){
+  const p = PERFIS[email] || {nome:'Equipe', sub:'Loretto Scarpa'};
+  const nome = p.nome, sub = p.sub;
   window._usuario = nome;
-  const sub  = role==='gestor' ? 'Loretto Scarpa · Painel da Gestão' : 'Loretto Scarpa · Painel da Jhennifer';
   const ub = document.querySelector('.h-user b'); if(ub) ub.textContent = nome.toUpperCase();
   const hs = document.querySelector('.h-sub');    if(hs) hs.textContent = sub;
   const cap= document.querySelector('.hoje-cap-data'); if(cap) cap.textContent = saudacaoHora()+', '+nome+'!';
