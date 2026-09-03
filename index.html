@@ -529,6 +529,10 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .rot-av-g{display:flex;gap:8px;flex-wrap:wrap;}
 .rot-av-c{background:var(--bgd);border:1px solid var(--oud2);border-left:2px solid var(--azul);border-radius:2px;padding:8px 10px;max-width:340px;}
 .rot-av-f{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--azul);margin-bottom:4px;}
+.rot-op{display:block;width:100%;text-align:left;padding:13px 15px;background:var(--bg2);border:1px solid var(--oud2);border-radius:3px;cursor:pointer;font-family:inherit;transition:.15s;}
+.rot-op:hover{border-color:var(--ou);background:rgba(212,180,90,.08);}
+.rot-op b{color:var(--ou2);font-size:13px;}
+.rot-op span{display:block;margin-top:3px;font-size:11.5px;color:var(--cr3);line-height:1.4;}
 .rot-ajuda{margin-top:22px;border-top:1px solid var(--oud2);padding-top:14px;font-size:12px;color:var(--cr3);line-height:1.65;}
 .rot-ajuda b{color:var(--cr2);font-weight:500;}
 .rot-vazio{color:var(--cr3);font-size:11.5px;font-style:italic;padding:8px 2px;text-align:center;}
@@ -1556,6 +1560,7 @@ async function cobrir(sel,id,nome){
     <div class="slbl" style="margin:0;border:none;padding:0;">Rotina da equipe</div>
     <span style="display:flex;align-items:center;gap:12px;">
       <button class="bt-ouro-mini" id="rot-imp" style="display:none" onclick="rotImportar()">Carregar cronograma do Yuri</button>
+      <button class="bt-ouro-mini" style="background:transparent;color:var(--ou2);" onclick="rotAbrirTroca()">Trocar rotinas</button>
       <span class="rot-sem" id="rot-sem"></span>
     </span>
   </div>
@@ -1569,7 +1574,10 @@ async function cobrir(sel,id,nome){
     porque é a rotina que está sendo redesenhada.<br>
     <b>Para passar a outra pessoa</b>, use o <b>⇄</b> do cartão: aí o painel pergunta se é só naquele dia
     (cobertura) ou daqui pra frente.<br>
-    <b>Sem dia marcado</b>, a atividade vale só na data escolhida e some depois — é a provisória do dia.
+    <b>Sem dia marcado</b>, a atividade vale só na data escolhida e some depois — é a provisória do dia.<br>
+    <b>Trocar rotinas</b>, lá em cima, muda a rotina inteira de dono de uma vez — para promoção,
+    substituição ou troca de posto. Só a rotina permanente muda; o que foi combinado para um dia
+    específico fica com quem estava.
   </div>
 </div>
 
@@ -1626,13 +1634,44 @@ async function cobrir(sel,id,nome){
     <div class="modal-sub" id="rot-mv-sub"></div>
     <div class="campo" id="rot-mv-quem-c"><label>Para quem</label><select class="ev-inp" id="rot-mv-quem"></select></div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
-      <button class="bt" style="text-align:left;padding:13px 15px;" onclick="rotMover('hoje')">
-        <b style="color:var(--ou2);">Só neste dia</b><br>
-        <span style="font-family:Barlow,sans-serif;font-size:11.5px;letter-spacing:0;text-transform:none;color:var(--cr3);">Cobertura pontual. A rotina normal volta no próximo.</span>
+      <button class="rot-op" onclick="rotMover('hoje')">
+        <b>Só neste dia</b>
+        <span>Cobertura pontual. A rotina normal volta no próximo.</span>
       </button>
-      <button class="bt" style="text-align:left;padding:13px 15px;" onclick="rotMover('sempre')">
-        <b style="color:var(--ou2);">Daqui pra frente</b><br>
-        <span style="font-family:Barlow,sans-serif;font-size:11.5px;letter-spacing:0;text-transform:none;color:var(--cr3);">A responsabilidade muda de dono de vez.</span>
+      <button class="rot-op" onclick="rotMover('sempre')">
+        <b>Daqui pra frente</b>
+        <span>A responsabilidade muda de dono de vez.</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Rotina · trocar de dono em bloco (promoção, substituição, troca de posto) -->
+<div class="mov" id="mov-rot-troca">
+  <div class="modal-box" style="max-width:500px;">
+    <button class="modal-close" onclick="fecharModal('mov-rot-troca')">&times;</button>
+    <div class="modal-tit">Trocar rotinas</div>
+    <div class="modal-sub">Quando alguém é promovida, sai, ou troca de posto com outra: a rotina
+      continua a mesma, o que muda é de quem ela é.</div>
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <div class="campo" style="flex:1;"><label>De quem</label>
+        <select class="ev-inp" id="rot-tr-de" onchange="rotTrocaResumo()"></select></div>
+      <div class="campo" style="flex:1;"><label>Para quem</label>
+        <select class="ev-inp" id="rot-tr-para" onchange="rotTrocaResumo()"></select></div>
+    </div>
+    <div class="dica" id="rot-tr-resumo"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
+      <button class="rot-op" onclick="rotTrocar('passar')">
+        <b>Passar a rotina</b>
+        <span id="rot-tr-d1">Quem sai fica sem rotina; quem entra assume a dela.</span>
+      </button>
+      <button class="rot-op" onclick="rotTrocar('trocar')">
+        <b>Trocar as duas</b>
+        <span id="rot-tr-d2">Cada uma fica com a rotina da outra.</span>
+      </button>
+      <button class="rot-op" onclick="rotTrocar('copiar')">
+        <b>Copiar</b>
+        <span id="rot-tr-d3">As duas ficam com a mesma rotina — a de origem continua com a dela.</span>
       </button>
     </div>
   </div>
@@ -2153,6 +2192,91 @@ async function rotMover(quando){
     }
     fecharModal('mov-rot-mov'); _rotMv=null;
   }catch(e){ console.warn('rotMover',e); alert('Não consegui mover agora.'); }
+}
+
+/* ══ trocar rotinas de dono, em bloco ══
+   Promoção, desligamento, troca de posto: a rotina continua a mesma, quem muda é
+   o dono. Refazer trinta atividades à mão convida ao erro — e é justamente na
+   semana da troca que ninguém tem tempo de conferir uma por uma.
+
+   Muda só o que é PERMANENTE (fixa e avulsa). A provisória do dia e a cobertura
+   de um dia ficam com quem estava: são combinados daquela data, e não rotina.
+
+   Vai num batch — meia troca é o pior resultado possível: ou as duas ficam sem
+   rotina, ou as duas ficam com a mesma. Batch é tudo ou nada.                */
+function rotPermanentes(quem){
+  return ROT_ITENS.filter(function(i){ return (i.tipo==='fixa'||i.tipo==='avulsa') && i.pessoa===quem; });
+}
+function rotAbrirTroca(){
+  const outros=rotEquipe().filter(function(n){ return n!==ROT_QUEM; });
+  rotPreencheQuem('rot-tr-de', ROT_QUEM);
+  rotPreencheQuem('rot-tr-para', outros[0]);
+  rotTrocaResumo();
+  abrirModal('mov-rot-troca');
+}
+function rotTrocaResumo(){
+  const de=document.getElementById('rot-tr-de').value, para=document.getElementById('rot-tr-para').value;
+  const a=rotPermanentes(de).length, b=rotPermanentes(para).length;
+  const box=document.getElementById('rot-tr-resumo');
+  if(de===para){ box.innerHTML='<b style="color:var(--vermelho);">Escolha duas pessoas diferentes.</b>'; return; }
+  box.innerHTML=esc(de)+' tem <b style="color:var(--cr2);">'+a+'</b> atividade'+(a===1?'':'s')
+    +' · '+esc(para)+' tem <b style="color:var(--cr2);">'+b+'</b>'
+    + (b ? '<br><span style="color:var(--vermelho);">'+esc(para)+' já tem rotina: "Passar" e "Copiar" apagam a dela.</span>' : '');
+  /* dizer o que vai acontecer com estes dois nomes, e não em abstrato */
+  const atv=function(n){ return n+(n===1?' atividade':' atividades'); };
+  document.getElementById('rot-tr-d1').textContent=de+' fica sem rotina; '+para+' assume '+atv(a)+' dela.';
+  document.getElementById('rot-tr-d2').textContent=de+' fica com '+atv(b)+' de '+para+', e '+para+' com '+atv(a)+' de '+de+'.';
+  document.getElementById('rot-tr-d3').textContent=para+' passa a fazer as mesmas '+atv(a)+', e '+de+' continua com as dela.';
+}
+async function rotTrocar(modo){
+  if(!DB) return;
+  const de=document.getElementById('rot-tr-de').value, para=document.getElementById('rot-tr-para').value;
+  if(de===para){ alert('Escolha duas pessoas diferentes.'); return; }
+  const dosA=rotPermanentes(de), dosB=rotPermanentes(para);
+  if(modo!=='trocar' && !dosA.length){ alert(de+' não tem rotina permanente pra passar.'); return; }
+  if(modo==='trocar' && !dosA.length && !dosB.length){ alert('Nenhuma das duas tem rotina cadastrada.'); return; }
+
+  const aviso =
+    modo==='passar' ? 'Passar a rotina de '+de+' para '+para+'?\n\n'
+      + '· '+para+' assume as '+dosA.length+' atividades de '+de+'\n'
+      + (dosB.length ? '· as '+dosB.length+' atividades que '+para+' tinha serão APAGADAS\n' : '')
+      + '· '+de+' fica sem rotina'
+    : modo==='trocar' ? 'Trocar as rotinas de '+de+' e '+para+'?\n\n'
+      + '· '+de+' passa a ter as '+dosB.length+' de '+para+'\n'
+      + '· '+para+' passa a ter as '+dosA.length+' de '+de
+    : 'Copiar a rotina de '+de+' para '+para+'?\n\n'
+      + '· '+para+' fica com uma cópia das '+dosA.length+' atividades\n'
+      + (dosB.length ? '· as '+dosB.length+' que '+para+' tinha serão APAGADAS\n' : '')
+      + '· '+de+' continua com a dela';
+  if(!confirm(aviso)) return;
+
+  try{
+    const lote=DB.batch(), col=DB.collection('ls_rotina');
+    if(modo==='trocar'){
+      dosA.forEach(function(i){ lote.update(col.doc(i.id), {pessoa:para}); });
+      dosB.forEach(function(i){ lote.update(col.doc(i.id), {pessoa:de}); });
+    }else{
+      /* quem recebe começa limpo: duas rotinas somadas no mesmo dia não é o que
+         ninguém quis dizer com "assumir o lugar dela" */
+      dosB.forEach(function(i){ lote.delete(col.doc(i.id)); });
+      if(modo==='passar') dosA.forEach(function(i){ lote.update(col.doc(i.id), {pessoa:para}); });
+      else dosA.forEach(function(i){
+        const novo=Object.assign({}, i); delete novo.id;
+        novo.pessoa=para; novo.criadoEm=Date.now(); novo.criadoPor=window._usuario||'';
+        lote.set(col.doc(), novo);
+      });
+    }
+    /* cobertura marcada pra um dia que ainda vem apontava pro dono antigo: de pé,
+       entregaria a uma terceira pessoa uma atividade que já mudou de mãos */
+    const hoje=rotHoje(), movidas={};
+    (modo==='trocar'?dosA.concat(dosB):dosA).forEach(function(i){ movidas[i.id]=1; });
+    ROT_ITENS.forEach(function(r){
+      if(r.tipo==='realoc' && movidas[r.refId] && (r.data||'')>=hoje) lote.delete(col.doc(r.id));
+    });
+    await lote.commit();
+    fecharModal('mov-rot-troca');
+    if(modo==='passar') ROT_QUEM=para;      /* a rotina foi pra lá: mostra onde ela está agora */
+  }catch(e){ console.warn('rotTrocar',e); alert('Não consegui trocar agora. Nada foi alterado.'); }
 }
 
 /* ── criar e editar ── */
