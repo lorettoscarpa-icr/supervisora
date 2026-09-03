@@ -1807,6 +1807,9 @@ const ROT_SEED={
   // comum aos dias úteis
   {h:'10:25', t:'Responder mensagens + repescagem e-commerce',   d:UTEIS},
   {h:'12:30', t:'Almoço',                                        d:UTEIS},
+  // loja fecha 18:00; ele fecha as últimas portas 5 min antes e sai na
+  // sequência. Só nos dias úteis — no sábado ele sai 13:00.
+  {h:'17:55', t:'Fechar as últimas portas (5 min antes do fechamento da loja)', d:UTEIS},
   {h:'18:00', t:'Saída',                                         d:UTEIS},
   // dia normal — Seg, Qui, Sex
   {h:'10:50', t:'Organizar respostas do Direct (Instagram)',     d:[1,4,5]},
