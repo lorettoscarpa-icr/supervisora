@@ -502,6 +502,8 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .rot-cheg{background:transparent;border:1px solid transparent;color:var(--cr3);font-size:11px;line-height:1;padding:2px 4px;cursor:pointer;border-radius:2px;opacity:.35;transition:.15s;}
 .rot-cheg:hover{opacity:1;border-color:var(--oud2);}
 .rot-cheg.on{opacity:1;border-color:var(--ou);background:rgba(212,180,90,.15);}
+/* dia mexido na mão: tracejado para separar do dia de chegada de sempre */
+.rot-cheg.excecao{opacity:1;border-style:dashed;border-color:var(--azul);}
 .rot-itens{padding:8px;display:flex;flex-direction:column;gap:6px;flex:1;}
 
 .rot-card{background:var(--bgd);border:1px solid var(--oud2);border-left:2px solid var(--ou3);border-radius:2px;padding:8px 9px;cursor:grab;transition:border-color .15s,transform .1s;}
@@ -529,6 +531,14 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .rot-av-g{display:flex;gap:8px;flex-wrap:wrap;}
 .rot-av-c{background:var(--bgd);border:1px solid var(--oud2);border-left:2px solid var(--azul);border-radius:2px;padding:8px 10px;max-width:340px;}
 .rot-av-f{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--azul);margin-bottom:4px;}
+/* .rot-dias e .bt nunca tiveram CSS: os dias da semana saíam empilhados um por linha,
+   e "Cancelar"/"Salvar" saíam como botão cinza de navegador no meio do painel escuro.
+   Vale para todas as janelas — o formulário de atividade tem os dois casos. */
+.rot-dias{display:flex;gap:6px;flex-wrap:wrap;}
+.bt{background:transparent;border:1px solid var(--oud2);color:var(--cr2);padding:9px 16px;border-radius:3px;cursor:pointer;font-family:inherit;font-size:12.5px;transition:.15s;}
+.bt:hover{border-color:var(--ou);color:var(--cr);}
+.bt.ouro{background:var(--ou);border-color:var(--ou);color:var(--bg);font-weight:600;}
+.bt.ouro:hover{background:var(--ou2);border-color:var(--ou2);}
 .rot-op{display:block;width:100%;text-align:left;padding:13px 15px;background:var(--bg2);border:1px solid var(--oud2);border-radius:3px;cursor:pointer;font-family:inherit;transition:.15s;}
 .rot-op:hover{border-color:var(--ou);background:rgba(212,180,90,.08);}
 .rot-op b{color:var(--ou2);font-size:13px;}
@@ -1560,6 +1570,7 @@ async function cobrir(sel,id,nome){
     <div class="slbl" style="margin:0;border:none;padding:0;">Rotina da equipe</div>
     <span style="display:flex;align-items:center;gap:12px;">
       <button class="bt-ouro-mini" id="rot-imp" style="display:none" onclick="rotImportar()">Carregar cronograma do Yuri</button>
+      <button class="bt-ouro-mini" style="background:transparent;color:var(--ou2);" onclick="rotAbrirChegada()">Dias de chegada</button>
       <button class="bt-ouro-mini" style="background:transparent;color:var(--ou2);" onclick="rotAbrirTroca()">Trocar rotinas</button>
       <span class="rot-sem" id="rot-sem"></span>
     </span>
@@ -1642,6 +1653,22 @@ async function cobrir(sel,id,nome){
         <b>Daqui pra frente</b>
         <span>A responsabilidade muda de dono de vez.</span>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Rotina · em que dias da semana a carga chega -->
+<div class="mov" id="mov-rot-cheg">
+  <div class="modal-box" style="max-width:430px;">
+    <button class="modal-close" onclick="fecharModal('mov-rot-cheg')">&times;</button>
+    <div class="modal-tit">Dias de chegada</div>
+    <div class="modal-sub">Nestes dias o roteiro de chegada de sapato entra sozinho, sem
+      ninguém marcar. O 📦 de cada dia continua valendo para a exceção: a carga que
+      atrasou, ou a semana em que não veio nada.</div>
+    <div class="rot-dias" id="rot-ch-dias" style="margin-top:4px;"></div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="bt" onclick="fecharModal('mov-rot-cheg')">Cancelar</button>
+      <button class="bt ouro" onclick="rotSalvarChegada()">Salvar</button>
     </div>
   </div>
 </div>
@@ -1996,23 +2023,67 @@ function carregarRotina(){
   });
 }
 
-// Dia de chegada de sapato troca o roteiro inteiro do dia e não tem data
-// fixa — chega quando chega. Então a rotina guarda os dois roteiros, e a
-// supervisora marca o dia: as fixas de 'chegada' entram no lugar das
-// normais, sem ninguém apagar e recadastrar nada.
+// Dia de chegada de sapato troca o roteiro inteiro do dia: a rotina guarda os
+// dois roteiros e o dia escolhe qual vale, sem ninguém apagar e recadastrar nada.
+//
+// A chegada tem dia certo — segunda e quarta. Marcar na mão duas vezes por semana,
+// pra sempre, é trabalho repetido que uma semana corrida engole: e a semana em que
+// ninguém marcar é a semana em que o estoquista abre o roteiro errado. Então o
+// padrão vale sozinho, e o 📦 continua existindo para a exceção: a carga que
+// atrasou para quinta, ou a segunda em que não veio nada.
+const ROT_CHEGADA_PADRAO=[1,3];                 // seg e qua, enquanto ninguém mudar
+function rotDiasChegada(){
+  const c=ROT_ITENS.filter(function(r){ return r.tipo==='chegadapadrao'; })[0];
+  return (c && Array.isArray(c.dias)) ? c.dias : ROT_CHEGADA_PADRAO;
+}
+/* Dia de chegada só troca o roteiro de quem TEM roteiro de chegada — hoje só o
+   estoquista. Sem esta condição, segunda e quarta esvaziariam a rotina de todo o
+   resto da equipe: as atividades delas são todas do roteiro normal, e o dia
+   passaria a pedir um roteiro de chegada que elas não têm. */
+function rotTemChegada(pessoa){
+  return ROT_ITENS.some(function(i){ return i.tipo==='fixa'&&i.pessoa===pessoa&&i.modelo==='chegada'; });
+}
+function rotModeloPadrao(pessoa, iso){
+  if(!rotTemChegada(pessoa)) return 'normal';
+  const dow=new Date(iso+'T12:00:00').getDay();
+  return rotDiasChegada().indexOf(dow)>=0 ? 'chegada' : 'normal';
+}
 function rotModelo(pessoa, iso){
+  /* a marca do dia manda nos dois sentidos: liga a chegada num dia que não é de
+     chegada, e desliga num que é */
   const m=ROT_ITENS.filter(function(r){ return r.tipo==='modelodia'&&r.pessoa===pessoa&&r.data===iso; })[0];
-  return m ? m.modelo : 'normal';
+  return m ? m.modelo : rotModeloPadrao(pessoa, iso);
 }
 async function rotMarcarChegada(iso){
   if(!DB) return;
-  const atual=rotModelo(ROT_QUEM, iso);
+  const virar = rotModelo(ROT_QUEM, iso)==='chegada' ? 'normal' : 'chegada';
   const doc=ROT_ITENS.filter(function(r){ return r.tipo==='modelodia'&&r.pessoa===ROT_QUEM&&r.data===iso; })[0];
   try{
-    if(atual==='chegada'){ if(doc) await DB.collection('ls_rotina').doc(doc.id).delete(); }
-    else if(doc) await DB.collection('ls_rotina').doc(doc.id).update({modelo:'chegada'});
-    else await DB.collection('ls_rotina').add({tipo:'modelodia', pessoa:ROT_QUEM, data:iso, modelo:'chegada', criadoEm:Date.now()});
+    /* voltando ao que o padrão já diz, a exceção deixa de existir em vez de virar
+       um documento repetindo o padrão */
+    if(virar===rotModeloPadrao(ROT_QUEM, iso)){ if(doc) await DB.collection('ls_rotina').doc(doc.id).delete(); }
+    else if(doc) await DB.collection('ls_rotina').doc(doc.id).update({modelo:virar});
+    else await DB.collection('ls_rotina').add({tipo:'modelodia', pessoa:ROT_QUEM, data:iso, modelo:virar, criadoEm:Date.now()});
   }catch(e){ console.warn('rotMarcarChegada',e); alert('Não consegui marcar agora.'); }
+}
+/* ── quais dias da semana a carga chega ── */
+function rotAbrirChegada(){
+  const dias=rotDiasChegada();
+  document.getElementById('rot-ch-dias').innerHTML=[1,2,3,4,5,6].map(function(d){
+    return '<button type="button" class="rot-p'+(dias.indexOf(d)>=0?' on':'')+'" style="border-radius:2px;padding:6px 12px;"'
+      + ' onclick="this.classList.toggle(\'on\')" data-d="'+d+'">'+ROT_DOW[d]+'</button>';
+  }).join('');
+  abrirModal('mov-rot-cheg');
+}
+async function rotSalvarChegada(){
+  if(!DB) return;
+  const dias=[...document.querySelectorAll('#rot-ch-dias .rot-p.on')].map(function(b){ return +b.dataset.d; }).sort();
+  const doc=ROT_ITENS.filter(function(r){ return r.tipo==='chegadapadrao'; })[0];
+  try{
+    if(doc) await DB.collection('ls_rotina').doc(doc.id).update({dias:dias});
+    else await DB.collection('ls_rotina').add({tipo:'chegadapadrao', dias:dias, criadoEm:Date.now(), criadoPor:window._usuario||''});
+    fecharModal('mov-rot-cheg');
+  }catch(e){ console.warn('rotSalvarChegada',e); alert('Não consegui salvar agora.'); }
 }
 
 // o que vale numa data, já com as coberturas daquele dia aplicadas
@@ -2078,7 +2149,14 @@ function renderRotina(){
       + ' ondragover="rotSobre(event,this)" ondragleave="this.classList.remove(\'alvo\')" ondrop="rotSolta(event,this)">'
       + '<div class="rot-col-hd"><span class="rot-dow">'+ROT_DOW[x.d.dow]+'</span>'
         + '<span style="display:flex;align-items:center;gap:6px;">'
-          + (x.d.dow!==0&&x.d.dow!==6 ? '<button class="rot-cheg'+(rotModelo(ROT_QUEM,x.d.iso)==='chegada'?' on':'')+'" title="Dia de chegada de sapato" onclick="rotMarcarChegada(\''+x.d.iso+'\')">📦</button>' : '')
+          /* sem roteiro de chegada não há o que trocar: marcar aqui só esvaziaria o dia */
+          + (x.d.dow!==0 && rotTemChegada(ROT_QUEM) ? (function(){
+              const vale=rotModelo(ROT_QUEM,x.d.iso), padrao=rotModeloPadrao(ROT_QUEM,x.d.iso), excecao=vale!==padrao;
+              const dica = vale==='chegada'
+                ? (excecao ? 'Chegada fora do dia de sempre — clique para desmarcar' : 'Dia de chegada de sapato (toda '+ROT_DOW[x.d.dow]+'). Clique se não vier nada nesta semana')
+                : (excecao ? 'Sem chegada nesta '+ROT_DOW[x.d.dow]+' — clique para voltar ao normal' : 'Marcar chegada de sapato só neste dia');
+              return '<button class="rot-cheg'+(vale==='chegada'?' on':'')+(excecao?' excecao':'')+'" title="'+dica+'" onclick="rotMarcarChegada(\''+x.d.iso+'\')">📦</button>';
+            })() : '')
           + '<span class="rot-num">'+String(x.d.dia).padStart(2,'0')+'</span></span></div>'
       + '<div class="rot-itens">'
         + (meus.length?meus.map(rotCard).join(''):'<div class="rot-vazio">—</div>')
