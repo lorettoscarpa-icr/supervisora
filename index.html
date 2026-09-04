@@ -919,6 +919,21 @@ body{zoom:1.1;}
 .nm-hoje{background:transparent;border:1px solid var(--oud2);color:var(--cr3);padding:5px 11px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:2px;}
 .nm-hoje:hover{border-color:var(--ou);color:var(--ou2);}
 .nm-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--cr3);border:1px solid var(--oud2);padding:5px 10px;border-radius:2px;}
+
+/* --- acesso só de leitura (consultoria): vê tudo, não mexe em nada --- */
+.so-leitura .so-hide,
+.so-leitura .ev-add-btn, .so-leitura .oc-novo-btn, .so-leitura .mel-novo,
+.so-leitura .mel-del, .so-leitura .rot-add, .so-leitura .rot-ic,
+.so-leitura #rot-imp, .so-leitura .fab, .so-leitura .fab-item,
+.so-leitura .pauta-btn, .so-leitura .st-save, .so-leitura .av-pess-btn,
+.so-leitura .ev-del, .so-leitura .rot-op{display:none !important;}
+/* estes mostram informação: continuam à vista, só não clicam */
+.so-leitura .pauta-chip, .so-leitura .conf-item, .so-leitura .mel-status,
+.so-leitura .ev-check, .so-leitura .rot-cheg,
+.so-leitura .rapido-cat-btn{pointer-events:none;cursor:default;}
+.leitura-tag{display:none;}
+.so-leitura .leitura-tag{display:inline-block;margin-top:6px;font-size:9px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--ou2);border:1px solid var(--oud2);border-radius:3px;padding:2px 8px;}
 </style>
 <!-- Firebase (compat) · Central Loretto Scarpa -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -1141,6 +1156,7 @@ function escalaSanitizada(){
 }
 
 async function publicarEscala(){
+  if(semPermissao(true)) return;
   if(!DB) return;
   // sem acesso aos lançamentos (ou ainda carregando) a lista viria vazia e
   // apagaria a escala boa que já está publicada — melhor não escrever nada
@@ -1159,6 +1175,7 @@ async function publicarEscala(){
 }
 
 async function cobrir(sel,id,nome){
+  if(semPermissao()) return;
   const v=sel.value; window._cob=window._cob||{}; window._cob[id]=v;
   const a=ausenciasPraCobrir().filter(x=>x.nome===nome)[0]||{};
   const el=document.getElementById('st-'+id);
@@ -1479,9 +1496,9 @@ async function cobrir(sel,id,nome){
         </div>
 
         <div class="pdi-acoes">
-          <button class="bt ouro" onclick="pdiSalvar()">Salvar plano</button>
+          <button class="bt ouro so-hide" onclick="pdiSalvar()">Salvar plano</button>
           <button class="bt" onclick="window.print()">Imprimir</button>
-          <button class="bt" onclick="pdiNovo()">Novo plano</button>
+          <button class="bt so-hide" onclick="pdiNovo()">Novo plano</button>
         </div>
 
         <div class="pdi-hist">
@@ -1570,8 +1587,8 @@ async function cobrir(sel,id,nome){
     <div class="slbl" style="margin:0;border:none;padding:0;">Rotina da equipe</div>
     <span style="display:flex;align-items:center;gap:12px;">
       <button class="bt-ouro-mini" id="rot-imp" style="display:none" onclick="rotImportar()">Carregar cronograma do Yuri</button>
-      <button class="bt-ouro-mini" style="background:transparent;color:var(--ou2);" onclick="rotAbrirChegada()">Dias de chegada</button>
-      <button class="bt-ouro-mini" style="background:transparent;color:var(--ou2);" onclick="rotAbrirTroca()">Trocar rotinas</button>
+      <button class="bt-ouro-mini so-hide" style="background:transparent;color:var(--ou2);" onclick="rotAbrirChegada()">Dias de chegada</button>
+      <button class="bt-ouro-mini so-hide" style="background:transparent;color:var(--ou2);" onclick="rotAbrirTroca()">Trocar rotinas</button>
       <span class="rot-sem" id="rot-sem"></span>
     </span>
   </div>
@@ -1796,6 +1813,7 @@ let _rotLimpou=false;
 // dia, viram lixo e seriam recarregadas a cada leitura pra sempre. Roda uma
 // vez por sessão e só toca no que passou de 60 dias.
 async function rotLimpar(){
+  if(semPermissao(true)) return;
   if(_rotLimpou || !DB) return; _rotLimpou=true;
   const lim=new Date(); lim.setDate(lim.getDate()-60); const corte=rotIso(lim);
   const velhas=ROT_ITENS.filter(i=>(i.tipo==='realoc'||i.tipo==='extra') && i.data && i.data<corte);
@@ -1996,6 +2014,7 @@ function rotFaltando(quem){
 }
 
 async function rotImportar(){
+  if(semPermissao()) return;
   if(!DB || !ROT_SEED[ROT_QUEM]) return;
   const quem=ROT_QUEM, lista=rotFaltando(quem);
   if(!lista.length) return;
@@ -2055,6 +2074,7 @@ function rotModelo(pessoa, iso){
   return m ? m.modelo : rotModeloPadrao(pessoa, iso);
 }
 async function rotMarcarChegada(iso){
+  if(semPermissao()) return;
   if(!DB) return;
   const virar = rotModelo(ROT_QUEM, iso)==='chegada' ? 'normal' : 'chegada';
   const doc=ROT_ITENS.filter(function(r){ return r.tipo==='modelodia'&&r.pessoa===ROT_QUEM&&r.data===iso; })[0];
@@ -2076,6 +2096,7 @@ function rotAbrirChegada(){
   abrirModal('mov-rot-cheg');
 }
 async function rotSalvarChegada(){
+  if(semPermissao()) return;
   if(!DB) return;
   const dias=[...document.querySelectorAll('#rot-ch-dias .rot-p.on')].map(function(b){ return +b.dataset.d; }).sort();
   const doc=ROT_ITENS.filter(function(r){ return r.tipo==='chegadapadrao'; })[0];
@@ -2187,7 +2208,7 @@ function rotCard(i){
   const cls = i.tipo==='extra' ? ' extra' : (i.movidoDe ? ' movido' : '');
   const quando = i.hora ? '<div class="rot-hora">'+esc(i.hora)+'</div>'
                : (i.turno&&i.turno!=='dia' ? '<div class="rot-hora turno">'+esc(ROT_TURNO[i.turno])+'</div>' : '');
-  return '<div class="rot-card'+cls+'" draggable="true" data-id="'+esc(i.id)+'" data-dow="'+i._dow+'" data-iso="'+i._iso+'"'
+  return '<div class="rot-card'+cls+'" draggable="'+(SO_LEITURA?'false':'true')+'" data-id="'+esc(i.id)+'" data-dow="'+i._dow+'" data-iso="'+i._iso+'"'
     + ' ondragstart="rotPega(event,\''+esc(i.id)+'\','+i._dow+',\''+i._iso+'\')" ondragend="this.classList.remove(\'arrastando\')">'
     + quando
     + '<div class="rot-card-txt">'+esc(i.texto)+'</div>'
@@ -2214,6 +2235,7 @@ function rotPega(ev,id,dow,iso){
 }
 function rotSobre(ev,col){ if(!_rotDrag) return; ev.preventDefault(); ev.dataTransfer.dropEffect='move'; col.classList.add('alvo'); }
 async function rotSolta(ev,col){
+  if(semPermissao()) return;
   ev.preventDefault(); col.classList.remove('alvo');
   const g=_rotDrag; _rotDrag=null;
   if(!g || !DB) return;
@@ -2254,6 +2276,7 @@ function rotAbrirMover(id, para, iso, dow){
 }
 
 async function rotMover(quando){
+  if(semPermissao()) return;
   if(!_rotMv || !DB) return;
   const para=document.getElementById('rot-mv-quem').value;
   const id=_rotMv.id, tipo=_rotMv.tipo, iso=_rotMv.iso;
@@ -2307,6 +2330,7 @@ function rotTrocaResumo(){
   document.getElementById('rot-tr-d3').textContent=para+' passa a fazer as mesmas '+atv(a)+', e '+de+' continua com as dela.';
 }
 async function rotTrocar(modo){
+  if(semPermissao()) return;
   if(!DB) return;
   const de=document.getElementById('rot-tr-de').value, para=document.getElementById('rot-tr-para').value;
   if(de===para){ alert('Escolha duas pessoas diferentes.'); return; }
@@ -2410,6 +2434,7 @@ function rotToggleDia(d){
 }
 
 async function rotSalvar(){
+  if(semPermissao()) return;
   if(!DB) return;
   const texto=(document.getElementById('rot-f-txt').value||'').trim();
   if(!texto){ alert('Escreva o que é a atividade.'); return; }
@@ -2439,6 +2464,7 @@ async function rotSalvar(){
 }
 
 async function rotExcluir(id){
+  if(semPermissao()) return;
   const it=ROT_ITENS.filter(function(x){ return x.id===id; })[0]; if(!it || !DB) return;
   const aviso = it.tipo==='fixa'
     ? 'Excluir "'+it.texto+'" da rotina?\n\nSai de todos os dias, pra sempre.'
@@ -2630,6 +2656,7 @@ function pdiFoto(inp){
 }
 
 async function pdiSalvar(){
+  if(semPermissao()) return;
   if(!DB){ alert('Sem conexão.'); return; }
   const pessoa=PDI_QUEM;
   if(!pessoa){ alert('Escolha o colaborador.'); return; }
@@ -2660,6 +2687,7 @@ async function pdiSalvar(){
 }
 
 async function pdiExcluir(id){
+  if(semPermissao()) return;
   const x=PDI_ITENS.filter(function(i){ return i.id===id; })[0]; if(!x||!DB) return;
   if(!confirm('Excluir o plano de '+x.pessoa+' de '+pdiBr(x.data)+'?')) return;
   try{
@@ -3053,6 +3081,7 @@ async function abrirPauta(nome){
 }
 
 async function marcarCumprido(btn, nome, key, val){
+  if(semPermissao()) return;
   const box=btn.closest('.pauta-cumpriu');
   if(box){ box.querySelectorAll('.pauta-chip').forEach(b=>b.classList.remove('on-ok','on-no')); btn.classList.add(val?'on-ok':'on-no'); }
   // reflete no cache local
@@ -3111,6 +3140,7 @@ function imprimirColab(){
 }
 
 async function salvarPauta(nome){
+  if(semPermissao()) return;
   const inp=document.getElementById('pauta-comb-inp'), dt=document.getElementById('pauta-comb-data'), foco=document.getElementById('pauta-foco-inp');
   const st=document.getElementById('pauta-status');
   const _alvoP=window._pMes||mesSoma(mesHoje(),-1);
@@ -3379,6 +3409,24 @@ const PERFIS = {
   'aviaconsultoriaempresarial@gmail.com': {nome:'Ávia',      sub:'Loretto Scarpa · Consultoria'}
 };
 const ACESSO = Object.keys(PERFIS);
+
+// Contas que só acompanham. O painel inteiro continua visível; o que muda
+// é que nada daqui grava. ATENÇÃO: isto é a camada da tela. Quem impede de
+// verdade são as regras do Firestore — sem elas, esta conta ainda poderia
+// escrever por fora do painel.
+const SO_LEITURA_EMAILS = ['aviaconsultoriaempresarial@gmail.com'];
+let SO_LEITURA = false;
+
+// Chamada na entrada de toda função que grava. Avisa uma vez por ação, em
+// vez de deixar o clique morrer calado — silêncio faria parecer defeito.
+function semPermissao(silencioso){
+  if(!SO_LEITURA) return false;
+  if(!silencioso){
+    if(typeof toast==='function') toast('Seu acesso é de leitura: acompanha tudo, mas não altera.');
+    else alert('Seu acesso é de leitura: acompanha tudo, mas não altera.');
+  }
+  return true;
+}
 // Produção: exige login pela Central; sem login, redireciona. Dados vêm do Firestore.
 const EXIGIR_LOGIN = true;
 
@@ -3412,6 +3460,8 @@ if(AUTH){
     if(ACESSO.indexOf(email) === -1){ semAcesso(email); return; }
     SESSION = user;
     ROLE = email;
+    SO_LEITURA = SO_LEITURA_EMAILS.indexOf(email) >= 0;
+    if(SO_LEITURA) document.body.classList.add('so-leitura');
     aplicarSessao(email);
     carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); carregarEventos(); carregarPautasResumo(); montarSeletorMesPauta(); carregarRotina(); carregarPdi(); });
   });
@@ -3432,7 +3482,12 @@ function aplicarSessao(email){
   window._usuario = nome;
   const ub = document.querySelector('.h-user b'); if(ub) ub.textContent = nome.toUpperCase();
   const hs = document.querySelector('.h-sub');    if(hs) hs.textContent = sub;
-  const cap= document.querySelector('.hoje-cap-data'); if(cap) cap.textContent = saudacaoHora()+', '+nome+'!';
+  const cap= document.querySelector('.hoje-cap-data');
+  if(cap){ cap.textContent = saudacaoHora()+', '+nome+'!';
+    if(SO_LEITURA && !cap.parentNode.querySelector('.leitura-tag')){
+      const tag=document.createElement('div'); tag.className='leitura-tag';
+      tag.textContent='Acesso de leitura'; cap.parentNode.appendChild(tag);
+    } }
   const av=document.getElementById('cap-av'); if(av){ av.setAttribute('data-foto',nome); av.textContent=nome[0]; if(typeof aplicarFotos==='function') aplicarFotos(); }
 }
 
@@ -3702,6 +3757,7 @@ async function carregarConf(){
   renderConf();
 }
 async function persistConfCfg(){
+  if(semPermissao()) return;
   window._confCfg=window._confCfg||{dia:CONF_DIA.slice(),sem:CONF_SEM.slice()};
   if(!DB) return;
   try{ await DB.collection('ls_conferencias').doc('_config').set({dia:window._confCfg.dia,sem:window._confCfg.sem,atualizadoEm:new Date().toISOString()},{merge:true}); }
@@ -3733,6 +3789,7 @@ async function excluirConfItem(tipo,id){
   renderConf(); await persistConfCfg();
 }
 async function toggleConf(tipo,id){
+  if(semPermissao()) return;
   const store=tipo==='sem'?(window._confSem=window._confSem||{}):(window._confDia=window._confDia||{});
   const atual=store[id]&&store[id].feito;
   const d=new Date(), hora=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
@@ -3777,6 +3834,7 @@ function toggleFormMelhoria(fechar){
   else { ['mel-titulo','mel-problema','mel-solucao'].forEach(id=>{const e=document.getElementById(id); if(e)e.value='';}); }
 }
 async function salvarMelhoria(){
+  if(semPermissao()) return;
   const tit=(document.getElementById('mel-titulo').value||'').trim();
   const area=document.getElementById('mel-area').value;
   const prob=(document.getElementById('mel-problema').value||'').trim();
@@ -3805,6 +3863,7 @@ async function carregarMelhorias(){
   renderMelhorias();
 }
 async function ciclarStatusMelhoria(id){
+  if(semPermissao()) return;
   const arr=window._melhorias||[]; const it=arr.find(x=>x.id===id); if(!it)return;
   const i=MEL_STATUS.indexOf(it.status||'nova');
   it.status=MEL_STATUS[(i+1)%MEL_STATUS.length];
@@ -3814,6 +3873,7 @@ async function ciclarStatusMelhoria(id){
   catch(e){ console.warn('status melhoria',e); }
 }
 async function excluirMelhoria(id){
+  if(semPermissao()) return;
   if(!confirm('Excluir esta ideia do mural?'))return;
   window._melhorias=(window._melhorias||[]).filter(x=>x.id!==id);
   renderMelhorias();
@@ -3931,6 +3991,7 @@ function renderOcorrencias(){
   }).join('');
 }
 async function excluirOcorrencia(id){
+  if(semPermissao()) return;
   if(!confirm('Excluir esta ocorrência?'))return;
   window._ocorrencias=(window._ocorrencias||[]).filter(o=>o.id!==id); renderOcorrencias();
   if(!DB)return; try{ await DB.collection('ls_ocorrencias').doc(id).delete(); }catch(e){ console.warn('excluirOc',e); }
@@ -3940,6 +4001,7 @@ function selCatOc(btn,cat){
   btn.classList.add('active'); window._ocCatSel=cat;
 }
 async function salvarOcorrencia(){
+  if(semPermissao()) return;
   const pessoa=document.getElementById('oc-f-pessoa').value;
   const data=document.getElementById('oc-f-data').value;
   const obs=(document.getElementById('oc-f-obs').value||'').trim();
@@ -3960,6 +4022,7 @@ async function salvarOcorrencia(){
    Deduplica por pessoa+dia+origem, então reeditar o status do dia só atualiza. */
 function _ocPresenca(nome, dataISO){ return (window._ocorrencias||[]).find(o=>o&&o.origem==='presenca'&&o.pessoa===nome&&o.data===dataISO); }
 async function registrarOcorrenciaPresenca(nome, status, obsMotivo, cobre){
+  if(semPermissao()) return;
   const dataISO=_hojeStr();
   const motLbl = status==='atestado'?'Atestado':(status==='ferias'?'Férias':(status==='folga'?'Folga':(status==='falta'?'Falta':'Ausência')));
   let obs=motLbl+' — registrado pelo card "Quem está na loja".';
@@ -3979,6 +4042,7 @@ async function registrarOcorrenciaPresenca(nome, status, obsMotivo, cobre){
   if(typeof renderOcorrencias==='function') renderOcorrencias();
 }
 async function removerOcorrenciaPresenca(nome){
+  if(semPermissao()) return;
   const ex=_ocPresenca(nome,_hojeStr()); if(!ex) return;
   window._ocorrencias=(window._ocorrencias||[]).filter(o=>o.id!==ex.id);
   if(typeof renderOcorrencias==='function') renderOcorrencias();
@@ -4026,6 +4090,7 @@ function setEstrela(ci,n){
   if(row) row.querySelectorAll('span').forEach((e,k)=>{ e.textContent=k<n?'★':'☆'; e.style.color=k<n?'var(--ou)':'var(--cr3)'; });
 }
 async function salvarAvaliacao(){
+  if(semPermissao()) return;
   const nome=document.getElementById('av-f-pessoa').value;
   const av=window._avSel||AV_CATS.map(()=>0);
   if(av.length<AV_CATS.length || av.some(x=>!x)){ alert('Dê nota de 1 a 5 em todos os '+AV_CATS.length+' critérios.'); return; }
@@ -4667,6 +4732,7 @@ function toggleFormEvento(fechar){
   }
 }
 async function salvarEvento(){
+  if(semPermissao()) return;
   const tit=(document.getElementById('ev-titulo').value||'').trim();
   const data=document.getElementById('ev-data').value||'';
   if(!tit){ alert('Dê um nome pro evento.'); return; }
@@ -4691,6 +4757,7 @@ async function carregarEventos(){
   renderEventos();
 }
 async function toggleEvento(id){
+  if(semPermissao()) return;
   const it=(window._eventos||[]).find(x=>x.id===id); if(!it)return;
   it.concluido=!it.concluido; renderEventos();
   if(!DB)return;
@@ -4698,6 +4765,7 @@ async function toggleEvento(id){
   catch(e){ console.warn('toggleEvento',e); }
 }
 async function excluirEvento(id){
+  if(semPermissao()) return;
   if(!confirm('Excluir este evento?'))return;
   window._eventos=(window._eventos||[]).filter(x=>x.id!==id); renderEventos();
   if(!DB)return;
@@ -4803,6 +4871,7 @@ function stRenderBody(){
         : 'Confirma <b>'+s.nome+'</b> presente hoje — remove a ausência e a ocorrência lançadas pra hoje.')+'</div>';
 }
 async function salvarStatus(){
+  if(semPermissao()) return;
   const s=window._stEdit; if(!s)return;
   const nome=s.nome, hj=_hojeStr();
   const inicioRef=_inicioAusencia(nome);
