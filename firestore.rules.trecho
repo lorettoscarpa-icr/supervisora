@@ -1,0 +1,74 @@
+// ══════════════════════════════════════════════════════════════════
+//  PAINEL DA SUPERVISORA · o que ACRESCENTAR nas regras já publicadas
+//
+//  Duas coisas de uma vez:
+//   1. as coleções que o painel usa e que ainda não têm regra própria
+//      (hoje caem na coringa do final, que libera escrita pra QUALQUER
+//      pessoa logada — inclusive vendedora, pelo endereço direto);
+//   2. a Ávia entra como SÓ VISUALIZAÇÃO.
+//
+//  Na tela ela já não tem botão de salvar, editar nem excluir. Mas a
+//  tela é só a tela: quem impede de verdade são estas regras. Enquanto
+//  elas não subirem, o "só leitura" dela vale só no painel.
+//
+//  São TRÊS mudanças. Não substitua o arquivo — acrescente.
+// ══════════════════════════════════════════════════════════════════
+
+
+// ── MUDANÇA A ── acrescente esta função junto das outras funções
+//    (pode ir logo depois de gestorOuSup)
+
+    // Quem ABRE o painel da supervisora: a diretoria, a Jhennifer e a Ávia.
+    // A Ávia está aqui e NÃO está em gestorOuSup, e é isso que faz o
+    // acesso dela ser só de visualização: ela lê tudo, não grava nada.
+    function painelSup() {
+      return logado() && request.auth.token.email in [
+        'lorettoscarpa@gmail.com',
+        'larissalorettoscarpa@gmail.com',
+        'jhenniferlorettoscarpa@gmail.com',
+        'aviaconsultoriaempresarial@gmail.com'
+      ];
+    }
+
+
+// ── MUDANÇA B ── acrescente estes blocos junto dos outros match
+
+    // Escala da equipe — versão higienizada de lancamentos (só "Ausente",
+    // sem motivo). Todo colaborador logado LÊ, porque a Central mostra o
+    // calendário do mês pra equipe inteira. Publicar é do painel.
+    match /ls_escala/{doc} {
+      allow read:  if logado();
+      allow write: if gestorOuSup();
+    }
+
+    // O resto do painel da supervisora. Ninguém fora dele usa estas
+    // coleções, e o que está aqui é sobre pessoa: ocorrência, avaliação
+    // mensal, plano de desenvolvimento, quem faltou, quem cobriu. Só quem
+    // abre o painel LÊ; só a diretoria e a Jhennifer GRAVAM.
+    match /ls_pdi/{doc}           { allow read: if painelSup(); allow write: if gestorOuSup(); }
+    match /ls_avaliacoes/{doc}    { allow read: if painelSup(); allow write: if gestorOuSup(); }
+    match /ls_ocorrencias/{doc}   { allow read: if painelSup(); allow write: if gestorOuSup(); }
+    match /ls_pautas/{doc}        { allow read: if painelSup(); allow write: if gestorOuSup(); }
+    match /ls_presenca/{doc}      { allow read: if painelSup(); allow write: if gestorOuSup(); }
+    match /ls_coberturas/{doc}    { allow read: if painelSup(); allow write: if gestorOuSup(); }
+    match /ls_melhorias/{doc}     { allow read: if painelSup(); allow write: if gestorOuSup(); }
+    match /ls_eventos/{doc}       { allow read: if painelSup(); allow write: if gestorOuSup(); }
+    match /ls_conferencias/{doc}  { allow read: if painelSup(); allow write: if gestorOuSup(); }
+
+
+// ── MUDANÇA C ── acrescente estes nomes na lista de exceções da regra
+//    coringa lá do final (a mesma onde já estão 'catalogos_arquivos' e
+//    'ls_rotina'). Sem isto a mudança B não serve de nada: no Firestore
+//    as regras se SOMAM, e basta UMA liberar pra liberar.
+//
+//    A linha inteira fica assim:
+
+      allow read, write: if !(coll in ['hub_config','ls_acessos','lancamentos','bancoHoras','documentosRH','ls_comunicados','ls_tarefas','catalogos_arquivos','ls_ausencias','ls_vez_hist','ls_rotina','ls_escala','ls_pdi','ls_avaliacoes','ls_ocorrencias','ls_pautas','ls_presenca','ls_coberturas','ls_melhorias','ls_eventos','ls_conferencias'])
+        && request.auth != null
+        && request.auth.token.firebase.sign_in_provider != 'anonymous';
+
+
+// ── OBSERVAÇÃO ────────────────────────────────────────────────────
+//  O RH da Ávia (lancamentos, bancoHoras, documentosRH) NÃO muda: ela
+//  continua gravando lá normalmente, pelo painel de RH dela. O "só
+//  visualização" é do painel da supervisora, não do trabalho dela.
