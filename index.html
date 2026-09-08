@@ -1081,6 +1081,9 @@ body{zoom:1.1;}
   .cob-fut{font-size:11px;color:var(--ou);margin-top:3px;}
   .cob-tar{width:100%;margin-top:8px;background:transparent;border:1px dashed var(--oud);color:var(--ou2);padding:8px;font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;border-radius:2px;}
   .cob-tar:hover{border-style:solid;background:rgba(212,180,90,.08);}
+  .cob-bloco{margin-top:14px;padding-top:13px;border-top:1px solid var(--oud2);}
+  .cob-linha b{color:var(--cr);font-weight:600;}
+  .cob-vazio{margin-top:14px;padding-top:13px;border-top:1px solid var(--oud2);font-size:11.5px;color:var(--cr3);font-style:italic;}
   </style>
   <div class="cob-sec">
     <div class="slbl">Cobertura de Ausências</div>
@@ -1091,6 +1094,9 @@ body{zoom:1.1;}
 
 <script>
 const GRUPO={'Ialey':'vendas','Michelly':'vendas','Natália':'vendas','Jhennifer':'supervisao','Yuri':'operacao','Edson':'operacao','Gustavo':'operacao','Lorrayne':'marketing'};
+const _FEM=['Ialey','Michelly','Natália','Jhennifer','Lorrayne','Larissa'];
+function _art(n){ return _FEM.indexOf(n)>=0?'a ':'o '; }
+function _jsq(t){ return String(t==null?'':t).replace(/[\\'"]/g,''); }
 function _cobId(nome,inicio){ return 'cb_'+String(nome).normalize('NFD').replace(/[^a-zA-Z]/g,'').toLowerCase()+'_'+String(inicio||'').replace(/[^0-9]/g,''); }
 function _amanhaStr(){ const d=new Date(); d.setDate(d.getDate()+1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 // Ausências que pedem cobertura organizada: quem já está fora hoje (RH + edições
@@ -1107,17 +1113,41 @@ function ausenciasPraCobrir(){
   });
   return Object.keys(base).map(n=>base[n]);
 }
-/* O "+ funções" ali em cima é uma frase — ninguém sabe QUAIS. Este botão abre
-   a lista: atividade por atividade, quem assume enquanto a pessoa está fora. */
-function _cobBtnTarefas(a){
+/* Celular de vendas e rotina eram a mesma frase ("celular + funções"), e o
+   celular ainda aparecia pra operação, que não tem celular de vendas nenhum.
+   São duas coberturas diferentes: o telefone é do salão, a rotina é de todo
+   mundo — e podem ir pra pessoas diferentes. */
+function _vende(nome){ return GRUPO[nome]==='vendas'; }
+function _cobLinha1(a){
+  return _vende(a.nome)
+    ? '📱 <b>Celular de vendas</b> — quem assume as conversas e o atendimento d'+_art(a.nome)+a.nome
+    : '👤 <b>Quem responde</b> pela área d'+_art(a.nome)+a.nome+' no período';
+}
+function _cobStatus1(a, quem){
+  if(!quem) return _vende(a.nome) ? 'Celular de vendas sem cobertura definida' : 'Sem cobertura definida ainda';
+  return (_vende(a.nome)?'📱 Celular de vendas com <b>':'👤 <b>')+quem+'</b> · '+_cobPeriodoTxt(a);
+}
+/* O "+ funções" da frase antiga: ninguém sabia QUAIS. Aqui vira um bloco à
+   parte, com a conta de quantas já passaram e pra quem. */
+function _cobBlocoTarefas(a){
   if(typeof cobTarefas!=='function' || !a.inicio || !a.fim) return '';
   const tot=cobTarefas(a.nome, a.inicio, a.fim).length;
-  if(!tot) return '';
-  const pass=cobQuantas(a.nome, a.inicio);
+  if(!tot) return '<div class="cob-vazio">Sem rotina cadastrada no período — não há tarefa a passar.</div>';
+  const d=cobDoc(a.nome, a.inicio), it=(d&&d.itens)||{}, por={};
+  let n=0;
+  Object.keys(it).forEach(function(k){ if(it[k]){ n++; por[it[k]]=(por[it[k]]||0)+1; } });
+  const nomes=Object.keys(por).sort(), sobra=tot-n;
   const arg="'"+_jsq(a.nome)+"','"+a.inicio+"','"+a.fim+"','"+_jsq(a.mot&&a.mot.txt)+"'";
-  return '<button class="cob-tar so-hide" onclick="rotAbrirCobertura('+arg+')">'
-    + (pass ? '✓ '+pass+' de '+tot+' tarefas passadas — revisar' : 'Organizar as '+tot+' tarefas')
-    + '</button>';
+  return '<div class="cob-bloco">'
+    + '<div class="cob-linha">📋 <b>Rotina</b> — '+tot+(tot===1?' atividade':' atividades')+' no período</div>'
+    + '<div class="cob-status '+(n?'ok':'pend')+'">'
+      + (n ? nomes.map(function(p){ return '<b>'+p+'</b> assume '+por[p]; }).join(' · ')
+             + (sobra>0 ? ' · '+sobra+(sobra===1?' continua':' continuam')+' com '+a.nome : '')
+           : 'Tarefas ainda não organizadas')
+    + '</div>'
+    + '<button class="cob-tar so-hide" onclick="rotAbrirCobertura('+arg+')">'
+      + (n ? 'Rever as tarefas' : 'Organizar as '+tot+' tarefas') + '</button>'
+    + '</div>';
 }
 function _cobPeriodoTxt(a){ return (a.inicio&&a.fim&&a.inicio!==a.fim)?('de '+fmtData(a.inicio)+' até '+fmtData(a.fim)):('em '+fmtData(a.fim||a.inicio)); }
 function renderCobertura(){
@@ -1137,10 +1167,10 @@ function renderCobertura(){
     return '<div class="cob-card">'
       +'<div class="cob-head"><span class="mini-av" data-foto="'+a.nome+'">'+a.nome[0]+'</span><div><div class="cob-nome">'+a.nome+'</div><div class="cob-motivo '+motCls+'">'+a.mot.txt+' · '+periodo+'</div>'
       +(a.futura?'<div class="cob-fut">⏳ sai amanhã — deixe a cobertura definida</div>':'')+'</div></div>'
-      +'<div class="cob-linha">📱 Celular de vendas + funções de '+a.nome+'</div>'
+      +'<div class="cob-linha">'+_cobLinha1(a)+'</div>'
       +'<div class="cob-assign">Assume → '+sel+'</div>'
-      +'<div class="cob-status '+(escolhido?'ok':'pend')+'" id="st-'+id+'">'+(escolhido?('📱 Celular + funções com <b>'+escolhido+'</b> · '+periodo):'Sem cobertura definida ainda')+'</div>'
-      +_cobBtnTarefas(a)+'</div>';
+      +'<div class="cob-status '+(escolhido?'ok':'pend')+'" id="st-'+id+'">'+_cobStatus1(a,escolhido)+'</div>'
+      +_cobBlocoTarefas(a)+'</div>';
   }).join('');
   if(typeof aplicarFotos==='function') aplicarFotos();
 }
@@ -1218,7 +1248,7 @@ async function cobrir(sel,id,nome){
   const v=sel.value; window._cob=window._cob||{}; window._cob[id]=v;
   const a=ausenciasPraCobrir().filter(x=>x.nome===nome)[0]||{};
   const el=document.getElementById('st-'+id);
-  if(el){ el.className='cob-status '+(v?'ok':'pend'); el.innerHTML=v?('📱 Celular + funções com <b>'+v+'</b> · '+_cobPeriodoTxt(a)):'Sem cobertura definida ainda'; }
+  if(el){ el.className='cob-status '+(v?'ok':'pend'); el.innerHTML=_cobStatus1(a, v); }
   // reflete no card "Quem está na loja Hoje" e tira a pendência da lista
   if(typeof renderPresenca==='function' && typeof presencaCardData==='function') renderPresenca(presencaCardData());
   if(typeof renderPendencias==='function') renderPendencias();
@@ -2259,9 +2289,7 @@ function rotAvulsasDe(nome){
 }
 
 let _cobEdit=null;
-function _jsq(t){ return String(t==null?'':t).replace(/[\\'"]/g,''); }
 function cobD(iso){ const p=String(iso||'').split('-'); return new Date(+p[0],(+p[1])-1,+p[2]); }
-function _art(n){ return ROT_FEM.indexOf(n)>=0?'a ':'o '; }
 function cobPeriodo(e){ return e.inicio===e.fim ? ('em '+fmtData(e.inicio)) : ('de '+fmtData(e.inicio)+' até '+fmtData(e.fim)); }
 
 // quais dias da semana caem dentro do período (folga de 1 dia não precisa
@@ -2442,6 +2470,9 @@ function cobDiasTxt(t){
 }
 function cobMensagem(quem, de, ini, fim, tarefas, tudo){
   const dd=cobDias(ini, fim);
+  // quem pegou o celular de vendas precisa saber disso na mesma mensagem —
+  // são duas coberturas, e nem sempre vão pra mesma pessoa
+  const comCel = _vende(de) && (window._cob||{})[_cobId(de, ini)]===quem;
   const linhas=tarefas.slice().sort(rotOrdena).map(function(t){
     const q=cobDiasTxt(t);
     return '• '+(t.hora?t.hora+' — ':'')+t.texto+(q?' ('+q+')':'');
@@ -2451,7 +2482,8 @@ function cobMensagem(quem, de, ini, fim, tarefas, tudo){
     + ' — '+dd+(dd===1?' dia':' dias')+' — e você fica com '
     + (tudo?'a rotina dela':'parte da rotina dela')+' nesse período.\n\n'
     + 'Além do que você já faz:\n' + linhas.join('\n')
-    + '\n\nJá está tudo no painel, na aba Rotina, marcado em verde como "cobrindo '+de+'".'
+    + (comCel ? '\n\n📱 O celular de vendas dela também fica com você nesse período — as conversas e o atendimento das clientes dela.' : '')
+    + '\n\nA rotina já está no painel, na aba Rotina, marcada em verde como "cobrindo '+de+'".'
     + '\n\nQualquer dúvida me chama! 💛';
 }
 function rotAbrirAviso(de, inicio, fim, itens, tarefas){
