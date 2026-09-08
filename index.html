@@ -546,6 +546,30 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .rot-ajuda{margin-top:22px;border-top:1px solid var(--oud2);padding-top:14px;font-size:12px;color:var(--cr3);line-height:1.65;}
 .rot-ajuda b{color:var(--cr2);font-weight:500;}
 .rot-vazio{color:var(--cr3);font-size:11.5px;font-style:italic;padding:8px 2px;text-align:center;}
+/* cobertura da rotina — passar as tarefas de quem está fora */
+.rot-banner{background:var(--bg2);border:1px solid var(--oud2);border-left:2px solid var(--ou);padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:var(--cr2);line-height:1.5;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.rot-banner b{color:var(--ou2);font-weight:600;}
+.rot-banner.cobrindo{border-left-color:var(--verde);}
+.rot-banner .bt-ouro-mini{margin-left:auto;flex:none;}
+.cbt-topo{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--oud2);padding:10px 12px;border-radius:3px;margin-bottom:6px;flex-wrap:wrap;}
+.cbt-topo span{font-size:11.5px;color:var(--cr3);flex:none;}
+.cbt-topo select{flex:1;min-width:170px;background:var(--v1);border:1px solid var(--oud);color:var(--cr);font-family:inherit;font-size:12px;padding:7px 10px;cursor:pointer;}
+.cbt-sec{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cr3);margin:16px 0 2px;}
+.cbt-l{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--oud2);}
+.cbt-q{font-family:'DM Mono',monospace;font-size:9px;color:var(--ou2);width:54px;flex:none;text-align:right;}
+.cbt-q.vazio{color:var(--cr3);}
+.cbt-c{flex:1;min-width:0;}
+.cbt-t{font-size:12.5px;color:var(--cr2);line-height:1.35;}
+.cbt-d{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.8px;text-transform:uppercase;color:var(--cr3);margin-top:3px;}
+.cbt-s{width:196px;flex:none;background:var(--v1);border:1px solid var(--oud);color:var(--cr);font-family:inherit;font-size:11.5px;padding:6px 8px;cursor:pointer;}
+.cbt-s.fica{color:var(--cr3);border-color:var(--oud2);}
+.cbt-resumo{margin-top:16px;padding:11px 13px;border:1px solid var(--oud2);background:var(--oud2);font-size:12px;color:var(--cr2);line-height:1.55;}
+.cbt-resumo b{color:var(--ou2);}
+@media(max-width:700px){.cbt-l{flex-wrap:wrap;}.cbt-s{width:100%;}.cbt-q{width:auto;text-align:left;}}
+.cav-b{border:1px solid var(--oud2);border-left:2px solid var(--verde);padding:13px 15px;margin-bottom:12px;background:var(--bg2);}
+.cav-h{font-size:12.5px;color:var(--cr3);margin-bottom:9px;}
+.cav-h b{color:var(--ou2);font-size:13.5px;}
+.cav-b .wpp-template{min-height:0;overflow-y:auto;}
 
 @media(max-width:900px){ .rot-semana{grid-template-columns:repeat(3,1fr);} }
 @media(max-width:560px){ .rot-semana{grid-template-columns:repeat(2,1fr);} }
@@ -1055,6 +1079,8 @@ body{zoom:1.1;}
   .cob-status.ok{color:var(--ou);border-color:var(--oud);}
   .cob-status.pend{color:var(--cr3);}
   .cob-fut{font-size:11px;color:var(--ou);margin-top:3px;}
+  .cob-tar{width:100%;margin-top:8px;background:transparent;border:1px dashed var(--oud);color:var(--ou2);padding:8px;font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;border-radius:2px;}
+  .cob-tar:hover{border-style:solid;background:rgba(212,180,90,.08);}
   </style>
   <div class="cob-sec">
     <div class="slbl">Cobertura de Ausências</div>
@@ -1081,6 +1107,18 @@ function ausenciasPraCobrir(){
   });
   return Object.keys(base).map(n=>base[n]);
 }
+/* O "+ funções" ali em cima é uma frase — ninguém sabe QUAIS. Este botão abre
+   a lista: atividade por atividade, quem assume enquanto a pessoa está fora. */
+function _cobBtnTarefas(a){
+  if(typeof cobTarefas!=='function' || !a.inicio || !a.fim) return '';
+  const tot=cobTarefas(a.nome, a.inicio, a.fim).length;
+  if(!tot) return '';
+  const pass=cobQuantas(a.nome, a.inicio);
+  const arg="'"+_jsq(a.nome)+"','"+a.inicio+"','"+a.fim+"','"+_jsq(a.mot&&a.mot.txt)+"'";
+  return '<button class="cob-tar so-hide" onclick="rotAbrirCobertura('+arg+')">'
+    + (pass ? '✓ '+pass+' de '+tot+' tarefas passadas — revisar' : 'Organizar as '+tot+' tarefas')
+    + '</button>';
+}
 function _cobPeriodoTxt(a){ return (a.inicio&&a.fim&&a.inicio!==a.fim)?('de '+fmtData(a.inicio)+' até '+fmtData(a.fim)):('em '+fmtData(a.fim||a.inicio)); }
 function renderCobertura(){
   const grid=document.getElementById('cob-grid'); if(!grid)return;
@@ -1101,7 +1139,8 @@ function renderCobertura(){
       +(a.futura?'<div class="cob-fut">⏳ sai amanhã — deixe a cobertura definida</div>':'')+'</div></div>'
       +'<div class="cob-linha">📱 Celular de vendas + funções de '+a.nome+'</div>'
       +'<div class="cob-assign">Assume → '+sel+'</div>'
-      +'<div class="cob-status '+(escolhido?'ok':'pend')+'" id="st-'+id+'">'+(escolhido?('📱 Celular + funções com <b>'+escolhido+'</b> · '+periodo):'Sem cobertura definida ainda')+'</div></div>';
+      +'<div class="cob-status '+(escolhido?'ok':'pend')+'" id="st-'+id+'">'+(escolhido?('📱 Celular + funções com <b>'+escolhido+'</b> · '+periodo):'Sem cobertura definida ainda')+'</div>'
+      +_cobBtnTarefas(a)+'</div>';
   }).join('');
   if(typeof aplicarFotos==='function') aplicarFotos();
 }
@@ -1594,6 +1633,7 @@ async function cobrir(sel,id,nome){
   </div>
 
   <div class="rot-pessoas" id="rot-pessoas"></div>
+  <div id="rot-banner"></div>
   <div class="rot-semana" id="rot-semana"></div>
   <div id="rot-avulsas"></div>
 
@@ -1721,6 +1761,40 @@ async function cobrir(sel,id,nome){
   </div>
 </div>
 
+<!-- Rotina · quem faz as tarefas de quem está fora -->
+<div class="mov" id="mov-rot-cob">
+  <div class="modal-box" style="max-width:640px;">
+    <button class="modal-close" onclick="fecharModal('mov-rot-cob')">&times;</button>
+    <div class="modal-tit" id="cbt-tit">Tarefas da cobertura</div>
+    <div class="modal-sub" id="cbt-sub"></div>
+    <div class="cbt-topo" id="cbt-topo">
+      <span>Passar tudo para</span>
+      <select id="cbt-todas" onchange="cobTodas(this.value)"></select>
+    </div>
+    <div id="cbt-lista"></div>
+    <div class="cbt-resumo" id="cbt-resumo"></div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="bt" onclick="fecharModal('mov-rot-cob')">Fechar</button>
+      <button class="bt so-hide" id="cbt-avisar" onclick="cobAvisarDaqui()">Avisar de novo</button>
+      <button class="bt so-hide" id="cbt-desfazer" onclick="cobDesfazer()">Desfazer tudo</button>
+      <button class="bt ouro so-hide" onclick="cobSalvar()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rotina · avisar quem vai cobrir, pelo WhatsApp -->
+<div class="mov" id="mov-rot-aviso">
+  <div class="modal-box" style="max-width:620px;">
+    <button class="modal-close" onclick="fecharModal('mov-rot-aviso')">&times;</button>
+    <div class="modal-tit">Avisar quem vai cobrir</div>
+    <div class="modal-sub" id="cav-sub"></div>
+    <div id="cav-lista"></div>
+    <div style="display:flex;gap:8px;margin-top:6px;justify-content:flex-end;">
+      <button class="bt" onclick="fecharModal('mov-rot-aviso')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div class="mov" id="modal-ficha">
   <div class="modal-box">
     <button class="modal-close" onclick="fecharModal('modal-ficha')">×</button>
@@ -1816,7 +1890,8 @@ async function rotLimpar(){
   if(semPermissao(true)) return;
   if(_rotLimpou || !DB) return; _rotLimpou=true;
   const lim=new Date(); lim.setDate(lim.getDate()-60); const corte=rotIso(lim);
-  const velhas=ROT_ITENS.filter(i=>(i.tipo==='realoc'||i.tipo==='extra') && i.data && i.data<corte);
+  const velhas=ROT_ITENS.filter(i=>((i.tipo==='realoc'||i.tipo==='extra') && i.data && i.data<corte)
+                                 || (i.tipo==='cobre' && i.fim && i.fim<corte));
   for(const v of velhas){
     try{ await DB.collection('ls_rotina').doc(v.id).delete(); }
     catch(e){ console.warn('rotLimpar',e); break; }   // sem permissão: para, não insiste
@@ -2036,6 +2111,8 @@ function carregarRotina(){
   _unsubRot = DB.collection('ls_rotina').onSnapshot(function(snap){
     ROT_ITENS = snap.docs.map(function(d){ const o=d.data(); o.id=d.id; return o; });
     renderRotina(); rotLimpar();
+    // o card "Cobertura de Ausências" conta as tarefas a partir daqui
+    if(typeof renderCobertura==='function') renderCobertura();
   }, function(e){ console.warn('rotina',e);
     const g=document.getElementById('rot-semana');
     if(g) g.innerHTML='<div class="rot-vazio" style="grid-column:1/-1;">Não consegui ler a rotina agora. ('+esc(e.code||e.message)+')</div>';
@@ -2107,8 +2184,53 @@ async function rotSalvarChegada(){
   }catch(e){ console.warn('rotSalvarChegada',e); alert('Não consegui salvar agora.'); }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   COBERTURA DA ROTINA · quem faz as tarefas de quem está fora
+
+   Mais um tipo de documento em ls_rotina:
+     cobre {de, inicio, fim, itens:{refId:'quem assume'}, motivo}
+
+   É UM documento por cobertura, não um por dia. Férias de 20 dias com
+   18 atividades daria mais de 300 realocs, e desfazer seria apagar 300.
+   Aqui encurtar a ausência é mudar o fim, e cancelar é apagar um
+   documento — a rotina inteira volta pro dono sozinha.
+
+   Atividade que ninguém assume simplesmente não entra no mapa: continua
+   no nome de quem está fora, como sempre esteve.
+
+   O arrastar do dia a dia (realoc) continua valendo e passa POR CIMA da
+   cobertura — é a decisão mais específica, tomada olhando aquele dia.
+   ══════════════════════════════════════════════════════════════ */
+// quem assume o quê nesta data, somando as coberturas que a alcançam
+function rotCobreDe(iso){
+  const m={};
+  ROT_ITENS.forEach(function(r){
+    if(r.tipo!=='cobre' || !r.inicio || !r.fim) return;
+    if(iso<r.inicio || iso>r.fim) return;
+    const it=r.itens||{};
+    Object.keys(it).forEach(function(ref){ if(it[ref]) m[ref]=it[ref]; });
+  });
+  return m;
+}
+// a cobertura de uma pessoa que ainda vale (hoje ou daqui pra frente)
+function rotCobDe(nome){
+  const hj=rotHoje();
+  return ROT_ITENS.filter(function(r){ return r.tipo==='cobre'&&r.de===nome&&r.fim>=hj; })
+                  .sort(function(a,b){ return a.inicio.localeCompare(b.inicio); })[0]||null;
+}
+// coberturas em que a pessoa é quem ASSUME (pro aviso na aba dela)
+function rotCobPara(nome){
+  const hj=rotHoje();
+  return ROT_ITENS.filter(function(r){
+    if(r.tipo!=='cobre' || r.fim<hj) return false;
+    const it=r.itens||{};
+    return Object.keys(it).some(function(k){ return it[k]===nome; });
+  });
+}
+
 // o que vale numa data, já com as coberturas daquele dia aplicadas
 function rotDoDia(iso, dow){
+  const cob=rotCobreDe(iso);
   const ov={}; ROT_ITENS.forEach(function(r){ if(r.tipo==='realoc'&&r.data===iso) ov[r.refId]=r.pessoa; });
   return ROT_ITENS.filter(function(i){
     if(i.tipo==='extra') return i.data===iso;
@@ -2119,9 +2241,259 @@ function rotDoDia(iso, dow){
     }
     return false;
   }).map(function(i){
-    const dono=ov[i.id];
-    return Object.assign({}, i, {pessoa: dono||i.pessoa, movidoDe: dono?i.pessoa:null, _iso:iso, _dow:dow});
+    const dono=ov[i.id]||cob[i.id];
+    return Object.assign({}, i, {pessoa: dono||i.pessoa, movidoDe: dono?i.pessoa:null,
+                                 porCobertura: !ov[i.id] && !!cob[i.id], _iso:iso, _dow:dow});
   });
+}
+
+/* as "sem dia certo" não têm data pra casar com o período, então o que vale
+   pra elas é a cobertura de HOJE: enquanto a pessoa estiver fora, a tarefa
+   mensal aparece na aba de quem assumiu. */
+function rotAvulsasDe(nome){
+  const cob=rotCobreDe(rotHoje());
+  return ROT_ITENS.filter(function(i){ return i.tipo==='avulsa'; })
+    .map(function(i){ const d=cob[i.id];
+      return Object.assign({}, i, {pessoa:d||i.pessoa, movidoDe:d?i.pessoa:null, porCobertura:!!d}); })
+    .filter(function(i){ return i.pessoa===nome; });
+}
+
+let _cobEdit=null;
+function _jsq(t){ return String(t==null?'':t).replace(/[\\'"]/g,''); }
+function cobD(iso){ const p=String(iso||'').split('-'); return new Date(+p[0],(+p[1])-1,+p[2]); }
+function _art(n){ return ROT_FEM.indexOf(n)>=0?'a ':'o '; }
+function cobPeriodo(e){ return e.inicio===e.fim ? ('em '+fmtData(e.inicio)) : ('de '+fmtData(e.inicio)+' até '+fmtData(e.fim)); }
+
+// quais dias da semana caem dentro do período (folga de 1 dia não precisa
+// mostrar a atividade de sábado)
+function cobDows(inicio, fim){
+  const s={}, d=cobD(inicio), f=cobD(fim);
+  for(let i=0;i<400 && d<=f;i++){ s[d.getDay()]=1; d.setDate(d.getDate()+1); }
+  return s;
+}
+/* uma linha por ATIVIDADE, não por dia: passar "abrir a loja" é passar todas
+   as segundas do período, não a segunda do dia 12. */
+function cobTarefas(nome, inicio, fim){
+  const dows=cobDows(inicio, fim), out=[];
+  ROT_ITENS.forEach(function(i){
+    if(i.pessoa!==nome) return;
+    if(i.tipo==='fixa'){
+      const dias=(i.dias||[]).filter(function(d){ return dows[d]; });
+      if(dias.length) out.push(Object.assign({}, i, {_dias:dias}));
+    }else if(i.tipo==='extra'){
+      if(i.data>=inicio && i.data<=fim) out.push(Object.assign({}, i, {_dias:null}));
+    }else if(i.tipo==='avulsa'){
+      out.push(Object.assign({}, i, {_dias:null}));
+    }
+  });
+  return out;
+}
+function cobDoc(nome, inicio){
+  return ROT_ITENS.filter(function(r){ return r.tipo==='cobre'&&r.de===nome&&r.inicio===inicio; })[0]||null;
+}
+// quantas já estão passadas — pro rodapé do card de cobertura
+function cobQuantas(nome, inicio){
+  const d=cobDoc(nome, inicio); if(!d) return 0;
+  const it=d.itens||{};
+  return Object.keys(it).filter(function(k){ return it[k]; }).length;
+}
+
+function rotAbrirCobertura(nome, inicio, fim, motivo){
+  if(!inicio||!fim) return;
+  const tar=cobTarefas(nome, inicio, fim);
+  const doc=cobDoc(nome, inicio);
+  const salvo=doc?(doc.itens||{}):null;
+  // primeira vez: já abre com tudo no nome de quem ficou de cobrir, e ela
+  // só mexe no que for diferente
+  const quemCobre=(window._cob||{})[_cobId(nome, inicio)]||'';
+  const itens={};
+  tar.forEach(function(t){ itens[t.id] = salvo ? (salvo[t.id]||'') : quemCobre; });
+  _cobEdit={de:nome, inicio:inicio, fim:fim, motivo:motivo||'', itens:itens, tarefas:tar, existe:!!doc};
+  cobRender();
+  abrirModal('mov-rot-cob');
+}
+
+function _cobOpts(v){
+  const e=_cobEdit;
+  return '<option value="">continua com '+esc(e.de)+'</option>'
+    + rotEquipe().filter(function(n){ return n!==e.de; }).map(function(n){
+        return '<option value="'+esc(n)+'"'+(n===v?' selected':'')+'>'+esc(n)+' · '+esc((PESSOAS[n]||{}).funcao||'')+'</option>';
+      }).join('');
+}
+function cobRender(){
+  const e=_cobEdit; if(!e) return;
+  document.getElementById('cbt-tit').textContent = 'Tarefas d'+_art(e.de)+e.de;
+  document.getElementById('cbt-sub').textContent =
+    (e.motivo?e.motivo+' · ':'') + cobPeriodo(e)
+    + ' · o que você não passar pra ninguém continua com '+e.de;
+
+  document.getElementById('cbt-todas').innerHTML =
+    '<option value="">— escolher —</option>'
+    + rotEquipe().filter(function(n){ return n!==e.de; })
+        .map(function(n){ return '<option value="'+esc(n)+'">'+esc(n)+'</option>'; }).join('')
+    + '<option value="_nada">Ninguém — volta tudo para '+esc(e.de)+'</option>';
+  document.getElementById('cbt-topo').style.display = (e.tarefas.length && !SO_LEITURA) ? '' : 'none';
+
+  const linha=function(t){
+    const q = t.tipo==='extra' ? fmtData(t.data)
+            : t.tipo==='avulsa' ? '—'
+            : (t.hora || (t.turno&&t.turno!=='dia' ? ROT_TURNO[t.turno] : '—'));
+    const d = t.tipo==='fixa'   ? (t._dias||[]).map(function(x){ return ROT_DOW[x]; }).join(' · ')
+            : t.tipo==='avulsa' ? (ROT_FREQ[t.freq]||'Conforme necessidade')
+            : 'só neste dia';
+    const v = e.itens[t.id]||'';
+    return '<div class="cbt-l"><div class="cbt-q'+(q==='—'?' vazio':'')+'">'+esc(q)+'</div>'
+      + '<div class="cbt-c"><div class="cbt-t">'+esc(t.texto)+'</div><div class="cbt-d">'+esc(d)+'</div></div>'
+      + '<select class="cbt-s'+(v?'':' fica')+'" data-t="'+esc(t.id)+'"'+(SO_LEITURA?' disabled':'')
+        + ' onchange="cobSet(\''+esc(t.id)+'\',this.value)">'+_cobOpts(v)+'</select></div>';
+  };
+  const bloco=function(tit, lista){
+    return lista.length ? '<div class="cbt-sec">'+tit+'</div>'+lista.map(linha).join('') : '';
+  };
+  document.getElementById('cbt-lista').innerHTML =
+      bloco('Na semana', e.tarefas.filter(function(t){ return t.tipo==='fixa'; }).sort(rotOrdena))
+    + bloco('Provisórias do período', e.tarefas.filter(function(t){ return t.tipo==='extra'; }).sort(rotOrdena))
+    + bloco('Sem dia certo', e.tarefas.filter(function(t){ return t.tipo==='avulsa'; }));
+
+  ['cbt-desfazer','cbt-avisar'].forEach(function(k){
+    const b=document.getElementById(k); if(b) b.style.display = e.existe ? '' : 'none';
+  });
+  cobResumo();
+}
+function cobResumo(){
+  const e=_cobEdit; if(!e) return;
+  const el=document.getElementById('cbt-resumo'); if(!el) return;
+  const tot=e.tarefas.length, por={}; let n=0;
+  Object.keys(e.itens).forEach(function(k){ const v=e.itens[k]; if(v){ n++; por[v]=(por[v]||0)+1; } });
+  const atv=function(q){ return q+(q===1?' atividade':' atividades'); };
+  if(!tot){ el.innerHTML='Não há atividade cadastrada d'+_art(e.de)+esc(e.de)+' nesse período — nada a passar.'; return; }
+  if(!n){ el.innerHTML='Nada passa: as '+atv(tot)+' continuam com <b>'+esc(e.de)+'</b>.'; return; }
+  el.innerHTML='<b>'+n+' de '+tot+'</b> passam — '
+    + Object.keys(por).sort().map(function(p){ return '<b>'+esc(p)+'</b> assume '+atv(por[p]); }).join(', ')
+    + (n<tot ? '. '+(tot-n===1?'A outra continua':'As outras '+(tot-n)+' continuam')+' com '+esc(e.de)+'.' : '.');
+}
+function cobSet(id, v){
+  if(!_cobEdit) return;
+  _cobEdit.itens[id]=v;
+  const sel=document.querySelector('#cbt-lista select[data-t="'+id+'"]');
+  if(sel) sel.className='cbt-s'+(v?'':' fica');
+  cobResumo();
+}
+function cobTodas(v){
+  if(!_cobEdit || !v) return;
+  const quem = v==='_nada' ? '' : v;
+  Object.keys(_cobEdit.itens).forEach(function(k){ _cobEdit.itens[k]=quem; });
+  cobRender();
+  const t=document.getElementById('cbt-todas'); if(t) t.value='';
+}
+async function cobSalvar(){
+  if(semPermissao()) return;
+  if(!DB || !_cobEdit) return;
+  const e=_cobEdit, itens={};
+  Object.keys(e.itens).forEach(function(k){ if(e.itens[k]) itens[k]=e.itens[k]; });
+  const doc=cobDoc(e.de, e.inicio);
+  try{
+    // nenhuma tarefa passa: não existe cobertura de rotina pra guardar
+    if(!Object.keys(itens).length){
+      if(doc) await DB.collection('ls_rotina').doc(doc.id).delete();
+    }else if(doc){
+      await DB.collection('ls_rotina').doc(doc.id).update({fim:e.fim, itens:itens,
+        motivo:e.motivo||'', atualizadoEm:Date.now(), criadoPor:window._usuario||''});
+    }else{
+      await DB.collection('ls_rotina').add({tipo:'cobre', de:e.de, inicio:e.inicio, fim:e.fim,
+        itens:itens, motivo:e.motivo||'', criadoEm:Date.now(), criadoPor:window._usuario||''});
+    }
+    fecharModal('mov-rot-cob');
+    if(typeof renderCobertura==='function') renderCobertura();
+    // organizou: agora avisa quem assumiu, senão a pessoa só descobre abrindo o painel
+    rotAbrirAviso(e.de, e.inicio, e.fim, itens, e.tarefas);
+  }catch(err){ console.warn('cobSalvar',err); alert('Não consegui salvar agora.'); }
+}
+async function cobDesfazer(){
+  if(semPermissao()) return;
+  if(!DB || !_cobEdit) return;
+  const e=_cobEdit, doc=cobDoc(e.de, e.inicio);
+  if(!doc) return;
+  if(!confirm('Desfazer a cobertura da rotina d'+_art(e.de)+e.de+'?\n\nTodas as atividades voltam pro nome dela.')) return;
+  try{
+    await DB.collection('ls_rotina').doc(doc.id).delete();
+    fecharModal('mov-rot-cob');
+    if(typeof renderCobertura==='function') renderCobertura();
+  }catch(err){ console.warn('cobDesfazer',err); alert('Não consegui desfazer agora.'); }
+}
+
+/* ── Avisar quem vai cobrir ──────────────────────────────────────
+   Organizar no painel resolve metade do problema: o quadro fica certo,
+   mas a pessoa só descobre a tarefa nova se abrir a Rotina. A mensagem
+   sai daqui já pronta — o que ficou com ela, em que dias, e por quanto
+   tempo — e vai pelo WhatsApp, que é onde a equipe realmente lê. */
+function cobDias(ini, fim){ return Math.round((cobD(fim)-cobD(ini))/86400000)+1; }
+const _DIA_NOME=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+function cobDiasTxt(t){
+  if(t.tipo==='extra')  return 'só em '+fmtData(t.data);
+  if(t.tipo==='avulsa') return (ROT_FREQ[t.freq]||'Conforme necessidade').toLowerCase();
+  const d=(t._dias||[]).slice().sort(function(a,b){ return a-b; });
+  if(!d.length) return '';
+  // domingo e sábado são masculinos: "todo sábado", não "toda sábado"
+  if(d.length===1) return 'tod'+((d[0]===0||d[0]===6)?'o ':'a ')+_DIA_NOME[d[0]];
+  const seguido=d.every(function(x,k){ return k===0 || x===d[k-1]+1; });
+  return seguido ? ('de '+_DIA_NOME[d[0]]+' a '+_DIA_NOME[d[d.length-1]])
+                 : d.map(function(x){ return _DIA_NOME[x]; }).join(', ');
+}
+function cobMensagem(quem, de, ini, fim, tarefas, tudo){
+  const dd=cobDias(ini, fim);
+  const linhas=tarefas.slice().sort(rotOrdena).map(function(t){
+    const q=cobDiasTxt(t);
+    return '• '+(t.hora?t.hora+' — ':'')+t.texto+(q?' ('+q+')':'');
+  });
+  return 'Oi, '+quem+'!\n\n'
+    + 'A '+de+' vai estar fora de '+fmtData(ini)+' até '+fmtData(fim)
+    + ' — '+dd+(dd===1?' dia':' dias')+' — e você fica com '
+    + (tudo?'a rotina dela':'parte da rotina dela')+' nesse período.\n\n'
+    + 'Além do que você já faz:\n' + linhas.join('\n')
+    + '\n\nJá está tudo no painel, na aba Rotina, marcado em verde como "cobrindo '+de+'".'
+    + '\n\nQualquer dúvida me chama! 💛';
+}
+function rotAbrirAviso(de, inicio, fim, itens, tarefas){
+  const doc = cobDoc(de, inicio);
+  const it  = itens  || (doc ? (doc.itens||{}) : {});
+  const fimReal = fim || (doc && doc.fim) || inicio;
+  const tar = tarefas || cobTarefas(de, inicio, fimReal);
+  const porPessoa={};
+  tar.forEach(function(t){ const q=it[t.id]; if(!q) return; (porPessoa[q]=porPessoa[q]||[]).push(t); });
+  const nomes=Object.keys(porPessoa).sort();
+  if(!nomes.length) return;                       // ninguém assumiu: não há quem avisar
+
+  const dd=cobDias(inicio, fimReal);
+  document.getElementById('cav-sub').textContent =
+    de+' fora de '+fmtData(inicio)+' até '+fmtData(fimReal)+' · '+dd+(dd===1?' dia':' dias')
+    + ' · '+(nomes.length===1?'1 pessoa assume':nomes.length+' pessoas assumem');
+
+  document.getElementById('cav-lista').innerHTML = nomes.map(function(n, k){
+    const lista=porPessoa[n], id='cav-m-'+k;
+    return '<div class="cav-b">'
+      + '<div class="cav-h"><b>'+esc(n)+'</b> · '+lista.length+(lista.length===1?' atividade':' atividades')+'</div>'
+      + '<textarea class="wpp-template" id="'+id+'">'+esc(cobMensagem(n, de, inicio, fimReal, lista, lista.length===tar.length))+'</textarea>'
+      + '<div class="wpp-btn-row"><button class="wpp-btn primary so-hide" onclick="cobEnviar(\''+_jsq(n)+'\',\''+id+'\')">📱 Abrir WhatsApp d'+_art(n)+esc(n)+'</button></div>'
+      + '</div>';
+  }).join('');
+  // a mensagem tem tamanho variável: a caixa acompanha, até um limite
+  document.querySelectorAll('#cav-lista textarea').forEach(function(ta){
+    ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight+4, 380)+'px';
+  });
+  abrirModal('mov-rot-aviso');
+}
+function cobEnviar(nome, campo){
+  if(semPermissao()) return;
+  const ta=document.getElementById(campo), msg=ta?ta.value:'';
+  const tel=(typeof TEL_EQUIPE!=='undefined')?TEL_EQUIPE[nome]:null;
+  if(tel) window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(msg),'_blank');
+  else alert('Sem número cadastrado pra '+nome+'.\n\nCopie a mensagem e envie pelo WhatsApp:\n\n'+msg);
+}
+function cobAvisarDaqui(){
+  const e=_cobEdit; if(!e) return;
+  fecharModal('mov-rot-cob');
+  rotAbrirAviso(e.de, e.inicio, e.fim);
 }
 function rotOrdena(a,b){
   if(a.hora&&b.hora) return a.hora.localeCompare(b.hora);
@@ -2155,13 +2527,15 @@ function renderRotina(){
   // seletor de colaborador, com quanto cada um tem na semana
   document.getElementById('rot-pessoas').innerHTML = equipe.map(function(n){
     const qtd=dias.reduce(function(t,x){ return t+x.itens.filter(function(i){ return i.pessoa===n; }).length; },0)
-            + ROT_ITENS.filter(function(i){ return i.tipo==='avulsa'&&i.pessoa===n; }).length;
+            + rotAvulsasDe(n).length;
     return '<button class="rot-p'+(n===ROT_QUEM?' on':'')+'" onclick="rotQuem(\''+esc(n)+'\')">'
       + '<span class="rot-p-av" data-foto="'+esc(n)+'">'+esc(n[0])+'</span>'
       + '<span class="rot-p-n">'+esc(n)+'</span>'
       + (ausentes[n]?'<span class="rot-p-fora">fora</span>':'<span class="rot-p-q">'+qtd+'</span>')
       + '</button>';
   }).join('');
+
+  rotBanner();
 
   // a semana da pessoa escolhida, um dia por coluna
   document.getElementById('rot-semana').innerHTML = dias.map(function(x){
@@ -2187,13 +2561,14 @@ function renderRotina(){
   // Sem dia certo: mensal, semanal sem dia definido, ou conforme
   // necessidade. Não cabe em coluna de dia — forçar numa segunda faria
   // aparecer TODA segunda, que é justamente o que não é.
-  const avulsas=ROT_ITENS.filter(function(i){ return i.tipo==='avulsa'&&i.pessoa===ROT_QUEM; });
+  const avulsas=rotAvulsasDe(ROT_QUEM);
   document.getElementById('rot-avulsas').innerHTML = avulsas.length
     ? '<div class="rot-av-cx"><div class="rot-av-t">Sem dia certo</div><div class="rot-av-g">'
       + avulsas.map(function(i){
           return '<div class="rot-av-c">'
             + '<div class="rot-av-f">'+esc(ROT_FREQ[i.freq]||'Conforme necessidade')+'</div>'
             + '<div class="rot-card-txt">'+esc(i.texto)+'</div>'
+            + (i.movidoDe ? '<div class="rot-card-pe"><span class="rot-selo movido">cobrindo '+esc(i.movidoDe)+'</span></div>' : '')
             + '<div class="rot-card-pe"><span class="rot-acts">'
               + '<button class="rot-ic" title="Editar" onclick="rotEditar(\''+esc(i.id)+'\')">✎</button>'
               + '<button class="rot-ic del" title="Excluir" onclick="rotExcluir(\''+esc(i.id)+'\')">×</button>'
@@ -2202,6 +2577,37 @@ function renderRotina(){
       + '</div></div>'
     : '';
   if(typeof aplicarFotos==='function') aplicarFotos();
+}
+
+/* Quem abre a aba direto (sem passar pelo card de ausências) precisa entender
+   por que o quadro está diferente: quem está fora, quem assumiu, e o caminho
+   pra mexer nisso sem sair daqui. */
+function rotBanner(){
+  const el=document.getElementById('rot-banner'); if(!el) return;
+  const n=ROT_QUEM, avisos=[];
+
+  const fora=rotCobDe(n);
+  if(fora){
+    const it=fora.itens||{}, por={};
+    Object.keys(it).forEach(function(k){ if(it[k]) por[it[k]]=(por[it[k]]||0)+1; });
+    const quem=Object.keys(por).sort();
+    const e={de:n, inicio:fora.inicio, fim:fora.fim};
+    avisos.push('<div class="rot-banner"><div><b>'+esc(n)+'</b> fora '+esc(cobPeriodo(e))
+      + (fora.motivo?' ('+esc(fora.motivo)+')':'') + ' — '
+      + (quem.length ? quem.map(function(p){ return '<b>'+esc(p)+'</b> assume '+por[p]+(por[p]===1?' atividade':' atividades'); }).join(', ')
+                     : 'nenhuma atividade passou')
+      + '.</div><button class="bt-ouro-mini so-hide" onclick="rotAbrirCobertura(\''+_jsq(n)+'\',\''+fora.inicio+'\',\''+fora.fim+'\',\''+_jsq(fora.motivo)+'\')">Rever tarefas</button></div>');
+  }
+
+  rotCobPara(n).forEach(function(c){
+    const it=c.itens||{};
+    const q=Object.keys(it).filter(function(k){ return it[k]===n; }).length;
+    avisos.push('<div class="rot-banner cobrindo"><div><b>'+esc(n)+'</b> está cobrindo <b>'+esc(c.de)
+      + '</b> '+esc(cobPeriodo(c))+' — '+q+(q===1?' atividade a mais':' atividades a mais')
+      + ' no quadro, marcada'+(q===1?'':'s')+' em verde.</div></div>');
+  });
+
+  el.innerHTML=avisos.join('');
 }
 
 function rotCard(i){
@@ -2214,7 +2620,7 @@ function rotCard(i){
     + '<div class="rot-card-txt">'+esc(i.texto)+'</div>'
     + '<div class="rot-card-pe">'
       + (i.tipo==='extra' ? '<span class="rot-selo extra">só hoje</span>' : '')
-      + (i.movidoDe ? '<span class="rot-selo movido">de '+esc(i.movidoDe)+'</span>' : '')
+      + (i.movidoDe ? '<span class="rot-selo movido">'+(i.porCobertura?'cobrindo ':'de ')+esc(i.movidoDe)+'</span>' : '')
       + '<span class="rot-acts">'
         + '<button class="rot-ic" title="Passar para outra pessoa" onclick="rotAbrirMover(\''+esc(i.id)+'\',null,\''+i._iso+'\','+i._dow+')">⇄</button>'
         + '<button class="rot-ic" title="Editar" onclick="rotEditar(\''+esc(i.id)+'\')">✎</button>'
