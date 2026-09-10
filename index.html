@@ -977,7 +977,13 @@ body{zoom:1.1;}
 .pri-topo{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
 .pri-cap{font-size:12px;color:var(--cr3);line-height:1.6;max-width:720px;margin-bottom:16px;}
 .pri-cap b{color:var(--cr2);}
-.pri-grade{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;}
+.pri-grade{display:grid;grid-template-columns:26px 1fr 1fr;gap:10px;align-items:stretch;}
+.pri-ex{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--ou2);text-align:center;padding-bottom:2px;}
+.pri-ey{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--ou2);writing-mode:vertical-rl;transform:rotate(180deg);
+  display:flex;align-items:center;justify-content:center;}
+.pri-canto{}
 .pri-q{background:var(--bg2);border:1px solid var(--oud2);border-top-width:2px;border-radius:3px;
   display:flex;flex-direction:column;min-height:180px;transition:border-color .15s,background .15s;}
 .pri-q.alvo{border-color:var(--ou);background:rgba(212,180,90,.08);}
@@ -1010,7 +1016,12 @@ body{zoom:1.1;}
 .pri-tag.origem{border-color:var(--azul);color:var(--azul);}
 .pri-acts{margin-left:auto;display:flex;gap:1px;}
 .pri-vazio{color:var(--cr3);font-size:11.5px;font-style:italic;padding:10px 2px;text-align:center;}
-@media(max-width:760px){ .pri-grade{grid-template-columns:1fr;} }
+/* no celular a matriz vira lista: os eixos não cabem, e cada quadrante já
+   diz a sua condição no subtítulo */
+@media(max-width:760px){
+  .pri-grade{grid-template-columns:1fr;}
+  .pri-ex,.pri-ey,.pri-canto{display:none;}
+}
 .leitura-tag{display:none;}
 .so-leitura .leitura-tag{display:inline-block;margin-top:6px;font-size:9px;letter-spacing:2px;
   text-transform:uppercase;color:var(--ou2);border:1px solid var(--oud2);border-radius:3px;padding:2px 8px;}
@@ -4493,10 +4504,10 @@ const MEL_AREAS={vendas:'Vendas',rh:'RH',entregas:'Entregas',estoque:'Estoque',f
    o que impede de importar a mesma coisa duas vezes.
    ══════════════════════════════════════════════════════════════ */
 const PRI_Q=[
-  {k:'q1', imp:1, urg:1, t:'Faça agora',  s:'Importante e urgente'},
-  {k:'q2', imp:1, urg:0, t:'Agende',      s:'Importante, não urgente'},
-  {k:'q3', imp:0, urg:1, t:'Delegue',     s:'Urgente, não importante'},
-  {k:'q4', imp:0, urg:0, t:'Deixe pra depois', s:'Nem urgente nem importante'}
+  {k:'q1', imp:1, urg:1, t:'Faça agora!', s:'urgente e importante'},
+  {k:'q2', imp:1, urg:0, t:'Programe!',   s:'importante, mas não urgente'},
+  {k:'q3', imp:0, urg:1, t:'Delegue!',    s:'urgente, mas não importante'},
+  {k:'q4', imp:0, urg:0, t:'Elimine!',    s:'nem urgente nem importante'}
 ];
 let PRI_ITENS=[], _priEdit=null, _priDrag=null, _unsubPri=null, _priVerFeitos=false;
 
@@ -4534,17 +4545,26 @@ function renderPrioridades(){
   const g=document.getElementById('pri-grade'); if(!g) return;
   const hoje=(typeof rotHoje==='function')?rotHoje():new Date().toISOString().slice(0,10);
 
-  g.innerHTML=PRI_Q.map(function(q){
+  const quad=function(k){
+    const q=PRI_Q.filter(function(x){ return x.k===k; })[0];
     const itens=priDoQuadrante(q);
     return '<div class="pri-q '+q.k+'" data-q="'+q.k+'"'
       + ' ondragover="priSobre(event,this)" ondragleave="this.classList.remove(\'alvo\')" ondrop="priSolta(event,this)">'
       + '<div class="pri-q-hd"><div class="pri-q-t">'+q.t+'<span class="pri-q-n">'+itens.length+'</span></div>'
-      + '<div class="pri-q-s">'+q.s+'</div></div>'
+      + '<div class="pri-q-s">Se é '+q.s+'</div></div>'
       + '<div class="pri-itens">'
         + (itens.length?itens.map(function(i){ return priCard(i,hoje); }).join('')
                        :'<div class="pri-vazio">—</div>')
       + '</div></div>';
-  }).join('');
+  };
+  // os eixos são o que faz a matriz se ler sozinha: sem eles, cada quadrante
+  // vira um balde solto e a pessoa tem que decorar qual é qual
+  g.innerHTML =
+      '<div class="pri-canto"></div>'
+    + '<div class="pri-ex">Urgente</div>'
+    + '<div class="pri-ex">Não urgente</div>'
+    + '<div class="pri-ey">Importante</div>'    + quad('q1') + quad('q2')
+    + '<div class="pri-ey">Não importante</div>'+ quad('q3') + quad('q4');
 
   const imp=document.getElementById('pri-imp');
   if(imp){
@@ -4671,7 +4691,7 @@ async function priImportar(){
   const falta=priFaltando();
   if(!falta.length || !DB) return;
   if(!confirm('Trazer '+falta.length+(falta.length===1?' ideia':' ideias')+' da aba Melhorias?\n\n'
-    + 'Entram em "Agende" e você arrasta pro quadrante certo.')) return;
+    + 'Entram em "Programe!" e você arrasta pro quadrante certo.')) return;
   try{
     const lote=DB.batch(), col=DB.collection('ls_prioridades');
     falta.forEach(function(m){
