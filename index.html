@@ -689,6 +689,17 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .pauta-print-only{display:none;}
 /* follow-up do último 1:1 */
 .pauta-followup{background:rgba(122,155,191,.06);border:1px solid var(--oud2);padding:11px 13px;}
+.pauta-pdi{background:rgba(212,180,90,.05);border:1px solid var(--oud2);padding:11px 13px;}
+.pauta-pdi-cab{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:10px;
+  font-family:'DM Mono',monospace;color:var(--cr3);margin-bottom:6px;}
+.pauta-pdi-cab b{color:var(--ou2);font-family:inherit;font-size:11px;letter-spacing:.5px;}
+.pz{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.8px;text-transform:uppercase;
+  padding:1px 5px;border-radius:2px;margin-left:6px;white-space:nowrap;}
+.pz.vencida{color:var(--vermelho);border:1px solid var(--vermelho);}
+.pz.hoje{color:var(--ou2);border:1px solid var(--ou);}
+.pz.aberta{color:var(--cr3);border:1px solid var(--oud2);}
+.pz.assinado{color:var(--verde);border:1px solid var(--verde);}
+@media print{ .pauta-pdi{background:transparent;} }
 .pauta-cumpriu{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
 .pauta-chip{background:transparent;border:1px solid var(--oud2);color:var(--cr3);font-family:inherit;font-size:11px;padding:5px 12px;cursor:pointer;border-radius:20px;}
 .pauta-chip.on-ok{border-color:var(--verde);color:var(--verde);background:rgba(127,191,127,.12);}
@@ -3311,6 +3322,69 @@ const PAUTA_PERGUNTAS={
   ali:['Como você avalia o seu próprio mês?','O que mais te ajudaria a render melhor?'],
   cri:['Como você enxerga esse ponto que eu trouxe?','O que precisa mudar — e o que você precisa de mim pra isso?'],
 };
+/* O prazo do PDI é campo livre ("30/09", "30/09/2026", "fim do mês"). Lê o que
+   der pra ler e devolve null no resto — melhor não marcar do que marcar errado. */
+function _pdiPrazo(txt, refIso){
+  const m=String(txt||'').match(/(\d{1,2})\s*[\/\-.]\s*(\d{1,2})(?:\s*[\/\-.]\s*(\d{2,4}))?/);
+  if(!m) return null;
+  const d=+m[1], mes=+m[2];
+  if(d<1||d>31||mes<1||mes>12) return null;
+  let ano = m[3] ? (+m[3]<100 ? 2000+ +m[3] : +m[3]) : +String(refIso||'').slice(0,4);
+  if(!ano) ano=new Date().getFullYear();
+  let iso = ano+'-'+String(mes).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  // "30/09" num plano de dezembro é o setembro seguinte, não o que já passou
+  if(!m[3] && refIso && iso < refIso) iso = (ano+1)+iso.slice(4);
+  return iso;
+}
+// o plano em vigor da pessoa, já com cada ação classificada pelo prazo
+function _pdiVigente(nome){
+  if(typeof PDI_ITENS==='undefined') return null;
+  const meus=(PDI_ITENS||[]).filter(function(x){ return x.pessoa===nome; })
+    .sort(function(a,b){ return String(b.data||'').localeCompare(String(a.data||'')); });
+  const x=meus[0]; if(!x) return null;
+  const hoje=(typeof rotHoje==='function')?rotHoje():new Date().toISOString().slice(0,10);
+  const acoes=(x.tarefas||[]).filter(function(t){ return t.tarefa||t.prazo; }).map(function(t){
+    const iso=_pdiPrazo(t.prazo, x.data);
+    return {tarefa:t.tarefa||'', prazoTxt:t.prazo||'', iso:iso,
+            vencida: !!(iso && iso<hoje), hoje: iso===hoje};
+  });
+  return {doc:x, total:meus.length, acoes:acoes,
+          vencidas:acoes.filter(function(a){ return a.vencida; }).length};
+}
+function _pdiBloco(nome){
+  const v=_pdiVigente(nome);
+  if(v===null && typeof PDI_ITENS==='undefined') return '';
+  const x=v&&v.doc;
+  if(!x) return '<div class="pauta-sec"><div class="pauta-sec-tit">📋 Plano de Desenvolvimento</div>'
+    + '<div class="pauta-li vazio">Nenhum plano registrado — monte um em RH › Plano de Desenvolvimento.</div></div>';
+
+  const vencidas=v.vencidas;
+  const linhas=v.acoes.map(function(t){
+    let chip='';
+    if(!t.prazoTxt)   chip='<span class="pz aberta">sem prazo</span>';
+    else if(!t.iso)   chip='<span class="pz aberta">'+esc(t.prazoTxt)+'</span>';
+    else if(t.vencida)chip='<span class="pz vencida">venceu '+esc(fmtData(t.iso))+'</span>';
+    else if(t.hoje)   chip='<span class="pz hoje">vence hoje</span>';
+    else              chip='<span class="pz aberta">até '+esc(fmtData(t.iso))+'</span>';
+    return '<div class="pauta-li"><span class="mk">•</span><span>'+esc(t.tarefa||'(sem descrição)')+chip+'</span></div>';
+  }).join('');
+
+  const quando=(typeof pdiBr==='function'?pdiBr(x.data):x.data)+(x.hora?' · '+x.hora:'');
+  return '<div class="pauta-sec pauta-pdi">'
+    + '<div class="pauta-sec-tit">📋 Plano de Desenvolvimento · '+esc(quando)+'</div>'
+    + '<div class="pauta-pdi-cab">'
+      + (x.supervisor?'com <b>'+esc(x.supervisor)+'</b>':'')
+      + (x.assinatura?'<span class="pz assinado">documento assinado</span>':'<span class="pz aberta">sem o papel assinado</span>')
+      + (vencidas?'<span class="pz vencida">'+vencidas+(vencidas===1?' ação vencida':' ações vencidas')+'</span>':'')
+    + '</div>'
+    + (x.parabens?'<div class="pauta-li ok"><span class="mk">✓</span><span><b>Parabéns por:</b> '+esc(x.parabens)+'</span></div>':'')
+    + (x.pontos?'<div class="pauta-li dev"><span class="mk">→</span><span><b>A desenvolver:</b> '+esc(x.pontos)+'</span></div>':'')
+    + (linhas ? '<div class="pauta-comb-lbl">Ações combinadas</div>'+linhas
+              : '<div class="pauta-li vazio">Sem ações combinadas neste plano.</div>')
+    + (v.total>1?'<div class="pauta-li vazio" style="padding-top:8px;">Este é o plano mais recente — a pessoa tem '+v.total+' no total.</div>':'')
+    + '</div>';
+}
+
 async function abrirPauta(nome){
   const p = PESSOAS[nome];
   if(!p) return;
@@ -3375,6 +3449,8 @@ async function abrirPauta(nome){
   if(pct!=null && p.conv<0.45) dev.push({t:'Conversão abaixo do esperado: '+pct+'%.'});
   if(p.status==='bad') dev.push({t:'Está atrás da meta e ficou dias sem atualizar os dados.'});
   if(AV) AV_CATS.forEach((lbl,i)=>{ const n=+AV.av[i]||0; if(n&&n<=3) dev.push({t:'Atenção em '+lbl+' ('+n+'/5).'}); });
+  const _pdiV=_pdiVigente(nome);
+  if(_pdiV) _pdiV.acoes.filter(a=>a.vencida).forEach(a=>dev.push({t:'Do PDI, prazo vencido em '+fmtData(a.iso)+': '+a.tarefa}));
 
   const liHtml = (arr,cls,mk)=> arr.length
     ? arr.map(x=>`<div class="pauta-li ${cls}"><span class="mk">${mk}</span><span>${x.d?`<small>${x.d}</small>`:''}${x.t}</span></div>`).join('')
@@ -3465,6 +3541,14 @@ async function abrirPauta(nome){
   const roteiroHtml=_rot.map(t=>`<div class="pauta-rot">${t}</div>`).join('')
     +`<div class="pauta-perguntas"><div class="pauta-comb-lbl" style="margin:6px 0 2px">Perguntas pra abrir a conversa</div>${_perg.map(q=>`<div class="pauta-perg">${q}”</div>`).join('')}</div>`;
 
+  // ── #4 — o Plano de Desenvolvimento em vigor ──
+  //
+  //  A pauta já reunia ocorrências e avaliação do mês, mas o PDI ficava numa
+  //  aba à parte: a Jhennifer montava um plano com prazo e no mês seguinte a
+  //  pauta não lembrava dele. Aqui ele entra junto, com o que venceu marcado
+  //  em vermelho — que é o que precisa ser cobrado na conversa.
+  const pdiHtml = _pdiBloco(nome);
+
   const html = `
     <div class="pauta-print-only">Loretto Scarpa · Pauta de Reunião 1:1 · ${_mesRef}</div>
     <div class="pauta-hd">
@@ -3476,6 +3560,7 @@ async function abrirPauta(nome){
       <div class="pauta-tom ${tom.cls}">${tom.t}<small>${tom.s}</small></div>
     </div>
     ${followupHtml}
+    ${pdiHtml}
     ${perf}
     ${evolHtml}
     ${avBloco}
@@ -3510,7 +3595,8 @@ async function abrirPauta(nome){
     </div>`;
 
   // dados pra "via da pessoa" (documento de entrega)
-  window._pautaColab={nome:nome,funcao:p.funcao,mesRef:_mesRef,positivos:(AV&&AV.positivos)||'',melhorar:(AV&&AV.melhorar)||'',rec:rec.map(x=>x.t)};
+  window._pautaColab={nome:nome,funcao:p.funcao,mesRef:_mesRef,positivos:(AV&&AV.positivos)||'',melhorar:(AV&&AV.melhorar)||'',rec:rec.map(x=>x.t),
+    pdi: _pdiV ? {data:_pdiV.doc.data, acoes:_pdiV.acoes.map(a=>a.tarefa+(a.prazoTxt?' — até '+a.prazoTxt+(a.vencida?' (vencido)':''):''))} : null};
 
   document.getElementById('pauta-content').innerHTML = html;
   abrirModal('modal-pauta');
@@ -3563,6 +3649,7 @@ function imprimirColab(){
     <div class="colab-sec"><h3>O que reconhecemos no seu trabalho</h3>
       ${c.positivos?`<p>${esc(c.positivos)}</p>`:''}${li(c.rec)}${(!c.positivos&&!(c.rec&&c.rec.length))?'<p>—</p>':''}</div>
     ${c.melhorar?`<div class="colab-sec"><h3>Onde você pode evoluir</h3><p>${esc(c.melhorar)}</p></div>`:''}
+    ${(c.pdi&&c.pdi.acoes.length)?`<div class="colab-sec"><h3>Do seu Plano de Desenvolvimento (${esc(c.pdi.data?String(c.pdi.data).split('-').reverse().join('/'):'')})</h3>${li(c.pdi.acoes)}</div>`:''}
     <div class="colab-sec"><h3>O que combinamos</h3><p>${comb?esc(comb):'—'}</p></div>
     ${foco?`<div class="colab-sec"><h3>Foco pro próximo mês</h3><p>${esc(foco)}</p></div>`:''}
     ${dtBr?`<div class="colab-sec"><h3>Vamos acompanhar em</h3><p>${dtBr}</p></div>`:''}
