@@ -966,6 +966,13 @@ body{zoom:1.1;}
 .so-leitura .pauta-chip, .so-leitura .conf-item, .so-leitura .mel-status,
 .so-leitura .ev-check, .so-leitura .rot-cheg,
 .so-leitura .rapido-cat-btn{pointer-events:none;cursor:default;}
+.falhas-leitura{display:none;background:rgba(200,74,60,.08);border:1px solid var(--vermelho);
+  border-left-width:2px;padding:12px 15px;margin-bottom:18px;border-radius:3px;}
+.fl-t{font-size:12.5px;color:var(--vermelho);font-weight:600;margin-bottom:5px;}
+.fl-l{font-family:'DM Mono',monospace;font-size:10px;color:var(--cr2);line-height:1.7;}
+.fl-l small{color:var(--cr3);}
+.fl-d{font-size:12px;color:var(--cr3);line-height:1.5;margin-top:7px;}
+.fl-d b{color:var(--cr2);}
 .leitura-tag{display:none;}
 .so-leitura .leitura-tag{display:inline-block;margin-top:6px;font-size:9px;letter-spacing:2px;
   text-transform:uppercase;color:var(--ou2);border:1px solid var(--oud2);border-radius:3px;padding:2px 8px;}
@@ -990,6 +997,7 @@ body{zoom:1.1;}
 
 <!-- HOJE -->
 <div class="tab-content active" id="tab-hoje">
+  <div class="falhas-leitura" id="falhas-leitura"></div>
   <div class="hoje-cap">
     <div class="cap-av" id="cap-av">J</div>
     <div>
@@ -1192,7 +1200,7 @@ async function carregarCoberturas(){
     await Promise.all(ausenciasPraCobrir().map(async a=>{
       const id=_cobId(a.nome,a.inicio);
       try{ const doc=await DB.collection('ls_coberturas').doc(id).get(); if(doc.exists) window._cob[id]=doc.data().cobre||''; }catch(_){}}));
-  }catch(e){ console.warn('carregarCoberturas',e); }
+  }catch(e){ falhaLeitura('ls_coberturas',e); }
   renderCobertura();
   // agora que a cobertura salva foi carregada, atualiza o card "Quem está na loja" (mostra quem cobre)
   // e refaz pendências/ações — cobertura já definida deixa de ser cobrada
@@ -2154,7 +2162,7 @@ function carregarRotina(){
     renderRotina(); rotLimpar();
     // o card "Cobertura de Ausências" conta as tarefas a partir daqui
     if(typeof renderCobertura==='function') renderCobertura();
-  }, function(e){ console.warn('rotina',e);
+  }, function(e){ falhaLeitura('ls_rotina',e);
     const g=document.getElementById('rot-semana');
     if(g) g.innerHTML='<div class="rot-vazio" style="grid-column:1/-1;">Não consegui ler a rotina agora. ('+esc(e.code||e.message)+')</div>';
   });
@@ -2945,7 +2953,7 @@ function carregarPdi(){
   _unsubPdi = DB.collection('ls_pdi').onSnapshot(function(snap){
     PDI_ITENS = snap.docs.map(function(d){ const o=d.data(); o.id=d.id; return o; });
     renderPdi();
-  }, function(e){ console.warn('pdi',e);
+  }, function(e){ falhaLeitura('ls_pdi',e);
     const h=document.getElementById('pdi-historico');
     if(h) h.innerHTML='<div class="pdi-vazio">Não consegui ler os planos. ('+esc(e.code||e.message)+')</div>';
   });
@@ -3485,7 +3493,7 @@ async function abrirPauta(nome){
   // ── carrega o registro da 1:1 (histórico por mês) ──
   const mesKey=_pa+'_'+String(_pm).padStart(2,'0');
   let _pautaDoc={};
-  if(DB){ try{ const d=await DB.collection('ls_pautas').doc(nome).get(); if(d.exists)_pautaDoc=d.data()||{}; }catch(e){ console.warn('pauta load',e); } }
+  if(DB){ try{ const d=await DB.collection('ls_pautas').doc(nome).get(); if(d.exists)_pautaDoc=d.data()||{}; }catch(e){ falhaLeitura('ls_pautas',e); } }
   const _hist=_pautaDoc.hist||{};
   const _atual=_hist[mesKey]||{};
   const _prevKey=Object.keys(_hist).filter(k=>k<mesKey).sort().pop();
@@ -3690,7 +3698,7 @@ async function carregarPautasResumo(){
     const snap=await DB.collection('ls_pautas').get();
     const map={}; snap.forEach(d=>{ map[d.id]=d.data()||{}; });
     window._pautas=map;
-  }catch(e){ console.warn('carregarPautasResumo',e); window._pautas=window._pautas||{}; }
+  }catch(e){ falhaLeitura('ls_pautas',e); window._pautas=window._pautas||{}; }
   if(typeof renderPendencias==='function') renderPendencias();
 }
 
@@ -3944,6 +3952,39 @@ let SO_LEITURA = false;
 
 // Chamada na entrada de toda função que grava. Avisa uma vez por ação, em
 // vez de deixar o clique morrer calado — silêncio faria parecer defeito.
+/* ══════════════════════════════════════════════════════════════
+   LEITURA NEGADA ≠ LISTA VAZIA
+
+   Os carregadores engoliam o erro e caíam pra lista vazia, então uma
+   coleção bloqueada pelas regras do Firestore aparecia como "Nenhuma
+   ocorrência em Setembro" — igualzinho a um mês sem ocorrência. Foi
+   assim que a aba de Ocorrências ficou vazia pra uma conta sem ninguém
+   saber por quê: a tela não tinha como dizer a diferença.
+
+   Agora a falha sobe pra um aviso no topo, com o nome da coleção e o
+   código do erro — que é o que se precisa pra corrigir a regra.
+   ══════════════════════════════════════════════════════════════ */
+window._falhasLeitura = {};
+function falhaLeitura(colecao, e){
+  console.warn('leitura falhou em '+colecao, e);
+  window._falhasLeitura[colecao] = String((e && (e.code||e.message)) || 'erro');
+  renderFalhas();
+}
+function renderFalhas(){
+  const el=document.getElementById('falhas-leitura'); if(!el) return;
+  const f=window._falhasLeitura||{}, ks=Object.keys(f);
+  if(!ks.length){ el.style.display='none'; el.innerHTML=''; return; }
+  const permissao=ks.filter(function(k){ return /permission|denied|insufficient/i.test(f[k]); });
+  el.style.display='block';
+  el.innerHTML='<div class="fl-t">⚠ '+ks.length+(ks.length===1?' parte do painel não carregou':' partes do painel não carregaram')+'</div>'
+    + '<div class="fl-l">'+ks.map(function(k){ return esc(k)+' <small>'+esc(f[k])+'</small>'; }).join(' · ')+'</div>'
+    + (permissao.length
+        ? '<div class="fl-d">Isto é permissão, não falta de dado: as regras do Firebase não liberam a leitura '
+          + (permissao.length===1?'desta coleção':'destas coleções')+' para <b>'+esc(window._usuario||'esta conta')
+          + '</b>. As telas aparecem vazias, mas o que está gravado continua lá.</div>'
+        : '<div class="fl-d">Pode ser conexão. Recarregue a página; se continuar, me avise com o código acima.</div>');
+}
+
 function semPermissao(silencioso){
   if(!SO_LEITURA) return false;
   if(!silencioso){
@@ -4138,7 +4179,7 @@ async function carregarRelatorioAnterior(){
     const cfg=await getCfgMesSup(ano,mes); const du=cfg.diasUteis||26;
     window._relAnt={total,metas:metaAlvoDe(cfg),cur,base,decorridos:du,totalDU:du,restantes:0,ano,mes};
     renderRelatorio();
-  }catch(e){ console.warn('carregarRelatorioAnterior',e); }
+  }catch(e){ falhaLeitura('ls_historico',e); }
 }
 
 function renderRelatorio(){ return; /* Relatório Mensal removido — a aba tem só a pauta 1:1 */
@@ -4235,7 +4276,7 @@ async function carregarDadosReais(){
     });
     _safe('aniversarios',renderAniversarios); _safe('statusHoje',atualizarStatusHoje);
     if(typeof aplicarFotos==='function') aplicarFotos();
-  }catch(e){ console.warn('carregarDadosReais',e); }
+  }catch(e){ falhaLeitura('ls_historico / ls_metas',e); }
 }
 
 function renderMetasCategoria(total,metas,decorridos,restantes,totalDU,fechado){
@@ -4278,7 +4319,7 @@ async function carregarConf(){
     window._confDia=dd.exists?dd.data():{}; window._confSem=ss.exists?ss.data():{};
     if(cfg.exists){ const c=cfg.data()||{}; window._confCfg={dia:Array.isArray(c.dia)?c.dia:CONF_DIA.slice(),sem:Array.isArray(c.sem)?c.sem:CONF_SEM.slice()}; }
     else window._confCfg={dia:CONF_DIA.slice(),sem:CONF_SEM.slice()};
-  }catch(e){ console.warn('carregarConf',e); window._confDia={}; window._confSem={}; }
+  }catch(e){ falhaLeitura('ls_conferencias',e); window._confDia={}; window._confSem={}; }
   renderConf();
 }
 async function persistConfCfg(){
@@ -4384,7 +4425,7 @@ async function carregarMelhorias(){
     const arr=[]; snap.forEach(d=>{ const o=d.data()||{}; o.id=d.id; arr.push(o); });
     arr.sort((a,b)=>String(b.criadoEm||'').localeCompare(String(a.criadoEm||'')));
     window._melhorias=arr;
-  }catch(e){ console.warn('carregarMelhorias',e); window._melhorias=[]; }
+  }catch(e){ falhaLeitura('ls_melhorias',e); window._melhorias=[]; }
   renderMelhorias();
 }
 async function ciclarStatusMelhoria(id){
@@ -4485,7 +4526,7 @@ async function carregarOcorrencias(){
     const arr=[]; snap.forEach(d=>{ const o=d.data()||{}; o.id=d.id; arr.push(o); });
     arr.sort((a,b)=>String(b.data||'').localeCompare(String(a.data||'')));
     window._ocorrencias=arr;
-  }catch(e){ console.warn('carregarOcorrencias',e); window._ocorrencias=[]; }
+  }catch(e){ falhaLeitura('ls_ocorrencias',e); window._ocorrencias=[]; }
   renderOcorrencias();
 }
 function ocorrenciasDe(nome){ return (window._ocorrencias||[]).filter(o=>o.pessoa===nome); }
@@ -4690,7 +4731,7 @@ async function avaliacoesDoMes(ano,mes){
   const key=ano+'_'+String(mes).padStart(2,'0');
   if(window._avCache[key]) return window._avCache[key];
   let dados={};
-  if(DB){ try{ const d=await DB.collection('ls_avaliacoes').doc(key).get(); dados=d.exists?(d.data().dados||{}):{}; }catch(e){ console.warn('avalMes',e); } }
+  if(DB){ try{ const d=await DB.collection('ls_avaliacoes').doc(key).get(); dados=d.exists?(d.data().dados||{}):{}; }catch(e){ falhaLeitura('ls_avaliacoes',e); } }
   window._avCache[key]=dados; return dados;
 }
 
@@ -4939,7 +4980,7 @@ async function carregarMaiorVenda(){
       }catch(_){}
     }));
     window._maiorVenda=best; renderDestaques();
-  }catch(e){ console.warn('carregarMaiorVenda',e); }
+  }catch(e){ falhaLeitura('ls_maior_venda',e); }
 }
 
 function renderAusenciasMes(items){
@@ -5036,7 +5077,7 @@ async function carregarCadastroRH(){
       if(f.nascimento){ var x=String(f.nascimento).split('-'); if(x.length===3) p.aniv=x[2]+'/'+x[1]; }
       if(f.admissao){ var y=String(f.admissao).split('-'); if(y.length>=2) p.admissao=y[1]+'/'+y[0]; }
     });
-  }catch(e){ console.warn('carregarCadastroRH',e); }
+  }catch(e){ falhaLeitura('rh_cadastro',e); }
 }
 
 async function carregarStatusEquipe(){
@@ -5105,7 +5146,7 @@ async function carregarStatusEquipe(){
     }
     // status do Yuri/Edson mudou -> a lista "Pra você resolver" precisa refazer
     if(typeof renderPendencias==='function') renderPendencias();
-  }catch(e){ console.warn('carregarStatusEquipe',e); }
+  }catch(e){ falhaLeitura('ls_tarefas / envios',e); }
 }
 
 async function carregarPresenca(){
@@ -5133,7 +5174,7 @@ async function carregarPresenca(){
     window._hoje.aus=ausentes.length;
     atualizarStatusHoje();
     if(typeof aplicarFotos==='function') aplicarFotos();
-  }catch(e){ console.warn('carregarPresenca',e); }
+  }catch(e){ falhaLeitura('ls_presenca',e); }
 }
 
 function renderPendencias(){
@@ -5216,7 +5257,7 @@ async function _carregarAvalPendAntigo(){
     const feitos=doc.exists?(doc.data().feitos||[]):[];
     window._avalPend=colabs.filter(n=>feitos.indexOf(n)<0).length;
     renderPendencias();
-  }catch(e){ console.warn('carregarAvalPend',e); }
+  }catch(e){ falhaLeitura('ls_avaliacoes',e); }
 }
 
 function renderEventos(){
@@ -5278,7 +5319,7 @@ async function carregarEventos(){
     const snap=await DB.collection('ls_eventos').get();
     const arr=[]; snap.forEach(d=>{ const o=d.data()||{}; o.id=d.id; arr.push(o); });
     window._eventos=arr;
-  }catch(e){ console.warn('carregarEventos',e); window._eventos=[]; }
+  }catch(e){ falhaLeitura('ls_eventos',e); window._eventos=[]; }
   renderEventos();
 }
 async function toggleEvento(id){
