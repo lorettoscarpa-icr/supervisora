@@ -984,6 +984,12 @@ body{zoom:1.1;}
   color:var(--ou2);writing-mode:vertical-rl;transform:rotate(180deg);
   display:flex;align-items:center;justify-content:center;}
 .pri-canto{}
+.pri-fila{background:var(--bg2);border:1px dashed var(--oud);border-radius:3px;padding:11px 13px;margin-bottom:14px;}
+.pri-fila-t{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--ou2);margin-bottom:9px;}
+.pri-fila-t small{text-transform:none;letter-spacing:0;color:var(--cr3);font-family:'Barlow',sans-serif;font-size:11px;margin-left:8px;}
+.pri-fila-g{display:flex;gap:8px;flex-wrap:wrap;}
+.pri-fila-g .pri-c{max-width:330px;flex:1 1 250px;border-left-color:var(--ou);}
 .pri-q{background:var(--bg2);border:1px solid var(--oud2);border-top-width:2px;border-radius:3px;
   display:flex;flex-direction:column;min-height:180px;transition:border-color .15s,background .15s;}
 .pri-q.alvo{border-color:var(--ou);background:rgba(212,180,90,.08);}
@@ -1661,6 +1667,7 @@ async function cobrir(sel,id,nome){
   <div class="pri-topo">
     <div class="slbl" style="margin:0;border:none;padding:0;">Prioridades da loja</div>
     <span style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <button class="bt-ouro-mini so-hide" id="pri-doc" style="display:none" onclick="priCarregarDoc()"></button>
       <button class="bt-ouro-mini so-hide" id="pri-imp" style="display:none" onclick="priImportar()"></button>
       <button class="bt-ouro-mini so-hide" onclick="priNovo()">+ Novo problema</button>
       <button class="bt-ouro-mini" style="background:transparent;color:var(--ou2);" id="pri-ver" onclick="priVerFeitos()">Mostrar concluídos</button>
@@ -1668,6 +1675,7 @@ async function cobrir(sel,id,nome){
   </div>
   <div class="pri-cap">Cada problema entra num quadrante por duas perguntas: <b>é importante?</b> (muda o resultado
     da loja) e <b>é urgente?</b> (tem hora marcada). Arraste o cartão de um quadrante pro outro quando a resposta mudar.</div>
+  <div id="pri-fila"></div>
   <div class="pri-grade" id="pri-grade"></div>
 </div>
 
@@ -4529,11 +4537,19 @@ function priOrdena(a,b){
   if(b.prazo) return 1;
   return String(a.criadoEm||'').localeCompare(String(b.criadoEm||''));
 }
+// null nos dois campos = ainda não classificado. Sem esta separação eles
+// cairiam todos em "Elimine!", que é o quadrante mais errado possível pra
+// um problema que ninguém olhou ainda.
+function priNaoClassificado(i){ return i.importante==null || i.urgente==null; }
 function priDoQuadrante(q){
   return PRI_ITENS.filter(function(i){
     if(!_priVerFeitos && i.feito) return false;
+    if(priNaoClassificado(i)) return false;
     return (i.importante?1:0)===q.imp && (i.urgente?1:0)===q.urg;
   }).sort(priOrdena);
+}
+function priSemClasse(){
+  return PRI_ITENS.filter(function(i){ return !i.feito && priNaoClassificado(i); }).sort(priOrdena);
 }
 // ideias de Melhorias ainda não trazidas pra cá
 function priFaltando(){
@@ -4565,6 +4581,21 @@ function renderPrioridades(){
     + '<div class="pri-ex">Não urgente</div>'
     + '<div class="pri-ey">Importante</div>'    + quad('q1') + quad('q2')
     + '<div class="pri-ey">Não importante</div>'+ quad('q3') + quad('q4');
+
+  const fila=priSemClasse();
+  const fx=document.getElementById('pri-fila');
+  if(fx) fx.innerHTML = fila.length
+    ? '<div class="pri-fila"><div class="pri-fila-t">A classificar · '+fila.length
+      + '<small>arraste cada um pro quadrante que responde às duas perguntas</small></div>'
+      + '<div class="pri-fila-g">'+fila.map(function(i){ return priCard(i,hoje); }).join('')+'</div></div>'
+    : '';
+
+  const doc=document.getElementById('pri-doc');
+  if(doc){
+    const n=priDocFaltando().length;
+    doc.style.display = n?'':'none';
+    doc.textContent = 'Trazer do documento ('+n+')';
+  }
 
   const imp=document.getElementById('pri-imp');
   if(imp){
@@ -4612,7 +4643,10 @@ async function priSolta(ev,col){
   const q=PRI_Q.filter(function(x){ return x.k===col.getAttribute('data-q'); })[0];
   const it=PRI_ITENS.filter(function(x){ return x.id===id; })[0];
   if(!q || !it) return;
-  if((it.importante?1:0)===q.imp && (it.urgente?1:0)===q.urg) return;   // mesmo quadrante
+  // sem esta primeira condição, arrastar um não-classificado pro "Elimine!"
+  // pareceria "mesmo quadrante" (null vira 0 nos dois) e não gravaria nada
+  if(!priNaoClassificado(it)
+     && (it.importante?1:0)===q.imp && (it.urgente?1:0)===q.urg) return;
   try{ await DB.collection('ls_prioridades').doc(id).update({importante:!!q.imp, urgente:!!q.urg}); }
   catch(e){ console.warn('priSolta',e); alert('Não consegui mover agora.'); }
 }
@@ -4680,6 +4714,47 @@ async function priExcluir(id){
   if(!DB) return;
   try{ await DB.collection('ls_prioridades').doc(id).delete(); }
   catch(e){ console.warn('priExcluir',e); }
+}
+
+/* ── Problemas Urgentes, do documento da operação ──────────────
+   Transcritos do PDF que a gestão mandou. Entram SEM classificação, na
+   faixa de cima: o documento diz que são urgentes, mas quem decide o
+   quadrante é a Jhennifer olhando um por um — importar já classificado
+   seria decidir por ela, que é justamente o trabalho da ferramenta.
+   Botão de carga única: some quando todos já estiverem lá. */
+const PRI_SEED=[
+  {t:'Loja abrindo com atraso', a:'processos',
+   d:'A loja tem aberto recorrentemente por volta das 9h15–9h20. As vendedoras precisam chegar a tempo de abrir no horário. '
+    +'Relatos: 09/09 — Gustavo chegou às 9h e ficou até 9h15 esperando o pessoal chegar. '
+    +'10/09 — Gregory atendeu 2 clientes entre 9h10 e 9h15 porque nenhuma vendedora havia chegado; só o Yuri estava na loja.'},
+  {t:'Reposição semanal do estoque', a:'estoque',
+   d:'Manter as linhas fixas em dia — grupo 1: sneakers + sportfinos + tratorados; grupo 2: sociais + Chelseas.'},
+  {t:'Corredor de fundo e pendências', a:'estoque',
+   d:'Concluir o que costuma ficar parado: organizar defeitos, devoluções e sapatos com pé trocado.'},
+  {t:'Limpeza do estacionamento e do hall de entrada', a:'processos',
+   d:'Sujam durante a semana, principalmente nos dias em que a Valdineia (faxineira) não vem.'},
+  {t:'Rotina de metas', a:'vendas',
+   d:'Implantar a reunião curta diária de metas e a reunião semanal de vendas da loja.'}
+];
+function priDocFaltando(){
+  const ja={}; PRI_ITENS.forEach(function(i){ ja[(i.titulo||'').trim()]=1; });
+  return PRI_SEED.filter(function(x){ return !ja[x.t]; });
+}
+async function priCarregarDoc(){
+  if(semPermissao()) return;
+  const falta=priDocFaltando();
+  if(!falta.length || !DB) return;
+  if(!confirm('Trazer '+falta.length+(falta.length===1?' problema':' problemas')+' do documento "Problemas Urgentes"?\n\n'
+    + 'Entram na faixa "A classificar", em cima da matriz, e você arrasta cada um pro quadrante.')) return;
+  try{
+    const lote=DB.batch(), col=DB.collection('ls_prioridades');
+    falta.forEach(function(x){
+      lote.set(col.doc(), {titulo:x.t, detalhe:x.d, area:x.a, responsavel:'', prazo:'',
+        importante:null, urgente:null, feito:false, origemId:null, origemDoc:'Problemas Urgentes',
+        criadoEm:new Date().toISOString(), criadoPor:window._usuario||''});
+    });
+    await lote.commit();
+  }catch(e){ console.warn('priCarregarDoc',e); alert('Não consegui trazer agora.'); }
 }
 
 /* Traz as ideias da aba Melhorias sem redigitar. Entram em "Agende" —
