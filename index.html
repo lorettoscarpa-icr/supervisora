@@ -973,6 +973,44 @@ body{zoom:1.1;}
 .fl-l small{color:var(--cr3);}
 .fl-d{font-size:12px;color:var(--cr3);line-height:1.5;margin-top:7px;}
 .fl-d b{color:var(--cr2);}
+/* ─── MATRIZ DE EISENHOWER ─── */
+.pri-topo{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
+.pri-cap{font-size:12px;color:var(--cr3);line-height:1.6;max-width:720px;margin-bottom:16px;}
+.pri-cap b{color:var(--cr2);}
+.pri-grade{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;}
+.pri-q{background:var(--bg2);border:1px solid var(--oud2);border-top-width:2px;border-radius:3px;
+  display:flex;flex-direction:column;min-height:180px;transition:border-color .15s,background .15s;}
+.pri-q.alvo{border-color:var(--ou);background:rgba(212,180,90,.08);}
+.pri-q.q1{border-top-color:var(--vermelho);}
+.pri-q.q2{border-top-color:var(--ou);}
+.pri-q.q3{border-top-color:var(--azul);}
+.pri-q.q4{border-top-color:var(--oud2);}
+.pri-q-hd{padding:11px 13px 9px;border-bottom:1px solid var(--oud2);}
+.pri-q-t{font-size:13px;font-weight:600;color:var(--cr);display:flex;align-items:baseline;gap:7px;}
+.pri-q.q1 .pri-q-t{color:var(--vermelho);}
+.pri-q.q2 .pri-q-t{color:var(--ou2);}
+.pri-q.q3 .pri-q-t{color:var(--azul);}
+.pri-q-n{font-family:'DM Mono',monospace;font-size:9px;color:var(--cr3);margin-left:auto;}
+.pri-q-s{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--cr3);margin-top:4px;}
+.pri-itens{padding:9px;display:flex;flex-direction:column;gap:7px;flex:1;}
+.pri-c{background:var(--bgd);border:1px solid var(--oud2);border-left:2px solid var(--oud);
+  border-radius:2px;padding:9px 10px;cursor:grab;transition:border-color .15s,opacity .15s;}
+.pri-c:hover{border-color:var(--oud);}
+.pri-c.arrastando{opacity:.4;}
+.pri-c.feito{opacity:.5;}
+.pri-c.feito .pri-c-t{text-decoration:line-through;}
+.pri-c-t{font-size:12.5px;color:var(--cr);line-height:1.35;font-weight:500;word-break:break-word;}
+.pri-c-d{font-size:11.5px;color:var(--cr3);line-height:1.4;margin-top:4px;word-break:break-word;}
+.pri-c-pe{display:flex;align-items:center;gap:5px;margin-top:7px;flex-wrap:wrap;}
+.pri-tag{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:.9px;text-transform:uppercase;
+  padding:1px 5px;border-radius:2px;border:1px solid var(--oud2);color:var(--cr3);white-space:nowrap;}
+.pri-tag.area{border-color:var(--oud);color:var(--ou2);}
+.pri-tag.venceu{border-color:var(--vermelho);color:var(--vermelho);}
+.pri-tag.origem{border-color:var(--azul);color:var(--azul);}
+.pri-acts{margin-left:auto;display:flex;gap:1px;}
+.pri-vazio{color:var(--cr3);font-size:11.5px;font-style:italic;padding:10px 2px;text-align:center;}
+@media(max-width:760px){ .pri-grade{grid-template-columns:1fr;} }
 .leitura-tag{display:none;}
 .so-leitura .leitura-tag{display:inline-block;margin-top:6px;font-size:9px;letter-spacing:2px;
   text-transform:uppercase;color:var(--ou2);border:1px solid var(--oud2);border-radius:3px;padding:2px 8px;}
@@ -991,6 +1029,7 @@ body{zoom:1.1;}
   <button class="tabnav-btn" onclick="abrirTab('rotina',this)">Rotina</button>
   <button class="tabnav-btn" onclick="abrirTab('relatorio',this)">Relatório</button>
   <button class="tabnav-btn" onclick="abrirTab('melhorias',this)">Melhorias</button>
+  <button class="tabnav-btn" onclick="abrirTab('prioridades',this)">Prioridades</button>
 </div>
 
 <main>
@@ -1606,6 +1645,21 @@ async function cobrir(sel,id,nome){
   </div>
 </div>
 
+<!-- PRIORIDADES · Matriz de Eisenhower -->
+<div class="tab-content" id="tab-prioridades">
+  <div class="pri-topo">
+    <div class="slbl" style="margin:0;border:none;padding:0;">Prioridades da loja</div>
+    <span style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <button class="bt-ouro-mini so-hide" id="pri-imp" style="display:none" onclick="priImportar()"></button>
+      <button class="bt-ouro-mini so-hide" onclick="priNovo()">+ Novo problema</button>
+      <button class="bt-ouro-mini" style="background:transparent;color:var(--ou2);" id="pri-ver" onclick="priVerFeitos()">Mostrar concluídos</button>
+    </span>
+  </div>
+  <div class="pri-cap">Cada problema entra num quadrante por duas perguntas: <b>é importante?</b> (muda o resultado
+    da loja) e <b>é urgente?</b> (tem hora marcada). Arraste o cartão de um quadrante pro outro quando a resposta mudar.</div>
+  <div class="pri-grade" id="pri-grade"></div>
+</div>
+
 <!-- RELATÓRIO -->
 <div class="tab-content" id="tab-relatorio">
   <div class="nav-mes" id="nav-rel"></div>
@@ -1840,6 +1894,43 @@ async function cobrir(sel,id,nome){
     <div id="cav-lista"></div>
     <div style="display:flex;gap:8px;margin-top:6px;justify-content:flex-end;">
       <button class="bt" onclick="fecharModal('mov-rot-aviso')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Prioridades · novo/editar problema -->
+<div class="mov" id="mov-pri">
+  <div class="modal-box" style="max-width:520px;">
+    <button class="modal-close" onclick="fecharModal('mov-pri')">&times;</button>
+    <div class="modal-tit" id="pri-m-tit">Novo problema</div>
+    <div class="modal-sub">O quadrante sai das duas perguntas abaixo — e você pode arrastar depois.</div>
+    <div class="campo"><label>Qual é o problema?</label>
+      <input class="ev-inp" id="pri-titulo" maxlength="110" placeholder="Ex.: Fila no caixa no fim do dia"></div>
+    <div class="campo" style="margin-top:10px;"><label>Detalhe (opcional)</label>
+      <textarea class="ev-inp" id="pri-detalhe" style="min-height:60px;resize:vertical;" placeholder="O que está acontecendo, desde quando, o que já tentaram…"></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+      <div class="campo" style="flex:1;min-width:150px;"><label>Área</label>
+        <select class="ev-inp" id="pri-area"></select></div>
+      <div class="campo" style="flex:1;min-width:150px;"><label>Responsável</label>
+        <select class="ev-inp" id="pri-resp"></select></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+      <div class="campo" style="flex:1;min-width:150px;"><label>É importante?</label>
+        <select class="ev-inp" id="pri-imp-sel">
+          <option value="1">Sim — muda o resultado da loja</option>
+          <option value="0">Não — dá pra viver sem</option>
+        </select></div>
+      <div class="campo" style="flex:1;min-width:150px;"><label>É urgente?</label>
+        <select class="ev-inp" id="pri-urg-sel">
+          <option value="1">Sim — tem hora marcada</option>
+          <option value="0">Não — pode esperar</option>
+        </select></div>
+    </div>
+    <div class="campo" style="margin-top:10px;"><label>Prazo (opcional)</label>
+      <input type="date" class="ev-inp" id="pri-prazo"></div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="bt" onclick="fecharModal('mov-pri')">Cancelar</button>
+      <button class="bt ouro" onclick="priSalvar()">Salvar</button>
     </div>
   </div>
 </div>
@@ -4029,7 +4120,7 @@ if(AUTH){
     SO_LEITURA = SO_LEITURA_EMAILS.indexOf(email) >= 0;
     if(SO_LEITURA) document.body.classList.add('so-leitura');
     aplicarSessao(email);
-    carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); carregarEventos(); carregarPautasResumo(); montarSeletorMesPauta(); carregarRotina(); carregarPdi(); });
+    carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); carregarEventos(); carregarPautasResumo(); montarSeletorMesPauta(); carregarRotina(); carregarPdi(); carregarPrioridades(); });
   });
 }
 
@@ -4383,6 +4474,214 @@ function renderConf(){
 }
 
 const MEL_AREAS={vendas:'Vendas',rh:'RH',entregas:'Entregas',estoque:'Estoque',financeiro:'Financeiro',processos:'Processos internos'};
+
+/* ══════════════════════════════════════════════════════════════
+   PRIORIDADES · Matriz de Eisenhower
+
+   Duas perguntas, quatro quadrantes: importante muda o resultado da
+   loja, urgente tem hora marcada. O que a matriz sozinha não resolve é
+   ordenar DENTRO do quadrante — cinco problemas em "Faça agora" ficam
+   empatados. Aqui quem desempata é o prazo: com prazo antes de sem
+   prazo, mais perto antes de mais longe, e o vencido sobe pro topo com
+   a etiqueta vermelha.
+
+   Um documento por problema em ls_prioridades:
+     {titulo, detalhe, area, importante, urgente, responsavel, prazo,
+      feito, origemId, criadoEm, criadoPor}
+
+   origemId guarda de qual ideia da aba Melhorias o problema veio, e é
+   o que impede de importar a mesma coisa duas vezes.
+   ══════════════════════════════════════════════════════════════ */
+const PRI_Q=[
+  {k:'q1', imp:1, urg:1, t:'Faça agora',  s:'Importante e urgente'},
+  {k:'q2', imp:1, urg:0, t:'Agende',      s:'Importante, não urgente'},
+  {k:'q3', imp:0, urg:1, t:'Delegue',     s:'Urgente, não importante'},
+  {k:'q4', imp:0, urg:0, t:'Deixe pra depois', s:'Nem urgente nem importante'}
+];
+let PRI_ITENS=[], _priEdit=null, _priDrag=null, _unsubPri=null, _priVerFeitos=false;
+
+function carregarPrioridades(){
+  if(!DB || _unsubPri) return;
+  _unsubPri = DB.collection('ls_prioridades').onSnapshot(function(snap){
+    PRI_ITENS = snap.docs.map(function(d){ const o=d.data(); o.id=d.id; return o; });
+    renderPrioridades();
+  }, function(e){ falhaLeitura('ls_prioridades', e);
+    const g=document.getElementById('pri-grade');
+    if(g) g.innerHTML='<div class="pri-vazio" style="grid-column:1/-1;">Não consegui ler as prioridades. ('+esc(e.code||e.message)+')</div>';
+  });
+}
+
+// com prazo antes de sem prazo, e o mais perto primeiro
+function priOrdena(a,b){
+  if(a.prazo && b.prazo) return a.prazo.localeCompare(b.prazo);
+  if(a.prazo) return -1;
+  if(b.prazo) return 1;
+  return String(a.criadoEm||'').localeCompare(String(b.criadoEm||''));
+}
+function priDoQuadrante(q){
+  return PRI_ITENS.filter(function(i){
+    if(!_priVerFeitos && i.feito) return false;
+    return (i.importante?1:0)===q.imp && (i.urgente?1:0)===q.urg;
+  }).sort(priOrdena);
+}
+// ideias de Melhorias ainda não trazidas pra cá
+function priFaltando(){
+  const ja={}; PRI_ITENS.forEach(function(i){ if(i.origemId) ja[i.origemId]=1; });
+  return (window._melhorias||[]).filter(function(m){ return m.id && !ja[m.id] && m.status!=='feita'; });
+}
+
+function renderPrioridades(){
+  const g=document.getElementById('pri-grade'); if(!g) return;
+  const hoje=(typeof rotHoje==='function')?rotHoje():new Date().toISOString().slice(0,10);
+
+  g.innerHTML=PRI_Q.map(function(q){
+    const itens=priDoQuadrante(q);
+    return '<div class="pri-q '+q.k+'" data-q="'+q.k+'"'
+      + ' ondragover="priSobre(event,this)" ondragleave="this.classList.remove(\'alvo\')" ondrop="priSolta(event,this)">'
+      + '<div class="pri-q-hd"><div class="pri-q-t">'+q.t+'<span class="pri-q-n">'+itens.length+'</span></div>'
+      + '<div class="pri-q-s">'+q.s+'</div></div>'
+      + '<div class="pri-itens">'
+        + (itens.length?itens.map(function(i){ return priCard(i,hoje); }).join('')
+                       :'<div class="pri-vazio">—</div>')
+      + '</div></div>';
+  }).join('');
+
+  const imp=document.getElementById('pri-imp');
+  if(imp){
+    const n=priFaltando().length;
+    imp.style.display = n?'':'none';
+    imp.textContent = 'Trazer de Melhorias ('+n+')';
+  }
+  const vf=document.getElementById('pri-ver');
+  if(vf) vf.textContent = _priVerFeitos ? 'Esconder concluídos' : 'Mostrar concluídos';
+}
+
+function priCard(i, hoje){
+  const venceu = i.prazo && i.prazo<hoje && !i.feito;
+  return '<div class="pri-c'+(i.feito?' feito':'')+'" draggable="'+(SO_LEITURA?'false':'true')+'" data-id="'+esc(i.id)+'"'
+    + ' ondragstart="priPega(event,\''+esc(i.id)+'\')" ondragend="this.classList.remove(\'arrastando\')">'
+    + '<div class="pri-c-t">'+esc(i.titulo||'')+'</div>'
+    + (i.detalhe?'<div class="pri-c-d">'+esc(i.detalhe)+'</div>':'')
+    + '<div class="pri-c-pe">'
+      + (i.area?'<span class="pri-tag area">'+esc(MEL_AREAS[i.area]||i.area)+'</span>':'')
+      + (i.responsavel?'<span class="pri-tag">'+esc(i.responsavel)+'</span>':'')
+      + (i.prazo?'<span class="pri-tag'+(venceu?' venceu':'')+'">'+(venceu?'venceu ':'até ')+esc(fmtData(i.prazo))+'</span>':'')
+      + (i.origemId?'<span class="pri-tag origem">de Melhorias</span>':'')
+      + '<span class="pri-acts">'
+        + '<button class="rot-ic" title="'+(i.feito?'Reabrir':'Marcar como resolvido')+'" onclick="priFeito(\''+esc(i.id)+'\')">'+(i.feito?'↺':'✓')+'</button>'
+        + '<button class="rot-ic" title="Editar" onclick="priEditar(\''+esc(i.id)+'\')">✎</button>'
+        + '<button class="rot-ic del" title="Excluir" onclick="priExcluir(\''+esc(i.id)+'\')">×</button>'
+      + '</span>'
+    + '</div></div>';
+}
+
+function priVerFeitos(){ _priVerFeitos=!_priVerFeitos; renderPrioridades(); }
+
+/* ── arrastar entre quadrantes: soltar é responder as duas perguntas ── */
+function priPega(ev,id){
+  _priDrag=id; ev.dataTransfer.effectAllowed='move';
+  try{ ev.dataTransfer.setData('text/plain',id); }catch(e){}
+  const el=ev.target.closest('.pri-c'); if(el) el.classList.add('arrastando');
+}
+function priSobre(ev,col){ if(!_priDrag) return; ev.preventDefault(); ev.dataTransfer.dropEffect='move'; col.classList.add('alvo'); }
+async function priSolta(ev,col){
+  ev.preventDefault(); col.classList.remove('alvo');
+  const id=_priDrag; _priDrag=null;
+  if(semPermissao()) return;
+  if(!id || !DB) return;
+  const q=PRI_Q.filter(function(x){ return x.k===col.getAttribute('data-q'); })[0];
+  const it=PRI_ITENS.filter(function(x){ return x.id===id; })[0];
+  if(!q || !it) return;
+  if((it.importante?1:0)===q.imp && (it.urgente?1:0)===q.urg) return;   // mesmo quadrante
+  try{ await DB.collection('ls_prioridades').doc(id).update({importante:!!q.imp, urgente:!!q.urg}); }
+  catch(e){ console.warn('priSolta',e); alert('Não consegui mover agora.'); }
+}
+
+function priNovo(){
+  if(semPermissao()) return;
+  _priEdit=null;
+  document.getElementById('pri-m-tit').textContent='Novo problema';
+  document.getElementById('pri-titulo').value='';
+  document.getElementById('pri-detalhe').value='';
+  document.getElementById('pri-prazo').value='';
+  document.getElementById('pri-area').innerHTML=Object.keys(MEL_AREAS).map(function(k){
+    return '<option value="'+k+'">'+esc(MEL_AREAS[k])+'</option>'; }).join('');
+  document.getElementById('pri-resp').innerHTML='<option value="">— ninguém ainda —</option>'
+    + rotEquipe().map(function(n){ return '<option value="'+esc(n)+'">'+esc(n)+'</option>'; }).join('');
+  document.getElementById('pri-imp-sel').value='1';
+  document.getElementById('pri-urg-sel').value='1';
+  abrirModal('mov-pri');
+}
+function priEditar(id){
+  if(semPermissao()) return;
+  const it=PRI_ITENS.filter(function(x){ return x.id===id; })[0]; if(!it) return;
+  priNovo();
+  _priEdit=id;
+  document.getElementById('pri-m-tit').textContent='Editar problema';
+  document.getElementById('pri-titulo').value=it.titulo||'';
+  document.getElementById('pri-detalhe').value=it.detalhe||'';
+  document.getElementById('pri-area').value=it.area||'processos';
+  document.getElementById('pri-resp').value=it.responsavel||'';
+  document.getElementById('pri-prazo').value=it.prazo||'';
+  document.getElementById('pri-imp-sel').value=it.importante?'1':'0';
+  document.getElementById('pri-urg-sel').value=it.urgente?'1':'0';
+}
+async function priSalvar(){
+  if(semPermissao()) return;
+  const tit=(document.getElementById('pri-titulo').value||'').trim();
+  if(!tit){ alert('Escreva qual é o problema.'); return; }
+  if(!DB){ alert('Sem conexão.'); return; }
+  const campos={
+    titulo:tit,
+    detalhe:(document.getElementById('pri-detalhe').value||'').trim(),
+    area:document.getElementById('pri-area').value,
+    responsavel:document.getElementById('pri-resp').value,
+    prazo:document.getElementById('pri-prazo').value||'',
+    importante:document.getElementById('pri-imp-sel').value==='1',
+    urgente:document.getElementById('pri-urg-sel').value==='1'
+  };
+  try{
+    if(_priEdit) await DB.collection('ls_prioridades').doc(_priEdit).update(campos);
+    else await DB.collection('ls_prioridades').add(Object.assign({feito:false, origemId:null,
+      criadoEm:new Date().toISOString(), criadoPor:window._usuario||''}, campos));
+    fecharModal('mov-pri');
+  }catch(e){ console.warn('priSalvar',e); alert('Não consegui salvar agora.'); }
+}
+async function priFeito(id){
+  if(semPermissao()) return;
+  const it=PRI_ITENS.filter(function(x){ return x.id===id; })[0]; if(!it || !DB) return;
+  try{ await DB.collection('ls_prioridades').doc(id).update({feito:!it.feito,
+        concluidoEm: it.feito?null:new Date().toISOString()}); }
+  catch(e){ console.warn('priFeito',e); }
+}
+async function priExcluir(id){
+  if(semPermissao()) return;
+  if(!confirm('Excluir este problema da matriz?')) return;
+  if(!DB) return;
+  try{ await DB.collection('ls_prioridades').doc(id).delete(); }
+  catch(e){ console.warn('priExcluir',e); }
+}
+
+/* Traz as ideias da aba Melhorias sem redigitar. Entram em "Agende" —
+   importante mas sem hora marcada — que é o palpite honesto pra uma
+   ideia de melhoria: se fosse pra fazer agora, alguém já teria feito.
+   A Jhennifer arrasta o que for urgente pro quadrante de cima. */
+async function priImportar(){
+  if(semPermissao()) return;
+  const falta=priFaltando();
+  if(!falta.length || !DB) return;
+  if(!confirm('Trazer '+falta.length+(falta.length===1?' ideia':' ideias')+' da aba Melhorias?\n\n'
+    + 'Entram em "Agende" e você arrasta pro quadrante certo.')) return;
+  try{
+    const lote=DB.batch(), col=DB.collection('ls_prioridades');
+    falta.forEach(function(m){
+      lote.set(col.doc(), {titulo:m.titulo||'', detalhe:m.problema||'', area:m.area||'processos',
+        responsavel:'', prazo:'', importante:true, urgente:false, feito:false, origemId:m.id,
+        criadoEm:new Date().toISOString(), criadoPor:window._usuario||''});
+    });
+    await lote.commit();
+  }catch(e){ console.warn('priImportar',e); alert('Não consegui trazer agora.'); }
+}
 const MEL_STATUS=['nova','andamento','feita'];
 const MEL_ST_LBL={nova:'Nova',andamento:'Em andamento',feita:'Feita'};
 function novaIdeiaMelhoria(){

@@ -149,6 +149,7 @@ service cloud.firestore {
     match /ls_conferencias/{document=**}{ allow read: if painelSup(); allow write: if gestorOuSup(); }
     match /ls_melhorias/{document=**}   { allow read: if painelSup(); allow write: if gestorOuSup(); }
     match /ls_eventos/{document=**}     { allow read: if painelSup(); allow write: if gestorOuSup(); }
+    match /ls_prioridades/{document=**} { allow read: if painelSup(); allow write: if gestorOuSup(); }
     // ▲▲ fim do novo ▲▲
 
     // ===== Comunicados e Tarefas (Central) — regra específica no servidor =====
@@ -237,7 +238,7 @@ service cloud.firestore {
     // coleções acima, e as regras que eu escrevi não serviriam de nada: no
     // Firestore as regras se SOMAM, basta UMA liberar pra liberar.
     match /{coll}/{document=**} {
-      allow read, write: if !(coll in ['hub_config','ls_acessos','lancamentos','bancoHoras','documentosRH','ls_comunicados','ls_tarefas','catalogos_arquivos','ls_rotina','ls_escala','ls_ocorrencias','ls_avaliacoes','ls_pdi','ls_pautas','ls_presenca','ls_coberturas','ls_conferencias','ls_melhorias','ls_eventos'])
+      allow read, write: if !(coll in ['hub_config','ls_acessos','lancamentos','bancoHoras','documentosRH','ls_comunicados','ls_tarefas','catalogos_arquivos','ls_rotina','ls_escala','ls_ocorrencias','ls_avaliacoes','ls_pdi','ls_pautas','ls_presenca','ls_coberturas','ls_conferencias','ls_melhorias','ls_eventos','ls_prioridades'])
         && request.auth != null
         && request.auth.token.firebase.sign_in_provider != 'anonymous';
     }
