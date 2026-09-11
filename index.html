@@ -990,6 +990,11 @@ body{zoom:1.1;}
 .pri-fila-t small{text-transform:none;letter-spacing:0;color:var(--cr3);font-family:'Barlow',sans-serif;font-size:11px;margin-left:8px;}
 .pri-fila-g{display:flex;gap:8px;flex-wrap:wrap;}
 .pri-fila-g .pri-c{max-width:330px;flex:1 1 250px;border-left-color:var(--ou);}
+.pri-convite{border:1px dashed var(--ou);background:rgba(212,180,90,.06);border-radius:3px;
+  padding:20px 22px;margin-bottom:14px;text-align:center;}
+.pri-convite-t{font-family:'Playfair Display',serif;font-size:17px;color:var(--ou2);margin-bottom:6px;}
+.pri-convite-s{font-size:12.5px;color:var(--cr3);line-height:1.55;max-width:520px;margin:0 auto 14px;}
+.pri-convite .bt-ouro-mini{margin:0 4px;}
 .pri-q{background:var(--bg2);border:1px solid var(--oud2);border-top-width:2px;border-radius:3px;
   display:flex;flex-direction:column;min-height:180px;transition:border-color .15s,background .15s;}
 .pri-q.alvo{border-color:var(--ou);background:rgba(212,180,90,.08);}
@@ -4583,25 +4588,36 @@ function renderPrioridades(){
     + '<div class="pri-ey">Não importante</div>'+ quad('q3') + quad('q4');
 
   const fila=priSemClasse();
+  const nDoc=priDocFaltando().length, nMel=priFaltando().length;
   const fx=document.getElementById('pri-fila');
-  if(fx) fx.innerHTML = fila.length
-    ? '<div class="pri-fila"><div class="pri-fila-t">A classificar · '+fila.length
-      + '<small>arraste cada um pro quadrante que responde às duas perguntas</small></div>'
-      + '<div class="pri-fila-g">'+fila.map(function(i){ return priCard(i,hoje); }).join('')+'</div></div>'
-    : '';
+  if(fx){
+    if(fila.length){
+      fx.innerHTML='<div class="pri-fila"><div class="pri-fila-t">A classificar · '+fila.length
+        + '<small>arraste cada um pro quadrante que responde às duas perguntas</small></div>'
+        + '<div class="pri-fila-g">'+fila.map(function(i){ return priCard(i,hoje); }).join('')+'</div></div>';
+    }else if(!PRI_ITENS.length && (nDoc||nMel) && !SO_LEITURA){
+      // nada na matriz e tem coisa esperando: o convite vai no meio da tela,
+      // senão o botãozinho lá em cima passa batido e a aba parece quebrada
+      fx.innerHTML='<div class="pri-convite"><div class="pri-convite-t">A matriz ainda está vazia</div>'
+        + '<div class="pri-convite-s">'
+        + (nDoc?'Os <b>'+nDoc+' problemas</b> do documento <i>Problemas Urgentes</i> estão prontos pra entrar. ':'')
+        + (nMel?'Há também <b>'+nMel+'</b> da aba Melhorias. ':'')
+        + 'Eles entram sem quadrante, e você arrasta cada um pro lugar.</div>'
+        + (nDoc?'<button class="bt-ouro-mini" onclick="priCarregarDoc()">Trazer os '+nDoc+' do documento</button>':'')
+        + (nMel?'<button class="bt-ouro-mini" style="background:transparent;color:var(--ou2);" onclick="priImportar()">Trazer '+nMel+' de Melhorias</button>':'')
+        + '</div>';
+    }else fx.innerHTML='';
+  }
 
   const doc=document.getElementById('pri-doc');
   if(doc){
-    const n=priDocFaltando().length;
-    doc.style.display = n?'':'none';
-    doc.textContent = 'Trazer do documento ('+n+')';
+    doc.style.display = nDoc?'':'none';
+    doc.textContent = 'Trazer do documento ('+nDoc+')';
   }
-
   const imp=document.getElementById('pri-imp');
   if(imp){
-    const n=priFaltando().length;
-    imp.style.display = n?'':'none';
-    imp.textContent = 'Trazer de Melhorias ('+n+')';
+    imp.style.display = nMel?'':'none';
+    imp.textContent = 'Trazer de Melhorias ('+nMel+')';
   }
   const vf=document.getElementById('pri-ver');
   if(vf) vf.textContent = _priVerFeitos ? 'Esconder concluídos' : 'Mostrar concluídos';
