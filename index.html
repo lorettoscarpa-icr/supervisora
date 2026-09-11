@@ -1049,7 +1049,6 @@ body{zoom:1.1;}
   <button class="tabnav-btn" onclick="abrirTab('vendas',this)">Vendas</button>
   <button class="tabnav-btn" onclick="abrirTab('rh',this)">RH</button>
   <button class="tabnav-btn" onclick="abrirTab('rotina',this)">Rotina</button>
-  <button class="tabnav-btn" onclick="abrirTab('relatorio',this)">Relatório</button>
   <button class="tabnav-btn" onclick="abrirTab('melhorias',this)">Melhorias</button>
   <button class="tabnav-btn" onclick="abrirTab('prioridades',this)">Prioridades</button>
 </div>
@@ -1581,6 +1580,7 @@ async function cobrir(sel,id,nome){
     <button class="rh-subnav-btn active" onclick="abrirRh('calendario',this)">Calendário do mês</button>
     <button class="rh-subnav-btn" onclick="abrirRh('ocorrencias',this)">Ocorrências</button>
     <button class="rh-subnav-btn" onclick="abrirRh('avaliacoes',this)">Avaliações Mensais</button>
+    <button class="rh-subnav-btn" onclick="abrirRh('reuniao',this)">Reunião 1:1</button>
     <button class="rh-subnav-btn" onclick="abrirRh('pdi',this)">Plano de Desenvolvimento</button>
   </div>
 
@@ -1604,6 +1604,25 @@ async function cobrir(sel,id,nome){
     <button class="oc-novo-btn" onclick="abrirModalRapido('ocorrencia')">+ Nova Ocorrência</button>
     <div class="oc-filtros" id="oc-filtros"></div>
     <div id="oc-lista"><div class="rel-load">Carregando ocorrências…</div></div>
+  </div>
+
+  <div class="rh-sec" id="rh-reuniao">
+    <div class="nav-mes" id="nav-rel"></div>
+    <div class="rel-card">
+      <div class="rel-tit">Reunião 1:1</div>
+      <div class="rel-sub">Pra Jhennifer chegar na conversa com o colaborador embasada — pontos pra <b style="color:var(--verde);">reconhecer</b> e pontos pra <b style="color:var(--ou2);">desenvolver</b>, com roteiro sugerido pra dar o feedback de forma construtiva. Puxa as ocorrências e a avaliação do mês e o plano de desenvolvimento em vigor. Sai na tela e em PDF de 1 página pra levar impressa.</div>
+      <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;max-width:520px;margin:0 auto;">
+        <select id="sel-pauta" class="rapido-inp" style="flex:1;min-width:200px;">
+          <option value="Ialey">Ialey · Vendedora</option>
+          <option value="Michelly">Michelly · Vendedora</option>
+          <option value="Natália">Natália · Vendedora</option>
+          <option value="Edson">Edson · E-commerce</option>
+          <option value="Yuri">Yuri · Estoquista</option>
+          <option value="Gustavo">Gustavo · Entregador</option>
+        </select>
+        <button class="rel-btn" style="padding:13px 24px;" onclick="abrirPauta(document.getElementById('sel-pauta').value)">📋 Abrir pauta da 1:1</button>
+      </div>
+    </div>
   </div>
 
   <div class="rh-sec" id="rh-pdi">
@@ -1685,25 +1704,6 @@ async function cobrir(sel,id,nome){
 </div>
 
 <!-- RELATÓRIO -->
-<div class="tab-content" id="tab-relatorio">
-  <div class="nav-mes" id="nav-rel"></div>
-  <div class="rel-card">
-    <div class="rel-tit">Relatório Individual · Reunião 1:1</div>
-    <div class="rel-sub">Pra Jhennifer chegar na conversa com o colaborador embasada — pontos pra <b style="color:var(--verde);">reconhecer</b> e pontos pra <b style="color:var(--ou2);">desenvolver</b>, com roteiro sugerido pra dar o feedback de forma construtiva. Sai na tela e em PDF de 1 página pra levar impressa.</div>
-    <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;max-width:520px;margin:0 auto;">
-      <select id="sel-pauta" class="rapido-inp" style="flex:1;min-width:200px;">
-        <option value="Ialey">Ialey · Vendedora</option>
-        <option value="Michelly">Michelly · Vendedora</option>
-        <option value="Natália">Natália · Vendedora</option>
-        <option value="Edson">Edson · E-commerce</option>
-        <option value="Yuri">Yuri · Estoquista</option>
-        <option value="Gustavo">Gustavo · Entregador</option>
-      </select>
-      <button class="rel-btn" style="padding:13px 24px;" onclick="abrirPauta(document.getElementById('sel-pauta').value)">📋 Abrir pauta da 1:1</button>
-    </div>
-  </div>
-</div>
-
 
 <!-- MELHORIAS -->
 <div class="tab-content" id="tab-melhorias">
