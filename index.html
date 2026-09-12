@@ -995,6 +995,15 @@ body{zoom:1.1;}
 .pri-convite-t{font-family:'Playfair Display',serif;font-size:17px;color:var(--ou2);margin-bottom:6px;}
 .pri-convite-s{font-size:12.5px;color:var(--cr3);line-height:1.55;max-width:520px;margin:0 auto 14px;}
 .pri-convite .bt-ouro-mini{margin:0 4px;}
+.pri-c-s{font-size:11.5px;color:var(--cr2);line-height:1.4;margin-top:5px;padding-left:8px;
+  border-left:1px solid var(--oud2);}
+.pri-c-s b{color:var(--ou2);font-weight:600;}
+.pri-tag.andamento{border-color:var(--azul);color:var(--azul);}
+.pri-filtros{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.pri-chip{background:transparent;border:1px solid var(--oud2);color:var(--cr3);padding:5px 11px;
+  border-radius:20px;font-family:inherit;font-size:11px;cursor:pointer;transition:.15s;}
+.pri-chip:hover{border-color:var(--oud);}
+.pri-chip.on{background:rgba(212,180,90,.14);border-color:var(--ou);color:var(--cr);}
 .pri-q{background:var(--bg2);border:1px solid var(--oud2);border-top-width:2px;border-radius:3px;
   display:flex;flex-direction:column;min-height:180px;transition:border-color .15s,background .15s;}
 .pri-q.alvo{border-color:var(--ou);background:rgba(212,180,90,.08);}
@@ -1049,7 +1058,6 @@ body{zoom:1.1;}
   <button class="tabnav-btn" onclick="abrirTab('vendas',this)">Vendas</button>
   <button class="tabnav-btn" onclick="abrirTab('rh',this)">RH</button>
   <button class="tabnav-btn" onclick="abrirTab('rotina',this)">Rotina</button>
-  <button class="tabnav-btn" onclick="abrirTab('melhorias',this)">Melhorias</button>
   <button class="tabnav-btn" onclick="abrirTab('prioridades',this)">Prioridades</button>
 </div>
 
@@ -1697,55 +1705,15 @@ async function cobrir(sel,id,nome){
       <button class="bt-ouro-mini" style="background:transparent;color:var(--ou2);" id="pri-ver" onclick="priVerFeitos()">Mostrar concluídos</button>
     </span>
   </div>
-  <div class="pri-cap">Cada problema entra num quadrante por duas perguntas: <b>é importante?</b> (muda o resultado
-    da loja) e <b>é urgente?</b> (tem hora marcada). Arraste o cartão de um quadrante pro outro quando a resposta mudar.</div>
+  <div class="pri-cap">Tudo que precisa ser resolvido na loja mora aqui — problema, solução proposta e
+    onde ele está. Cada um entra num quadrante por duas perguntas: <b>é importante?</b> (muda o resultado da
+    loja) e <b>é urgente?</b> (tem hora marcada). Arraste o cartão de um quadrante pro outro quando a resposta mudar.</div>
+  <div class="pri-filtros" id="pri-filtros"></div>
   <div id="pri-fila"></div>
   <div class="pri-grade" id="pri-grade"></div>
 </div>
 
 <!-- RELATÓRIO -->
-
-<!-- MELHORIAS -->
-<div class="tab-content" id="tab-melhorias">
-  <div class="mel-top">
-    <div>
-      <div class="slbl" style="margin-top:0;">Mural de Melhorias</div>
-      <div class="mc-cap">Ideia de melhoria que surgiu no dia a dia · registre o problema e a solução que você enxerga</div>
-    </div>
-    <button class="mel-novo" onclick="toggleFormMelhoria()">+ Nova ideia</button>
-  </div>
-
-  <div class="mel-form" id="mel-form" style="display:none;">
-    <div class="mel-f-linha">
-      <div style="flex:2;">
-        <label class="mel-lbl">Título</label>
-        <input class="mel-in" id="mel-titulo" maxlength="90" placeholder="Ex: Etiqueta de tamanho na caixa">
-      </div>
-      <div style="flex:1;">
-        <label class="mel-lbl">Área</label>
-        <select class="mel-in" id="mel-area">
-          <option value="vendas">Vendas</option>
-          <option value="rh">RH</option>
-          <option value="entregas">Entregas</option>
-          <option value="estoque">Estoque</option>
-          <option value="financeiro">Financeiro</option>
-          <option value="processos">Processos internos</option>
-        </select>
-      </div>
-    </div>
-    <label class="mel-lbl">Qual o problema?</label>
-    <textarea class="mel-in mel-ta" id="mel-problema" placeholder="O que está acontecendo hoje que atrapalha?"></textarea>
-    <label class="mel-lbl">Qual a solução que você propõe?</label>
-    <textarea class="mel-in mel-ta" id="mel-solucao" placeholder="O que dá pra fazer pra resolver?"></textarea>
-    <div class="mel-f-btns">
-      <button class="mel-btn" onclick="toggleFormMelhoria(true)">Cancelar</button>
-      <button class="mel-btn primary" id="mel-salvar" onclick="salvarMelhoria()">Publicar ideia</button>
-    </div>
-  </div>
-
-  <div class="mel-filtros" id="mel-filtros"></div>
-  <div id="mel-lista"><div class="rel-load">Carregando ideias…</div></div>
-</div>
 
 <!-- ROTINA -->
 <div class="tab-content" id="tab-rotina">
@@ -1927,11 +1895,14 @@ async function cobrir(sel,id,nome){
   <div class="modal-box" style="max-width:520px;">
     <button class="modal-close" onclick="fecharModal('mov-pri')">&times;</button>
     <div class="modal-tit" id="pri-m-tit">Novo problema</div>
-    <div class="modal-sub">O quadrante sai das duas perguntas abaixo — e você pode arrastar depois.</div>
-    <div class="campo"><label>Qual é o problema?</label>
+    <div class="modal-sub">O quadrante sai das duas perguntas — e dá pra arrastar depois. Sem resposta,
+      ele espera na caixa de entrada.</div>
+    <div class="campo"><label>Título</label>
       <input class="ev-inp" id="pri-titulo" maxlength="110" placeholder="Ex.: Fila no caixa no fim do dia"></div>
-    <div class="campo" style="margin-top:10px;"><label>Detalhe (opcional)</label>
-      <textarea class="ev-inp" id="pri-detalhe" style="min-height:60px;resize:vertical;" placeholder="O que está acontecendo, desde quando, o que já tentaram…"></textarea></div>
+    <div class="campo" style="margin-top:10px;"><label>Qual é o problema?</label>
+      <textarea class="ev-inp" id="pri-detalhe" style="min-height:58px;resize:vertical;" placeholder="O que está acontecendo hoje que atrapalha, desde quando, o que já tentaram…"></textarea></div>
+    <div class="campo" style="margin-top:10px;"><label>Solução proposta (opcional)</label>
+      <textarea class="ev-inp" id="pri-solucao" style="min-height:48px;resize:vertical;" placeholder="O que dá pra fazer pra resolver?"></textarea></div>
     <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
       <div class="campo" style="flex:1;min-width:150px;"><label>Área</label>
         <select class="ev-inp" id="pri-area"></select></div>
@@ -1943,11 +1914,13 @@ async function cobrir(sel,id,nome){
         <select class="ev-inp" id="pri-imp-sel">
           <option value="1">Sim — muda o resultado da loja</option>
           <option value="0">Não — dá pra viver sem</option>
+          <option value="">Decidir depois</option>
         </select></div>
       <div class="campo" style="flex:1;min-width:150px;"><label>É urgente?</label>
         <select class="ev-inp" id="pri-urg-sel">
           <option value="1">Sim — tem hora marcada</option>
           <option value="0">Não — pode esperar</option>
+          <option value="">Decidir depois</option>
         </select></div>
     </div>
     <div class="campo" style="margin-top:10px;"><label>Prazo (opcional)</label>
@@ -4522,7 +4495,9 @@ const PRI_Q=[
   {k:'q3', imp:0, urg:1, t:'Delegue!',    s:'urgente, mas não importante'},
   {k:'q4', imp:0, urg:0, t:'Elimine!',    s:'nem urgente nem importante'}
 ];
-let PRI_ITENS=[], _priEdit=null, _priDrag=null, _unsubPri=null, _priVerFeitos=false;
+let PRI_ITENS=[], _priEdit=null, _priDrag=null, _unsubPri=null, _priVerFeitos=false, _priArea='todas';
+function priFiltrarArea(a){ _priArea=a; renderPrioridades(); }
+function priNaArea(i){ return _priArea==='todas' || i.area===_priArea; }
 
 function carregarPrioridades(){
   if(!DB || _unsubPri) return;
@@ -4549,17 +4524,20 @@ function priNaoClassificado(i){ return i.importante==null || i.urgente==null; }
 function priDoQuadrante(q){
   return PRI_ITENS.filter(function(i){
     if(!_priVerFeitos && i.feito) return false;
+    if(!priNaArea(i)) return false;
     if(priNaoClassificado(i)) return false;
     return (i.importante?1:0)===q.imp && (i.urgente?1:0)===q.urg;
   }).sort(priOrdena);
 }
 function priSemClasse(){
-  return PRI_ITENS.filter(function(i){ return !i.feito && priNaoClassificado(i); }).sort(priOrdena);
+  return PRI_ITENS.filter(function(i){
+    return (_priVerFeitos || !i.feito) && priNaArea(i) && priNaoClassificado(i);
+  }).sort(priOrdena);
 }
 // ideias de Melhorias ainda não trazidas pra cá
 function priFaltando(){
   const ja={}; PRI_ITENS.forEach(function(i){ if(i.origemId) ja[i.origemId]=1; });
-  return (window._melhorias||[]).filter(function(m){ return m.id && !ja[m.id] && m.status!=='feita'; });
+  return (window._melhorias||[]).filter(function(m){ return m.id && !ja[m.id]; });
 }
 
 function renderPrioridades(){
@@ -4587,13 +4565,22 @@ function renderPrioridades(){
     + '<div class="pri-ey">Importante</div>'    + quad('q1') + quad('q2')
     + '<div class="pri-ey">Não importante</div>'+ quad('q3') + quad('q4');
 
+  // chips de área, só das áreas que têm alguma coisa
+  const cont={}; PRI_ITENS.forEach(function(i){ if(_priVerFeitos||!i.feito) cont[i.area]=(cont[i.area]||0)+1; });
+  const fl=document.getElementById('pri-filtros');
+  if(fl) fl.innerHTML = Object.keys(cont).length>1
+    ? '<button class="pri-chip'+(_priArea==='todas'?' on':'')+'" onclick="priFiltrarArea(\'todas\')">Todas · '+PRI_ITENS.filter(function(i){return _priVerFeitos||!i.feito;}).length+'</button>'
+      + Object.keys(MEL_AREAS).map(function(k){ return cont[k]
+          ? '<button class="pri-chip'+(_priArea===k?' on':'')+'" onclick="priFiltrarArea(\''+k+'\')">'+esc(MEL_AREAS[k])+' · '+cont[k]+'</button>' : ''; }).join('')
+    : '';
+
   const fila=priSemClasse();
   const nDoc=priDocFaltando().length, nMel=priFaltando().length;
   const fx=document.getElementById('pri-fila');
   if(fx){
     if(fila.length){
-      fx.innerHTML='<div class="pri-fila"><div class="pri-fila-t">A classificar · '+fila.length
-        + '<small>arraste cada um pro quadrante que responde às duas perguntas</small></div>'
+      fx.innerHTML='<div class="pri-fila"><div class="pri-fila-t">Caixa de entrada · '+fila.length
+        + '<small>ainda sem quadrante — arraste cada um pro lugar que responde às duas perguntas</small></div>'
         + '<div class="pri-fila-g">'+fila.map(function(i){ return priCard(i,hoje); }).join('')+'</div></div>';
     }else if(!PRI_ITENS.length && (nDoc||nMel) && !SO_LEITURA){
       // nada na matriz e tem coisa esperando: o convite vai no meio da tela,
@@ -4601,10 +4588,10 @@ function renderPrioridades(){
       fx.innerHTML='<div class="pri-convite"><div class="pri-convite-t">A matriz ainda está vazia</div>'
         + '<div class="pri-convite-s">'
         + (nDoc?'Os <b>'+nDoc+' problemas</b> do documento <i>Problemas Urgentes</i> estão prontos pra entrar. ':'')
-        + (nMel?'Há também <b>'+nMel+'</b> da aba Melhorias. ':'')
+        + (nMel?'Há também <b>'+nMel+'</b> do antigo Mural de Melhorias. ':'')
         + 'Eles entram sem quadrante, e você arrasta cada um pro lugar.</div>'
         + (nDoc?'<button class="bt-ouro-mini" onclick="priCarregarDoc()">Trazer os '+nDoc+' do documento</button>':'')
-        + (nMel?'<button class="bt-ouro-mini" style="background:transparent;color:var(--ou2);" onclick="priImportar()">Trazer '+nMel+' de Melhorias</button>':'')
+        + (nMel?'<button class="bt-ouro-mini" style="background:transparent;color:var(--ou2);" onclick="priImportar()">Trazer '+nMel+' do Mural de Melhorias</button>':'')
         + '</div>';
     }else fx.innerHTML='';
   }
@@ -4617,7 +4604,7 @@ function renderPrioridades(){
   const imp=document.getElementById('pri-imp');
   if(imp){
     imp.style.display = nMel?'':'none';
-    imp.textContent = 'Trazer de Melhorias ('+nMel+')';
+    imp.textContent = 'Trazer do Mural antigo ('+nMel+')';
   }
   const vf=document.getElementById('pri-ver');
   if(vf) vf.textContent = _priVerFeitos ? 'Esconder concluídos' : 'Mostrar concluídos';
@@ -4629,12 +4616,15 @@ function priCard(i, hoje){
     + ' ondragstart="priPega(event,\''+esc(i.id)+'\')" ondragend="this.classList.remove(\'arrastando\')">'
     + '<div class="pri-c-t">'+esc(i.titulo||'')+'</div>'
     + (i.detalhe?'<div class="pri-c-d">'+esc(i.detalhe)+'</div>':'')
+    + (i.solucao?'<div class="pri-c-s"><b>Solução:</b> '+esc(i.solucao)+'</div>':'')
     + '<div class="pri-c-pe">'
       + (i.area?'<span class="pri-tag area">'+esc(MEL_AREAS[i.area]||i.area)+'</span>':'')
+      + (i.andamento&&!i.feito?'<span class="pri-tag andamento">em andamento</span>':'')
       + (i.responsavel?'<span class="pri-tag">'+esc(i.responsavel)+'</span>':'')
       + (i.prazo?'<span class="pri-tag'+(venceu?' venceu':'')+'">'+(venceu?'venceu ':'até ')+esc(fmtData(i.prazo))+'</span>':'')
       + (i.origemId?'<span class="pri-tag origem">de Melhorias</span>':'')
       + '<span class="pri-acts">'
+        + (i.feito?'':'<button class="rot-ic" title="'+(i.andamento?'Tirar de em andamento':'Marcar como em andamento')+'" onclick="priAndamento(\''+esc(i.id)+'\')">▶</button>')
         + '<button class="rot-ic" title="'+(i.feito?'Reabrir':'Marcar como resolvido')+'" onclick="priFeito(\''+esc(i.id)+'\')">'+(i.feito?'↺':'✓')+'</button>'
         + '<button class="rot-ic" title="Editar" onclick="priEditar(\''+esc(i.id)+'\')">✎</button>'
         + '<button class="rot-ic del" title="Excluir" onclick="priExcluir(\''+esc(i.id)+'\')">×</button>'
@@ -4673,6 +4663,7 @@ function priNovo(){
   document.getElementById('pri-m-tit').textContent='Novo problema';
   document.getElementById('pri-titulo').value='';
   document.getElementById('pri-detalhe').value='';
+  document.getElementById('pri-solucao').value='';
   document.getElementById('pri-prazo').value='';
   document.getElementById('pri-area').innerHTML=Object.keys(MEL_AREAS).map(function(k){
     return '<option value="'+k+'">'+esc(MEL_AREAS[k])+'</option>'; }).join('');
@@ -4690,30 +4681,34 @@ function priEditar(id){
   document.getElementById('pri-m-tit').textContent='Editar problema';
   document.getElementById('pri-titulo').value=it.titulo||'';
   document.getElementById('pri-detalhe').value=it.detalhe||'';
+  document.getElementById('pri-solucao').value=it.solucao||'';
   document.getElementById('pri-area').value=it.area||'processos';
   document.getElementById('pri-resp').value=it.responsavel||'';
   document.getElementById('pri-prazo').value=it.prazo||'';
-  document.getElementById('pri-imp-sel').value=it.importante?'1':'0';
-  document.getElementById('pri-urg-sel').value=it.urgente?'1':'0';
+  document.getElementById('pri-imp-sel').value=it.importante==null?'':(it.importante?'1':'0');
+  document.getElementById('pri-urg-sel').value=it.urgente==null?'':(it.urgente?'1':'0');
 }
 async function priSalvar(){
   if(semPermissao()) return;
   const tit=(document.getElementById('pri-titulo').value||'').trim();
   if(!tit){ alert('Escreva qual é o problema.'); return; }
   if(!DB){ alert('Sem conexão.'); return; }
+  // '' nos selects é "decidir depois": vira null e o item espera na entrada
+  const tri=function(id){ const v=document.getElementById(id).value; return v===''?null:v==='1'; };
   const campos={
     titulo:tit,
     detalhe:(document.getElementById('pri-detalhe').value||'').trim(),
+    solucao:(document.getElementById('pri-solucao').value||'').trim(),
     area:document.getElementById('pri-area').value,
     responsavel:document.getElementById('pri-resp').value,
     prazo:document.getElementById('pri-prazo').value||'',
-    importante:document.getElementById('pri-imp-sel').value==='1',
-    urgente:document.getElementById('pri-urg-sel').value==='1'
+    importante:tri('pri-imp-sel'),
+    urgente:tri('pri-urg-sel')
   };
   try{
     if(_priEdit) await DB.collection('ls_prioridades').doc(_priEdit).update(campos);
-    else await DB.collection('ls_prioridades').add(Object.assign({feito:false, origemId:null,
-      criadoEm:new Date().toISOString(), criadoPor:window._usuario||''}, campos));
+    else await DB.collection('ls_prioridades').add(Object.assign({feito:false, andamento:false, origemId:null,
+      autor:window._usuario||'', criadoEm:new Date().toISOString(), criadoPor:window._usuario||''}, campos));
     fecharModal('mov-pri');
   }catch(e){ console.warn('priSalvar',e); alert('Não consegui salvar agora.'); }
 }
@@ -4723,6 +4718,12 @@ async function priFeito(id){
   try{ await DB.collection('ls_prioridades').doc(id).update({feito:!it.feito,
         concluidoEm: it.feito?null:new Date().toISOString()}); }
   catch(e){ console.warn('priFeito',e); }
+}
+async function priAndamento(id){
+  if(semPermissao()) return;
+  const it=PRI_ITENS.filter(function(x){ return x.id===id; })[0]; if(!it || !DB) return;
+  try{ await DB.collection('ls_prioridades').doc(id).update({andamento:!it.andamento}); }
+  catch(e){ console.warn('priAndamento',e); }
 }
 async function priExcluir(id){
   if(semPermissao()) return;
@@ -4781,14 +4782,17 @@ async function priImportar(){
   if(semPermissao()) return;
   const falta=priFaltando();
   if(!falta.length || !DB) return;
-  if(!confirm('Trazer '+falta.length+(falta.length===1?' ideia':' ideias')+' da aba Melhorias?\n\n'
-    + 'Entram em "Programe!" e você arrasta pro quadrante certo.')) return;
+  if(!confirm('Trazer '+falta.length+(falta.length===1?' ideia':' ideias')+' do antigo Mural de Melhorias?\n\n'
+    + 'Entram na caixa de entrada e você classifica cada uma.')) return;
   try{
     const lote=DB.batch(), col=DB.collection('ls_prioridades');
     falta.forEach(function(m){
-      lote.set(col.doc(), {titulo:m.titulo||'', detalhe:m.problema||'', area:m.area||'processos',
-        responsavel:'', prazo:'', importante:true, urgente:false, feito:false, origemId:m.id,
-        criadoEm:new Date().toISOString(), criadoPor:window._usuario||''});
+      lote.set(col.doc(), {titulo:m.titulo||'', detalhe:m.problema||'', solucao:m.solucao||'',
+        area:m.area||'processos', responsavel:'', prazo:'',
+        importante:null, urgente:null,            // quem classifica é ela, não a migração
+        feito:m.status==='feita', andamento:m.status==='andamento',
+        origemId:m.id, autor:m.autor||'', criadoEm:m.criadoEm||new Date().toISOString(),
+        criadoPor:window._usuario||''});
     });
     await lote.commit();
   }catch(e){ console.warn('priImportar',e); alert('Não consegui trazer agora.'); }
@@ -4797,10 +4801,8 @@ const MEL_STATUS=['nova','andamento','feita'];
 const MEL_ST_LBL={nova:'Nova',andamento:'Em andamento',feita:'Feita'};
 function novaIdeiaMelhoria(){
   const fm=document.getElementById('fab-menu'); if(fm) fm.classList.remove('open');
-  abrirTab('melhorias');
-  const f=document.getElementById('mel-form');
-  if(f && f.style.display==='none') toggleFormMelhoria();
-  const t=document.getElementById('mel-titulo'); if(t) setTimeout(()=>t.focus(),250);
+  abrirTab('prioridades');
+  setTimeout(function(){ priNovo(); const t=document.getElementById('pri-titulo'); if(t) t.focus(); },250);
 }
 function toggleFormMelhoria(fechar){
   const f=document.getElementById('mel-form'); if(!f)return;
