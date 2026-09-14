@@ -546,6 +546,30 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .rot-ajuda{margin-top:22px;border-top:1px solid var(--oud2);padding-top:14px;font-size:12px;color:var(--cr3);line-height:1.65;}
 .rot-ajuda b{color:var(--cr2);font-weight:500;}
 .rot-vazio{color:var(--cr3);font-size:11.5px;font-style:italic;padding:8px 2px;text-align:center;}
+/* checklist: marcar o que já foi feito no dia, na semana ou no mês */
+.rot-ck{background:transparent;border:1px solid var(--oud);color:transparent;width:15px;height:15px;
+  border-radius:3px;flex:none;cursor:pointer;font-size:10px;line-height:1;padding:0;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;transition:.15s;}
+.rot-ck:hover{border-color:var(--ou);color:var(--oud);}
+.rot-ck.on{background:var(--verde);border-color:var(--verde);color:#15240c;}
+.rot-card.ok{opacity:.55;}
+.rot-card.ok .rot-card-txt{text-decoration:line-through;}
+.rot-av-c.ok{opacity:.55;}
+.rot-av-c.ok .rot-card-txt{text-decoration:line-through;}
+.rot-card-top{display:flex;align-items:flex-start;gap:7px;}
+.rot-card-top .rot-card-txt{flex:1;min-width:0;}
+.rot-feitos{font-family:'DM Mono',monospace;font-size:8.5px;color:var(--cr3);}
+.rot-feitos.tudo{color:var(--verde);}
+.rot-lim{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:.9px;text-transform:uppercase;
+  border:1px solid var(--oud2);color:var(--cr3);padding:1px 5px;border-radius:2px;margin-left:6px;}
+.rot-lim.passou{border-color:var(--vermelho);color:var(--vermelho);}
+.rot-selo.sup{color:var(--azul);border:1px solid var(--azul);}
+.rot-selo.venda{color:var(--ou2);border:1px solid var(--oud);}
+.rot-papeis{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.rot-pchip{background:transparent;border:1px solid var(--oud2);color:var(--cr3);padding:5px 12px;
+  border-radius:20px;font-family:inherit;font-size:11px;cursor:pointer;transition:.15s;}
+.rot-pchip:hover{border-color:var(--oud);}
+.rot-pchip.on{background:rgba(212,180,90,.14);border-color:var(--ou);color:var(--cr);}
 /* cobertura da rotina — passar as tarefas de quem está fora */
 .rot-banner{background:var(--bg2);border:1px solid var(--oud2);border-left:2px solid var(--ou);padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:var(--cr2);line-height:1.5;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .rot-banner b{color:var(--ou2);font-weight:600;}
@@ -1728,6 +1752,7 @@ async function cobrir(sel,id,nome){
   </div>
 
   <div class="rot-pessoas" id="rot-pessoas"></div>
+  <div class="rot-papeis" id="rot-papeis"></div>
   <div id="rot-banner"></div>
   <div class="rot-semana" id="rot-semana"></div>
   <div id="rot-avulsas"></div>
@@ -2004,6 +2029,33 @@ const ROT_TURNO= {dia:'Durante o dia', manha:'Manhã', tarde:'Tarde'};
 const ROT_ORD  = {manha:0, dia:1, tarde:2};
 const ROT_FREQ = {mensal:'1x por mês', semanal:'1x por semana', necessidade:'Conforme necessidade'};
 let ROT_ITENS=[], ROT_QUEM=null, _rotEdit=null, _rotMv=null, _rotFDias=[], _unsubRot=null;
+/* Quem acumula dois papéis — a Jhennifer vende no salão e supervisa — precisa
+   ver de qual chapéu é cada atividade. Os itens gravados antes disso não têm o
+   campo, então o papel também é procurado no cronograma pelo texto: assim a
+   marcação vale pro que já estava lá, sem migração. */
+const ROT_PAPEL={sup:'Supervisão', venda:'Vendas'};
+let _rotPapelIdx=null;
+function rotPapelDe(i){
+  if(i.papel) return i.papel;
+  if(_rotPapelIdx===null){
+    _rotPapelIdx={};
+    Object.keys(ROT_SEED).forEach(function(q){
+      (ROT_SEED[q]||[]).forEach(function(r){ if(r.p) _rotPapelIdx[q+'|'+r.t]=r.p; });
+    });
+  }
+  return _rotPapelIdx[(i.pessoa||'')+'|'+(i.texto||'')] || null;
+}
+function rotPapeis(quem){
+  const set={};
+  ROT_ITENS.forEach(function(i){
+    if(i.pessoa!==quem) return;
+    if(i.tipo!=='fixa'&&i.tipo!=='avulsa'&&i.tipo!=='extra') return;
+    const p=rotPapelDe(i); if(p) set[p]=1;
+  });
+  return Object.keys(set);
+}
+let _rotFiltroPapel='todos';
+function rotFiltrarPapel(p){ _rotFiltroPapel=p; renderRotina(); }
 
 function rotHoje(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function rotIso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -2028,7 +2080,8 @@ async function rotLimpar(){
   if(_rotLimpou || !DB) return; _rotLimpou=true;
   const lim=new Date(); lim.setDate(lim.getDate()-60); const corte=rotIso(lim);
   const velhas=ROT_ITENS.filter(i=>((i.tipo==='realoc'||i.tipo==='extra') && i.data && i.data<corte)
-                                 || (i.tipo==='cobre' && i.fim && i.fim<corte));
+                                 || (i.tipo==='cobre' && i.fim && i.fim<corte)
+                                 || (i.tipo==='feitos' && i.mes && i.mes<corte.slice(0,7)));
   for(const v of velhas){
     try{ await DB.collection('ls_rotina').doc(v.id).delete(); }
     catch(e){ console.warn('rotLimpar',e); break; }   // sem permissão: para, não insiste
@@ -2056,11 +2109,11 @@ const FECHA_SALAO=[
   'Desligar o computador do caixa',
   'Desligar as luzes e o ar-condicionado'
 ];
-function rotFechamento(extras){
+function rotFechamento(extras, papel){
   const l=[];
   FECHA_SALAO.concat(extras||[]).forEach(function(t){
-    l.push({h:'17:55', t:t, d:UTEIS});   // loja fecha 18:00
-    l.push({h:'12:55', t:t, d:[6]});     // sábado a loja fecha 13:00
+    l.push({h:'17:55', t:t, d:UTEIS, p:papel});   // loja fecha 18:00
+    l.push({h:'12:55', t:t, d:[6],   p:papel});   // sábado a loja fecha 13:00
   });
   return l;
 }
@@ -2173,16 +2226,26 @@ const ROT_SEED={
  //    tarefas diárias ao chegar. Ficam todas às 09:00 mesmo — é um
  //    checklist de chegada, não uma sequência cronometrada, e dar hora
  //    cheia a cada uma seria inventar precisão que o documento não tem. ──
+ /* A rotina da supervisora, do documento da consultoria: o que é de todo
+    dia, o que é de segunda, e o que fecha o mês até o dia 5. A abertura
+    da equipe substituiu a "mini reunião diária" que estava aqui — é a
+    mesma coisa, descrita inteira. */
  'Jhennifer':[
-  {h:'09:00', t:'Mini reunião diária: desempenho de ontem, meta do dia, pontos fortes, pontos de atenção e engajamento', d:TODOS},
-  {h:'09:00', t:'Arrumar os sapatos na vitrine interna',                          d:TODOS},
-  {h:'09:00', t:'Atualizar a vitrine interna com as novidades (se necessário)',   d:TODOS},
-  {h:'09:00', t:'Organizar os totens da entrada, sempre com novidades',           d:TODOS},
-  {h:'09:00', t:'Verificar a vitrine externa e os totens giratórios (pedir ajuda das vendedoras)', d:TODOS},
-  {h:'09:00', t:'Conferir o uniforme completo: camisa para dentro, calça preta alfaiataria, sneaker preto e relógio', d:TODOS},
-  {h:'09:00', t:'Acompanhar o checklist diário e garantir que tudo foi executado', d:TODOS},
-  {v:'mensal', t:'Reunião Mensal de Metas, contribuindo com ideias estratégicas'}
- ].concat(rotFechamento()),
+  {h:'09:00', p:'sup', t:'Abertura da equipe: gratidão, mensagem motivacional, clima do time, resultados de ontem, metas e foco do dia — fechar com alinhamento antes de abrir o salão', d:TODOS},
+  {h:'09:00', p:'sup', t:'Verificar rupturas e itens abaixo do mínimo, e anotar o que as vendedoras reportarem durante o dia. Sinalizar a Yuri/Gregory conforme a categoria — a supervisora sinaliza, não compra', d:TODOS},
+  {h:'09:00', p:'sup', t:'Alinhamento de estoque: conferir as anotações de ruptura da semana e reportar pessoalmente ao Yuri e ao Grupo de Reposição', d:[1]},
+  {h:'09:00', p:'sup', t:'Verificar a vitrine externa e os totens giratórios (pedir ajuda das vendedoras)', d:TODOS},
+  {h:'09:00', p:'sup', t:'Acompanhar o checklist diário e garantir que tudo foi executado', d:TODOS},
+  {h:'09:00', p:'venda', t:'Arrumar os sapatos na vitrine interna',                 d:TODOS},
+  {h:'09:00', p:'venda', t:'Atualizar a vitrine interna com as novidades (se necessário)', d:TODOS},
+  {h:'09:00', p:'venda', t:'Organizar os totens da entrada, sempre com novidades',  d:TODOS},
+  {h:'09:00', p:'venda', t:'Conferir o uniforme completo: camisa para dentro, calça preta alfaiataria, sneaker preto e relógio', d:TODOS},
+  {v:'semanal', p:'sup', t:'Acompanhar as reposições: aguardar o retorno do Yuri sobre prazos e posicionamento dos pedidos, e reportar às vendedoras'},
+  {v:'semanal', p:'sup', t:'Verificar a previsão de chegada dos itens em ruptura ou atraso, comunicar o time e definir alternativas de produto pra oferecer às clientes'},
+  {v:'mensal', p:'sup', lim:5, t:'Devolutiva individual: conversa rápida com cada vendedora sobre o que funcionou e o que precisa ajustar no mês anterior'},
+  {v:'mensal', p:'sup', lim:5, t:'Avaliar com cada vendedora o resultado da meta do mês anterior e definir a nova meta individual por categoria'},
+  {v:'mensal', p:'sup', t:'Reunião Mensal de Metas, contribuindo com ideias estratégicas'}
+ ].concat(rotFechamento(null,'venda')),
  'Ialey':[
   {h:'09:00', t:'Limpar com álcool e organizar o caixa',                          d:TODOS},
   {h:'09:00', t:'Ligar o notebook e iniciar o sistema PDV',                       d:TODOS},
@@ -2225,6 +2288,12 @@ function rotFaltando(quem){
   });
 }
 
+/* Texto que foi reescrito: carregar o novo aposenta o antigo, senão a pessoa
+   fica com os dois cartões dizendo a mesma coisa em palavras diferentes. */
+const ROT_SUBSTITUI={
+  'Abertura da equipe: gratidão, mensagem motivacional, clima do time, resultados de ontem, metas e foco do dia — fechar com alinhamento antes de abrir o salão':
+    ['Mini reunião diária: desempenho de ontem, meta do dia, pontos fortes, pontos de atenção e engajamento']
+};
 async function rotImportar(){
   if(semPermissao()) return;
   if(!DB || !ROT_SEED[ROT_QUEM]) return;
@@ -2235,9 +2304,16 @@ async function rotImportar(){
   try{
     for(const r of lista){
       await DB.collection('ls_rotina').add(r.v
-        ? {tipo:'avulsa', pessoa:quem, texto:r.t, freq:r.v, criadoEm:Date.now(), criadoPor:window._usuario||''}
+        ? {tipo:'avulsa', pessoa:quem, texto:r.t, freq:r.v, diaLimite:r.lim||null, papel:r.p||null, criadoEm:Date.now(), criadoPor:window._usuario||''}
         : {tipo:'fixa', pessoa:quem, texto:r.t, hora:r.h, turno:'dia', modelo:r.m||'normal',
-           dias:r.d.slice(), criadoEm:Date.now(), criadoPor:window._usuario||''});
+           papel:r.p||null, dias:r.d.slice(), criadoEm:Date.now(), criadoPor:window._usuario||''});
+    }
+    for(const r of lista){
+      const velhos=ROT_SUBSTITUI[r.t]||[];
+      for(const vt of velhos){
+        const d=ROT_ITENS.filter(function(i){ return i.pessoa===quem && i.texto===vt; })[0];
+        if(d) try{ await DB.collection('ls_rotina').doc(d.id).delete(); }catch(_){}
+      }
     }
   }catch(e){ console.warn('rotImportar',e); alert('Não consegui carregar tudo. Veja o que entrou e tente de novo.'); }
   if(bt){ bt.disabled=false; }
@@ -2363,6 +2439,90 @@ function rotCobPara(nome){
     const it=r.itens||{};
     return Object.keys(it).some(function(k){ return it[k]===nome; });
   });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CHECKLIST · o que já foi feito
+
+   A rotina dizia o que fazer e não deixava marcar, então "acompanhar o
+   checklist diário" era um checklist sem caixinha. Agora cada atividade
+   pode ser marcada no período dela: a do dia no dia, a semanal na
+   semana, a mensal no mês.
+
+   Um documento por pessoa por mês, não um por marca:
+     feitos {pessoa, mes:'AAAA-MM', marcas:{'<refId>|<periodo>':true}}
+
+   Uma marca por documento daria centenas por mês por pessoa — tudo isso
+   carregado a cada abertura do painel, já que ls_rotina vem inteira.
+   Assim são sete documentos por mês, um por pessoa.
+   ══════════════════════════════════════════════════════════════ */
+// a semana ISO de uma data, pra marcar o que é "1x por semana"
+function rotSemanaISO(iso){
+  const d=cobD(iso); const dia=(d.getDay()+6)%7;      // segunda = 0
+  d.setDate(d.getDate()-dia+3);                       // quinta da mesma semana
+  const q=new Date(d.getFullYear(),0,4);
+  const n=1+Math.round(((d-q)/86400000-3+((q.getDay()+6)%7))/7);
+  return d.getFullYear()+'-W'+String(n).padStart(2,'0');
+}
+// em que período esta atividade é cobrada
+function rotPeriodo(i, iso){
+  if(i.tipo==='avulsa'){
+    if(i.freq==='mensal')  return String(iso).slice(0,7);
+    if(i.freq==='semanal') return rotSemanaISO(iso);
+    return '';                                        // conforme necessidade: não se cobra período
+  }
+  return iso;
+}
+function rotChave(i, iso){ const p=rotPeriodo(i, iso); return p?(i.id+'|'+p):''; }
+
+// todas as marcas de uma pessoa, juntando os documentos de cada mês
+function rotMarcas(pessoa){
+  const m={};
+  ROT_ITENS.forEach(function(r){
+    if(r.tipo!=='feitos' || r.pessoa!==pessoa) return;
+    const mk=r.marcas||{};
+    Object.keys(mk).forEach(function(k){ if(mk[k]) m[k]=true; });
+  });
+  return m;
+}
+function rotFeito(i, iso, marcas){
+  const c=rotChave(i, iso); return !!(c && marcas[c]);
+}
+async function rotMarcar(id, iso){
+  if(semPermissao()) return;
+  if(!DB) return;
+  const i=ROT_ITENS.filter(function(x){ return x.id===id; })[0]; if(!i) return;
+  const chave=rotChave(i, iso); if(!chave) return;
+  // a marca é do dono do dia (quem está cobrindo, se for o caso), não do dono do cadastro
+  const dono=(i.pessoa||ROT_QUEM);
+  // o mês do documento vem sempre da DATA. Fatiar o período dava "2026-W3" na
+  // marca semanal — um mês que não existe, e que juntava dez semanas diferentes
+  // no mesmo documento
+  const mes=iso.slice(0,7);
+  const marcado=rotFeito(i, iso, rotMarcas(dono));
+  try{
+    if(marcado){
+      // uma semana pode atravessar a virada do mês, então a marca pode estar em
+      // qualquer documento da pessoa: tira de todos os que a tiverem
+      const alvos=ROT_ITENS.filter(function(r){
+        return r.tipo==='feitos' && r.pessoa===dono && (r.marcas||{})[chave];
+      });
+      for(const d of alvos){
+        const campo={}; campo['marcas.'+chave]=firebase.firestore.FieldValue.delete();
+        await DB.collection('ls_rotina').doc(d.id).update(campo);
+      }
+      return;
+    }
+    const doc=ROT_ITENS.filter(function(r){ return r.tipo==='feitos'&&r.pessoa===dono&&r.mes===mes; })[0];
+    if(doc){
+      const campo={}; campo['marcas.'+chave]=true;
+      await DB.collection('ls_rotina').doc(doc.id).update(campo);
+    }else{
+      const m={}; m[chave]=true;
+      await DB.collection('ls_rotina').add({tipo:'feitos', pessoa:dono, mes:mes, marcas:m,
+        criadoEm:Date.now(), criadoPor:window._usuario||''});
+    }
+  }catch(e){ console.warn('rotMarcar',e); alert('Não consegui marcar agora.'); }
 }
 
 // o que vale numa data, já com as coberturas daquele dia aplicadas
@@ -2676,9 +2836,28 @@ function renderRotina(){
 
   rotBanner();
 
+  /* Só faz sentido separar os chapéus de quem tem mais de um — pra vendedora,
+     etiquetar tudo de "Vendas" seria ruído em cada cartão. */
+  const papeis=rotPapeis(ROT_QUEM);
+  const doisPapeis=papeis.length>1;
+  if(!doisPapeis) _rotFiltroPapel='todos';
+  const pf=document.getElementById('rot-papeis');
+  if(pf) pf.innerHTML = doisPapeis
+    ? '<button class="rot-pchip'+(_rotFiltroPapel==='todos'?' on':'')+'" onclick="rotFiltrarPapel(\'todos\')">Tudo</button>'
+      + papeis.sort().map(function(p){ return '<button class="rot-pchip'+(_rotFiltroPapel===p?' on':'')
+          + '" onclick="rotFiltrarPapel(\''+p+'\')">'+esc(ROT_PAPEL[p]||p)+'</button>'; }).join('')
+    : '';
+  const passaPapel=function(i){
+    return !doisPapeis || _rotFiltroPapel==='todos' || rotPapelDe(i)===_rotFiltroPapel;
+  };
+
   // a semana da pessoa escolhida, um dia por coluna
+  const marcas=rotMarcas(ROT_QUEM);
   document.getElementById('rot-semana').innerHTML = dias.map(function(x){
-    const meus=x.itens.filter(function(i){ return i.pessoa===ROT_QUEM; }).sort(rotOrdena);
+    const meus=x.itens.filter(function(i){ return i.pessoa===ROT_QUEM && passaPapel(i); })
+                      .map(function(i){ return Object.assign({}, i, {_papel: doisPapeis?rotPapelDe(i):null}); })
+                      .sort(rotOrdena);
+    const nOk=meus.filter(function(i){ return rotFeito(i, x.d.iso, marcas); }).length;
     return '<div class="rot-col'+(x.d.iso===hoje?' hoje':'')+'" data-dow="'+x.d.dow+'" data-iso="'+x.d.iso+'"'
       + ' ondragover="rotSobre(event,this)" ondragleave="this.classList.remove(\'alvo\')" ondrop="rotSolta(event,this)">'
       + '<div class="rot-col-hd"><span class="rot-dow">'+ROT_DOW[x.d.dow]+'</span>'
@@ -2691,22 +2870,33 @@ function renderRotina(){
                 : (excecao ? 'Sem chegada nesta '+ROT_DOW[x.d.dow]+' — clique para voltar ao normal' : 'Marcar chegada de sapato só neste dia');
               return '<button class="rot-cheg'+(vale==='chegada'?' on':'')+(excecao?' excecao':'')+'" title="'+dica+'" onclick="rotMarcarChegada(\''+x.d.iso+'\')">📦</button>';
             })() : '')
+          + (meus.length?'<span class="rot-feitos'+(nOk===meus.length?' tudo':'')+'">'+nOk+'/'+meus.length+'</span>':'')
           + '<span class="rot-num">'+String(x.d.dia).padStart(2,'0')+'</span></span></div>'
       + '<div class="rot-itens">'
-        + (meus.length?meus.map(rotCard).join(''):'<div class="rot-vazio">—</div>')
+        + (meus.length?meus.map(function(i){ return rotCard(i, marcas); }).join(''):'<div class="rot-vazio">—</div>')
         + '<button class="rot-add" onclick="rotNova('+x.d.dow+',\''+x.d.iso+'\')" title="Adicionar neste dia">+</button>'
       + '</div></div>';
   }).join('');
   // Sem dia certo: mensal, semanal sem dia definido, ou conforme
   // necessidade. Não cabe em coluna de dia — forçar numa segunda faria
   // aparecer TODA segunda, que é justamente o que não é.
-  const avulsas=rotAvulsasDe(ROT_QUEM);
+  const avulsas=rotAvulsasDe(ROT_QUEM).filter(passaPapel);
   document.getElementById('rot-avulsas').innerHTML = avulsas.length
     ? '<div class="rot-av-cx"><div class="rot-av-t">Sem dia certo</div><div class="rot-av-g">'
       + avulsas.map(function(i){
-          return '<div class="rot-av-c">'
-            + '<div class="rot-av-f">'+esc(ROT_FREQ[i.freq]||'Conforme necessidade')+'</div>'
-            + '<div class="rot-card-txt">'+esc(i.texto)+'</div>'
+          const okA=rotFeito(i, hoje, marcas);
+          const per=rotPeriodo(i, hoje);
+          const lim=i.diaLimite;
+          const passou=lim && !okA && (+hoje.slice(8,10))>lim;
+          return '<div class="rot-av-c'+(okA?' ok':'')+'">'
+            + '<div class="rot-av-f">'+esc(ROT_FREQ[i.freq]||'Conforme necessidade')
+              + (lim?'<span class="rot-lim'+(passou?' passou':'')+'">até dia '+lim+'</span>':'')
+              + (doisPapeis&&rotPapelDe(i)?'<span class="rot-lim">'+esc(ROT_PAPEL[rotPapelDe(i)])+'</span>':'')+'</div>'
+            + '<div class="rot-card-top">'
+              + (per?'<button class="rot-ck'+(okA?' on':'')+'" title="'+(okA?'Feito neste período — clique pra desmarcar':'Marcar como feito')
+                   + '" onclick="rotMarcar(\''+esc(i.id)+'\',\''+hoje+'\')">✓</button>':'')
+              + '<div class="rot-card-txt">'+esc(i.texto)+'</div>'
+            + '</div>'
             + (i.movidoDe ? '<div class="rot-card-pe"><span class="rot-selo movido">cobrindo '+esc(i.movidoDe)+'</span></div>' : '')
             + '<div class="rot-card-pe"><span class="rot-acts">'
               + '<button class="rot-ic" title="Editar" onclick="rotEditar(\''+esc(i.id)+'\')">✎</button>'
@@ -2749,15 +2939,21 @@ function rotBanner(){
   el.innerHTML=avisos.join('');
 }
 
-function rotCard(i){
-  const cls = i.tipo==='extra' ? ' extra' : (i.movidoDe ? ' movido' : '');
+function rotCard(i, marcas){
+  const ok = marcas ? rotFeito(i, i._iso, marcas) : false;
+  const cls = (i.tipo==='extra' ? ' extra' : (i.movidoDe ? ' movido' : '')) + (ok?' ok':'');
   const quando = i.hora ? '<div class="rot-hora">'+esc(i.hora)+'</div>'
                : (i.turno&&i.turno!=='dia' ? '<div class="rot-hora turno">'+esc(ROT_TURNO[i.turno])+'</div>' : '');
   return '<div class="rot-card'+cls+'" draggable="'+(SO_LEITURA?'false':'true')+'" data-id="'+esc(i.id)+'" data-dow="'+i._dow+'" data-iso="'+i._iso+'"'
     + ' ondragstart="rotPega(event,\''+esc(i.id)+'\','+i._dow+',\''+i._iso+'\')" ondragend="this.classList.remove(\'arrastando\')">'
     + quando
-    + '<div class="rot-card-txt">'+esc(i.texto)+'</div>'
+    + '<div class="rot-card-top">'
+      + '<button class="rot-ck'+(ok?' on':'')+'" title="'+(ok?'Feito — clique pra desmarcar':'Marcar como feito')
+        + '" onclick="event.stopPropagation();rotMarcar(\''+esc(i.id)+'\',\''+i._iso+'\')">✓</button>'
+      + '<div class="rot-card-txt">'+esc(i.texto)+'</div>'
+    + '</div>'
     + '<div class="rot-card-pe">'
+      + (i._papel ? '<span class="rot-selo '+i._papel+'">'+esc(ROT_PAPEL[i._papel])+'</span>' : '')
       + (i.tipo==='extra' ? '<span class="rot-selo extra">só hoje</span>' : '')
       + (i.movidoDe ? '<span class="rot-selo movido">'+(i.porCobertura?'cobrindo ':'de ')+esc(i.movidoDe)+'</span>' : '')
       + '<span class="rot-acts">'
