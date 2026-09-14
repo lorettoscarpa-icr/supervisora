@@ -2168,11 +2168,11 @@ const ROT_SEED={
   // sem dia no PDF: "conforme necessidade" / "conforme chegada"
   {v:'necessidade', t:'Guardar caixas do Edson (Mercado Livre) + lançar no sistema + troca de caixa'},
   {v:'necessidade', t:'Guardar sapatos no salão de vendas (tarde)'},
-  {h:'09:10', t:'Abrir as portas da loja',                    d:[6]},
-  {h:'09:30', t:'Guardar sapatos – salão de vendas',          d:[6]},
-  {h:'10:00', t:'Guardar sapatos – entregas',                 d:[6]},
-  {h:'11:00', t:'Tempo livre / demandas extras',              d:[6]},
-  {h:'13:00', t:'Saída',                                      d:[6]},
+  // ── sábado, do "Cronograma de Sábado · Yuri Xavier" ──
+  {h:'09:00', t:'Organização do hall de entrada: guardar as caixas vazias no fundo e as caixas cheias no estoque', d:[6]},
+  {h:'09:30', t:'Retorno das entregas: organizar e guardar no estoque os sapatos que voltaram das entregas de sexta', d:[6]},
+  {h:'10:45', t:'Café da manhã',                              d:[6]},
+  {h:'11:00', t:'Foco total no salão de vendas: ficar à disposição das vendedoras, ajudar a pegar sapatos no estoque, ajudar no pré-atendimento na porta quando a loja estiver cheia e todas ocupadas, e organizar o salão — loja corrida, o foco é o estoque; loja tranquila, deixar o salão organizado', d:[6]},
   {h:'08:40', t:'Verificar calçada / varrer',                 d:UTEIS, m:'chegada'},
   {h:'09:00', t:'Abrir as portas da loja',                    d:UTEIS, m:'chegada'},
   {h:'09:10', t:'Preparar o café',                            d:UTEIS, m:'chegada'},
@@ -2317,9 +2317,22 @@ function rotFaltando(quem){
 
 /* Texto que foi reescrito: carregar o novo aposenta o antigo, senão a pessoa
    fica com os dois cartões dizendo a mesma coisa em palavras diferentes. */
+/* Texto reescrito: carregar o novo aposenta o antigo, senão a pessoa fica com os
+   dois cartões dizendo a mesma coisa. O alvo pode vir só como texto, ou como
+   {t,h,d} quando o texto sozinho não identifica — o Yuri tem "Abrir as portas da
+   loja" em três horários e "Saída" em dois. */
 const ROT_SUBSTITUI={
   'Abertura da equipe: gratidão, mensagem motivacional, clima do time, resultados de ontem, metas e foco do dia — fechar com alinhamento antes de abrir o salão':
-    ['Mini reunião diária: desempenho de ontem, meta do dia, pontos fortes, pontos de atenção e engajamento']
+    ['Mini reunião diária: desempenho de ontem, meta do dia, pontos fortes, pontos de atenção e engajamento'],
+  // sábado do Yuri, refeito pelo cronograma novo: entra o primeiro item da lista
+  // e os cinco antigos do dia saem juntos
+  'Organização do hall de entrada: guardar as caixas vazias no fundo e as caixas cheias no estoque': [
+    {t:'Abrir as portas da loja',            h:'09:10', d:[6]},
+    {t:'Guardar sapatos – salão de vendas',  h:'09:30', d:[6]},
+    {t:'Guardar sapatos – entregas',         h:'10:00', d:[6]},
+    {t:'Tempo livre / demandas extras',      h:'11:00', d:[6]},
+    {t:'Saída',                              h:'13:00', d:[6]}
+  ]
 };
 async function rotImportar(){
   if(semPermissao()) return;
@@ -2337,9 +2350,18 @@ async function rotImportar(){
     }
     for(const r of lista){
       const velhos=ROT_SUBSTITUI[r.t]||[];
-      for(const vt of velhos){
-        const d=ROT_ITENS.filter(function(i){ return i.pessoa===quem && i.texto===vt; })[0];
-        if(d) try{ await DB.collection('ls_rotina').doc(d.id).delete(); }catch(_){}
+      for(const v of velhos){
+        const alvo=ROT_ITENS.filter(function(i){
+          if(i.pessoa!==quem) return false;
+          if(typeof v==='string') return i.texto===v;
+          if(i.texto!==v.t) return false;
+          if(v.h && (i.hora||'')!==v.h) return false;
+          if(v.d && (i.dias||[]).slice().sort().join(',')!==v.d.slice().sort().join(',')) return false;
+          return true;
+        });
+        for(const d of alvo){
+          try{ await DB.collection('ls_rotina').doc(d.id).delete(); }catch(_){}
+        }
       }
     }
   }catch(e){ console.warn('rotImportar',e); alert('Não consegui carregar tudo. Veja o que entrou e tente de novo.'); }
