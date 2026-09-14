@@ -530,6 +530,22 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .rot-av-t{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cr3);margin-bottom:10px;}
 .rot-av-g{display:flex;gap:8px;flex-wrap:wrap;}
 .rot-av-c{background:var(--bgd);border:1px solid var(--oud2);border-left:2px solid var(--azul);border-radius:2px;padding:8px 10px;max-width:340px;}
+/* cada frequência com a sua cor: o que é toda semana não se confunde
+   com o que é uma vez no mês só porque os dois não têm dia marcado */
+.rot-av-gr{margin-top:12px;}
+.rot-av-gr:first-of-type{margin-top:0;}
+.rot-av-h{display:flex;align-items:baseline;gap:8px;font-family:'DM Mono',monospace;font-size:8.5px;
+  letter-spacing:1.4px;text-transform:uppercase;margin-bottom:7px;padding-bottom:4px;
+  border-bottom:1px solid var(--oud2);}
+.rot-av-h b{font-weight:600;}
+.rot-av-h span{margin-left:auto;color:var(--cr3);}
+.rot-av-h span.tudo{color:var(--verde);}
+.rot-av-gr.semanal .rot-av-h b{color:var(--ou2);}
+.rot-av-gr.semanal .rot-av-c{border-left-color:var(--ou);}
+.rot-av-gr.mensal .rot-av-h b{color:var(--azul);}
+.rot-av-gr.mensal .rot-av-c{border-left-color:var(--azul);}
+.rot-av-gr.necessidade .rot-av-h b{color:var(--cr3);}
+.rot-av-gr.necessidade .rot-av-c{border-left-color:var(--oud2);}
 .rot-av-f{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--azul);margin-bottom:4px;}
 /* .rot-dias e .bt nunca tiveram CSS: os dias da semana saíam empilhados um por linha,
    e "Cancelar"/"Salvar" saíam como botão cinza de navegador no meio do painel escuro.
@@ -2892,29 +2908,40 @@ function renderRotina(){
   // necessidade. Não cabe em coluna de dia — forçar numa segunda faria
   // aparecer TODA segunda, que é justamente o que não é.
   const avulsas=rotAvulsasDe(ROT_QUEM).filter(passaPapel);
-  document.getElementById('rot-avulsas').innerHTML = avulsas.length
-    ? '<div class="rot-av-cx"><div class="rot-av-t">Sem dia certo</div><div class="rot-av-g">'
-      + avulsas.map(function(i){
-          const okA=rotFeito(i, hoje, marcas);
-          const per=rotPeriodo(i, hoje);
-          const lim=i.diaLimite;
-          const passou=lim && !okA && (+hoje.slice(8,10))>lim;
-          return '<div class="rot-av-c'+(okA?' ok':'')+'">'
-            + '<div class="rot-av-f">'+esc(ROT_FREQ[i.freq]||'Conforme necessidade')
-              + (lim?'<span class="rot-lim'+(passou?' passou':'')+'">até dia '+lim+'</span>':'')
-              + (doisPapeis&&rotPapelDe(i)?'<span class="rot-lim">'+esc(ROT_PAPEL[rotPapelDe(i)])+'</span>':'')+'</div>'
-            + '<div class="rot-card-top">'
-              + (per?'<button class="rot-ck'+(okA?' on':'')+'" title="'+(okA?'Feito neste período — clique pra desmarcar':'Marcar como feito')
-                   + '" onclick="rotMarcar(\''+esc(i.id)+'\',\''+hoje+'\')">✓</button>':'')
-              + '<div class="rot-card-txt">'+esc(i.texto)+'</div>'
-            + '</div>'
-            + (i.movidoDe ? '<div class="rot-card-pe"><span class="rot-selo movido">cobrindo '+esc(i.movidoDe)+'</span></div>' : '')
-            + '<div class="rot-card-pe"><span class="rot-acts">'
-              + '<button class="rot-ic" title="Editar" onclick="rotEditar(\''+esc(i.id)+'\')">✎</button>'
-              + '<button class="rot-ic del" title="Excluir" onclick="rotExcluir(\''+esc(i.id)+'\')">×</button>'
-            + '</span></div></div>';
-        }).join('')
-      + '</div></div>'
+  const avCard=function(i){
+    const okA=rotFeito(i, hoje, marcas);
+    const per=rotPeriodo(i, hoje);
+    const lim=i.diaLimite;
+    const passou=lim && !okA && (+hoje.slice(8,10))>lim;
+    const topo=(lim?'<span class="rot-lim'+(passou?' passou':'')+'">até dia '+lim+'</span>':'')
+      + (doisPapeis&&rotPapelDe(i)?'<span class="rot-lim">'+esc(ROT_PAPEL[rotPapelDe(i)])+'</span>':'');
+    return '<div class="rot-av-c'+(okA?' ok':'')+'">'
+      + (topo?'<div class="rot-av-f">'+topo+'</div>':'')
+      + '<div class="rot-card-top">'
+        + (per?'<button class="rot-ck'+(okA?' on':'')+'" title="'+(okA?'Feito neste período — clique pra desmarcar':'Marcar como feito')
+             + '" onclick="rotMarcar(\''+esc(i.id)+'\',\''+hoje+'\')">✓</button>':'')
+        + '<div class="rot-card-txt">'+esc(i.texto)+'</div>'
+      + '</div>'
+      + (i.movidoDe ? '<div class="rot-card-pe"><span class="rot-selo movido">cobrindo '+esc(i.movidoDe)+'</span></div>' : '')
+      + '<div class="rot-card-pe"><span class="rot-acts">'
+        + '<button class="rot-ic" title="Editar" onclick="rotEditar(\''+esc(i.id)+'\')">✎</button>'
+        + '<button class="rot-ic del" title="Excluir" onclick="rotExcluir(\''+esc(i.id)+'\')">×</button>'
+      + '</span></div></div>';
+  };
+  /* "sem dia certo" juntava tudo numa caixa só, e a frequência ia em letra miúda
+     dentro de cada cartão — o que é toda semana ficava igual ao que é uma vez no
+     mês. Agora cada frequência é um grupo, com título, contagem e cor própria. */
+  const grupos=['semanal','mensal','necessidade'].map(function(f){
+    const lst=avulsas.filter(function(i){ return (i.freq||'necessidade')===f; });
+    if(!lst.length) return '';
+    const ok=lst.filter(function(i){ return rotFeito(i, hoje, marcas); }).length;
+    const conta=(f==='necessidade')?'' : '<span'+(ok===lst.length?' class="tudo"':'')+'>'+ok+'/'+lst.length+'</span>';
+    return '<div class="rot-av-gr '+f+'">'
+      + '<div class="rot-av-h"><b>'+esc(ROT_FREQ[f])+'</b>'+conta+'</div>'
+      + '<div class="rot-av-g">'+lst.map(avCard).join('')+'</div></div>';
+  }).join('');
+  document.getElementById('rot-avulsas').innerHTML = grupos
+    ? '<div class="rot-av-cx"><div class="rot-av-t">Sem dia certo</div>'+grupos+'</div>'
     : '';
   if(typeof aplicarFotos==='function') aplicarFotos();
 }
