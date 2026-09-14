@@ -2086,6 +2086,17 @@ async function rotLimpar(){
     try{ await DB.collection('ls_rotina').doc(v.id).delete(); }
     catch(e){ console.warn('rotLimpar',e); break; }   // sem permissão: para, não insiste
   }
+  /* Carimba o papel nas atividades que já estavam gravadas antes do campo existir.
+     Aqui o painel adivinha pelo cronograma quando falta, mas a Central não tem o
+     cronograma — ela só lê a coleção. Gravar de verdade é o que faz os dois painéis
+     enxergarem a mesma coisa, em vez de duplicar a tabela dos dois lados. */
+  const semPapel=ROT_ITENS.filter(function(i){
+    return (i.tipo==='fixa'||i.tipo==='avulsa') && !i.papel && rotPapelDe(i);
+  });
+  for(const i of semPapel){
+    try{ await DB.collection('ls_rotina').doc(i.id).update({papel:rotPapelDe(i)}); }
+    catch(e){ console.warn('rotLimpar papel',e); break; }
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
