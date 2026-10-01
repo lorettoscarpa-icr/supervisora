@@ -1110,6 +1110,30 @@ body{zoom:1.1;}
   .pri-grade{grid-template-columns:1fr;}
   .pri-ex,.pri-ey,.pri-canto{display:none;}
 }
+/* ─── TRAVA DO PAINEL ─── */
+body.trancado > main{display:none !important;}
+body.trancado .fab{display:none !important;}
+.trava{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;
+  padding:24px;background:var(--bg);}
+body.trancado .trava{display:flex;}
+.trava-cx{max-width:340px;width:100%;text-align:center;}
+.trava-marca{font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:5px;color:var(--ou2);
+  text-transform:uppercase;}
+.trava-t{font-family:'Playfair Display',serif;font-size:21px;color:var(--cr);margin:18px 0 6px;}
+.trava-s{font-size:12.5px;color:var(--cr3);line-height:1.5;margin-bottom:20px;}
+.trava-in{width:100%;background:var(--v1);border:1px solid var(--oud);color:var(--cr);
+  font-family:'DM Mono',monospace;font-size:17px;letter-spacing:3px;text-align:center;
+  padding:13px 10px;box-sizing:border-box;}
+.trava-in:focus{outline:1px solid var(--ou);}
+.trava-bt{width:100%;margin-top:12px;background:var(--ou);color:var(--bg);border:none;padding:13px;
+  font-family:inherit;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;}
+.trava-erro{color:var(--vermelho);font-size:12px;margin-top:11px;min-height:16px;}
+.trava-sair{display:inline-block;margin-top:16px;color:var(--cr3);font-size:11.5px;text-decoration:underline;cursor:pointer;}
+.trava-sair:hover{color:var(--ou2);}
+.pin-bt{background:transparent;border:1px solid var(--oud2);color:var(--cr3);padding:5px 12px;
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.2px;text-transform:uppercase;
+  cursor:pointer;border-radius:2px;margin-left:auto;align-self:center;}
+.pin-bt:hover{border-color:var(--ou);color:var(--ou2);}
 .leitura-tag{display:none;}
 .so-leitura .leitura-tag{display:inline-block;margin-top:6px;font-size:9px;letter-spacing:2px;
   text-transform:uppercase;color:var(--ou2);border:1px solid var(--oud2);border-radius:3px;padding:2px 8px;}
@@ -1129,6 +1153,19 @@ body{zoom:1.1;}
   <button class="tabnav-btn" onclick="abrirTab('prioridades',this)">Prioridades</button>
 </div>
 
+<div class="trava" id="trava">
+  <div class="trava-cx">
+    <div class="trava-marca">Loretto Scarpa</div>
+    <div class="trava-t">Painel da Supervisora</div>
+    <div class="trava-s">Digite a senha do painel pra continuar.<br>Ela é diferente da senha da sua conta.</div>
+    <input class="trava-in" id="trava-pin" type="password" maxlength="40" autocomplete="off"
+      placeholder="senha do painel" onkeydown="if(event.key==='Enter')travaEntrar()">
+    <button class="trava-bt" onclick="travaEntrar()">Entrar</button>
+    <div class="trava-erro" id="trava-erro"></div>
+    <a class="trava-sair" href="https://lorettoscarpa-icr.github.io/central/">Voltar pra Central</a>
+  </div>
+</div>
+
 <main>
 
 <!-- HOJE -->
@@ -1140,6 +1177,7 @@ body{zoom:1.1;}
       <div class="hoje-cap-data">Bom dia, Jhennifer!</div>
       <div class="hoje-cap-status" id="hoje-status">Carregando…</div>
     </div>
+    <button class="pin-bt so-hide" id="pin-bt" style="display:none" onclick="travaDefinir()">🔒 Senha do painel</button>
   </div>
 
   <div id="pendencias" class="pend-card" style="display:none"></div>
@@ -4357,6 +4395,102 @@ function renderFalhas(){
         : '<div class="fl-d">Pode ser conexão. Recarregue a página; se continuar, me avise com o código acima.</div>');
 }
 
+/* ══════════════════════════════════════════════════════════════
+   TRAVA DO PAINEL
+
+   A conta dela fica logada no computador da loja. Quem sentar ali
+   entra no painel sem nada no caminho — e aqui dentro tem ocorrência,
+   avaliação, plano de desenvolvimento. Esta senha é uma TRANCA DE
+   TELA, separada da senha da conta, e vale só pras contas listadas.
+
+   Honestidade sobre o que ela é: guarda-se o hash, não a senha, então
+   olhar o código-fonte não revela nada. Mas uma senha de poucos
+   dígitos é adivinhável por quem souber fazer isso — o que ela resolve
+   é o colega que senta na cadeira, não um ataque. Pro caso real, basta.
+
+   Falha de leitura DESTRAVA em vez de trancar: deixar a supervisora
+   sem o painel dela por causa de uma oscilação de rede é pior do que
+   o risco que a tranca evita.
+   ══════════════════════════════════════════════════════════════ */
+const PIN_CONTAS = ['jhenniferlorettoscarpa@gmail.com'];   // quem precisa digitar
+const PIN_PODE_DEFINIR = ['jhenniferlorettoscarpa@gmail.com','lorettoscarpa@gmail.com'];
+let _pinCfg=null;
+
+// SHA-256 quando o navegador oferece (site em https); o método usado fica
+// gravado junto, então verificar nunca usa um diferente do que gravou
+async function pinHash(pin, alg){
+  const txt='ls.painel.'+String(pin);
+  if(alg!=='simples' && window.crypto && crypto.subtle){
+    try{
+      const buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+      return {alg:'sha256', hash:Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')};
+    }catch(_){}
+  }
+  let h=5381; for(let i=0;i<txt.length;i++){ h=((h<<5)+h+txt.charCodeAt(i))|0; }
+  return {alg:'simples', hash:String(h>>>0)};
+}
+function pinDestravado(){ try{ return sessionStorage.getItem('ls_painel_ok')==='1'; }catch(_){ return false; } }
+function pinMarcar(){ try{ sessionStorage.setItem('ls_painel_ok','1'); }catch(_){} }
+
+async function travaIniciar(email){
+  const bt=document.getElementById('pin-bt');
+  if(bt) bt.style.display = PIN_PODE_DEFINIR.indexOf(email)>=0 ? '' : 'none';
+  if(PIN_CONTAS.indexOf(email)<0) return;          // conta que não usa trava
+  if(pinDestravado()) return;                      // já destravou nesta aba
+  document.body.classList.add('trancado');
+  try{
+    const d = DB ? await DB.collection('ls_painel_cfg').doc('trava').get() : null;
+    _pinCfg = (d && d.exists) ? d.data() : null;
+    if(!_pinCfg || !_pinCfg.hash){ document.body.classList.remove('trancado'); return; }
+    const inp=document.getElementById('trava-pin'); if(inp) inp.focus();
+  }catch(e){
+    console.warn('trava', e);
+    document.body.classList.remove('trancado');    // falhou lendo: não prende ninguém fora
+  }
+}
+async function travaEntrar(){
+  const inp=document.getElementById('trava-pin'), er=document.getElementById('trava-erro');
+  const v=(inp&&inp.value||'').trim();
+  if(!v){ if(er) er.textContent='Digite a senha.'; return; }
+  const h=await pinHash(v, (_pinCfg||{}).alg);
+  if(h.hash===(_pinCfg||{}).hash){
+    pinMarcar(); document.body.classList.remove('trancado');
+    if(inp) inp.value=''; if(er) er.textContent='';
+  }else{
+    if(er) er.textContent='Senha incorreta.';
+    if(inp){ inp.value=''; inp.focus(); }
+  }
+}
+async function travaDefinir(){
+  if(semPermissao()) return;
+  if(!DB){ alert('Sem conexão.'); return; }
+  const tem = !!((_pinCfg||{}).hash);
+  if(tem){
+    const atual=prompt('Senha atual do painel (deixe em branco e dê OK pra REMOVER a trava):');
+    if(atual===null) return;
+    if(atual===''){
+      if(!confirm('Remover a trava do painel?\n\nQuem abrir com a conta da Jhennifer entra direto.')) return;
+      try{ await DB.collection('ls_painel_cfg').doc('trava').delete(); _pinCfg=null;
+        alert('Trava removida.'); }catch(e){ console.warn(e); alert('Não consegui remover agora.'); }
+      return;
+    }
+    const hv=await pinHash(atual, _pinCfg.alg);
+    if(hv.hash!==_pinCfg.hash){ alert('Senha atual incorreta.'); return; }
+  }
+  const nova=prompt(tem?'Nova senha do painel (mínimo 4 caracteres):':'Crie a senha do painel (mínimo 4 caracteres, letras ou números).\n\nEla é separada da senha da conta — serve pra quem sentar no computador logado não entrar aqui.');
+  if(nova===null) return;
+  if(nova.trim().length<4){ alert('Use pelo menos 4 caracteres.'); return; }
+  if(prompt('Repita a senha nova:')!==nova.trim()){ alert('As duas não bateram. Nada foi mudado.'); return; }
+  const h=await pinHash(nova.trim());
+  try{
+    await DB.collection('ls_painel_cfg').doc('trava').set({alg:h.alg, hash:h.hash,
+      por:(window._usuario||''), em:new Date().toISOString()});
+    _pinCfg={alg:h.alg, hash:h.hash};
+    pinMarcar();
+    alert('Pronto. A partir de agora o painel pede essa senha na conta da Jhennifer.\n\nSe ela esquecer, você troca por aqui.');
+  }catch(e){ console.warn('travaDefinir',e); alert('Não consegui salvar agora.'); }
+}
+
 function semPermissao(silencioso){
   if(!SO_LEITURA) return false;
   if(!silencioso){
@@ -4401,6 +4535,7 @@ if(AUTH){
     SO_LEITURA = SO_LEITURA_EMAILS.indexOf(email) >= 0;
     if(SO_LEITURA) document.body.classList.add('so-leitura');
     aplicarSessao(email);
+    travaIniciar(email);
     carregarCadastroRH().then(function(){ renderAniversarios(); carregarDadosReais(); carregarPresenca(); carregarStatusEquipe(); carregarMaiorVenda(); carregarAvalPend(); carregarRelatorioAnterior(); carregarConf(); carregarMelhorias(); carregarOcorrencias(); carregarAvaliacoes(); carregarEventos(); carregarPautasResumo(); montarSeletorMesPauta(); carregarRotina(); carregarPdi(); carregarPrioridades(); });
   });
 }
