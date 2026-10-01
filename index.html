@@ -284,7 +284,35 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .oc-filtros{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
 .oc-filtro{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;padding:6px 12px;background:rgba(255,255,255,.04);border:1px solid var(--oud2);color:var(--cr3);cursor:pointer;font-family:inherit;}
 .oc-filtro.ativo{color:var(--ou2);background:rgba(201,168,76,.1);border-color:var(--oud);}
-.oc-item{background:var(--bg2);border:1px solid var(--oud2);padding:14px 16px;margin-bottom:6px;display:flex;gap:14px;align-items:center;}
+.oc-item{background:var(--bg2);border:1px solid var(--oud2);padding:14px 16px;margin-bottom:8px;}
+.oc-topo{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+/* O que foi feito, a devolutiva da gestão e a ciência: a ocorrência deixa de ser
+   só o relato do fato e passa a carregar o que foi feito sobre ele. */
+.oc-bloco{margin-top:10px;padding-top:9px;border-top:1px solid var(--oud2);}
+.oc-b-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.4px;text-transform:uppercase;
+  color:var(--cr3);margin-bottom:5px;display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;}
+.oc-bloco.feito .oc-b-lbl b{color:var(--verde);}
+.oc-bloco.dev   .oc-b-lbl b{color:var(--azul);}
+.oc-b-lbl small{text-transform:none;letter-spacing:0;font-family:'Barlow',sans-serif;font-size:10px;color:var(--cr3);}
+.oc-b-txt{font-size:12.5px;color:var(--cr2);line-height:1.45;white-space:pre-wrap;word-break:break-word;}
+.oc-b-btn{background:transparent;border:1px dashed var(--oud2);color:var(--cr3);padding:6px 12px;
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.2px;text-transform:uppercase;
+  cursor:pointer;border-radius:2px;}
+.oc-b-btn:hover{border-color:var(--ou);color:var(--ou2);}
+.oc-b-ed{width:100%;min-height:62px;resize:vertical;background:var(--v1);border:1px solid var(--oud);
+  color:var(--cr);font-family:inherit;font-size:12.5px;padding:8px 10px;box-sizing:border-box;}
+.oc-b-acts{display:flex;gap:7px;justify-content:flex-end;margin-top:7px;}
+.oc-ciencia{margin-top:10px;padding-top:9px;border-top:1px solid var(--oud2);
+  display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.oc-c-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.4px;text-transform:uppercase;color:var(--cr3);}
+.oc-c-p{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.9px;text-transform:uppercase;
+  border:1px solid var(--oud2);color:var(--cr3);padding:2px 7px;border-radius:2px;}
+.oc-c-p.ok{border-color:var(--verde);color:var(--verde);}
+.oc-c-btn{margin-left:auto;background:transparent;border:1px solid var(--ou);color:var(--ou2);
+  padding:4px 12px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.2px;
+  text-transform:uppercase;cursor:pointer;border-radius:2px;}
+.oc-c-btn:hover{background:rgba(212,180,90,.12);}
+.oc-falta{color:var(--ou2);}
 .oc-item.atencao{border-left:3px solid var(--vermelho);}
 .oc-item.elogio{border-left:3px solid var(--verde);}
 .oc-data{font-size:10px;color:var(--cr3);font-family:'DM Mono',monospace;min-width:60px;}
@@ -296,7 +324,7 @@ main{padding:24px;max-width:1400px;margin:0 auto;}
 .oc-cat.elogio{color:var(--verde);background:rgba(127,191,127,.12);}
 .oc-pessoa{font-size:13px;color:var(--cr);min-width:90px;}
 .oc-pessoa b{color:var(--ou2);}
-.oc-obs{font-size:11px;color:var(--cr3);flex:1;font-style:italic;line-height:1.4;}
+.oc-obs{font-size:11.5px;color:var(--cr3);font-style:italic;line-height:1.45;margin-top:8px;word-break:break-word;}
 .oc-novo-btn{background:var(--ou);color:var(--bg);border:none;padding:10px 18px;font-family:inherit;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;cursor:pointer;margin-bottom:14px;}
 .oc-resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:18px;padding:14px 16px;background:var(--bg2);border:1px solid var(--oud2);}
 .oc-resumo-cel{display:flex;justify-content:space-between;align-items:center;font-size:11px;}
@@ -5208,21 +5236,121 @@ function renderOcorrencias(){
   const fl=document.getElementById('oc-filtros');
   if(fl){
     const nAt=arr.filter(o=>o.tipo==='atencao').length, nEl=arr.filter(o=>o.tipo==='elogio').length;
+    const nPend=arr.filter(ocSemTratativa).length;
     fl.innerHTML='<button class="oc-filtro '+(f==='todas'?'ativo':'')+'" onclick="filtrarOc(\'todas\')">Todas · '+arr.length+'</button>'
       +'<button class="oc-filtro '+(f==='atencao'?'ativo':'')+'" onclick="filtrarOc(\'atencao\')">Atenção · '+nAt+'</button>'
-      +'<button class="oc-filtro '+(f==='elogio'?'ativo':'')+'" onclick="filtrarOc(\'elogio\')">Elogios · '+nEl+'</button>';
+      +'<button class="oc-filtro '+(f==='elogio'?'ativo':'')+'" onclick="filtrarOc(\'elogio\')">Elogios · '+nEl+'</button>'
+      /* o ponto da consultoria era a resposta em tempo hábil: isto mostra,
+         de um clique, o que foi registrado e ainda não teve tratativa */
+      +(nPend?'<button class="oc-filtro '+(f==='pendente'?'ativo':'')+'" style="border-color:var(--oud);color:var(--ou2);" onclick="filtrarOc(\'pendente\')">Sem tratativa · '+nPend+'</button>':'');
   }
-  const vis=f==='todas'?arr:arr.filter(o=>o.tipo===f);
+  const vis=f==='todas'?arr:(f==='pendente'?arr.filter(ocSemTratativa):arr.filter(o=>o.tipo===f));
   if(!vis.length){ lista.innerHTML='<div class="mel-vazio">'+(arr.length?'Nenhuma ocorrência neste filtro.':'Nenhuma ocorrência em '+mesLbl(alvo.a,alvo.m)+'.')+'</div>'; return; }
-  lista.innerHTML=vis.map(o=>{
-    const dt=o.data?(o.data.slice(8,10)+'/'+o.data.slice(5,7)):'';
-    const catCls=(o.cat||'').normalize('NFD').replace(/[^a-zA-Z]/g,'').toLowerCase();
-    return '<div class="oc-item '+(o.tipo||'atencao')+'">'
+  lista.innerHTML=vis.map(ocCard).join('');
+}
+
+/* ── O que foi feito · devolutiva da gestão · ciência ──────────────
+   A ocorrência registrava só o fato. Faltava o outro lado: o que a
+   supervisora fez sobre aquilo, o retorno da gestão, e a marca de quem
+   leu. Sem isso, saber o desfecho dependia de uma reunião marcada só
+   pra isso — que é exatamente o que a consultoria pediu pra evitar.
+
+   Elogio não pede tratativa, então o bloco não aparece nele. */
+function ocSemTratativa(o){
+  return (o.tipo||'atencao')!=='elogio' && !((o.tratativa||{}).texto||'').trim();
+}
+// quem precisa dar ciência: as contas que escrevem no painel. Sai daqui, e não
+// de uma lista à parte, pra ninguém ficar "faltando" sem conseguir entrar
+function ocQuemDaCiencia(){
+  return Object.keys(PERFIS).filter(function(e){ return SO_LEITURA_EMAILS.indexOf(e)<0; })
+    .map(function(e){ return PERFIS[e].nome; });
+}
+let _ocEdit=null;   // {id, campo}
+
+function ocCard(o){
+  const dt=o.data?(o.data.slice(8,10)+'/'+o.data.slice(5,7)):'';
+  const catCls=(o.cat||'').normalize('NFD').replace(/[^a-zA-Z]/g,'').toLowerCase();
+  const ehElogio=(o.tipo||'atencao')==='elogio';
+  return '<div class="oc-item '+(o.tipo||'atencao')+'">'
+    +'<div class="oc-topo">'
       +'<div class="oc-data">'+dt+'</div><div class="oc-cat '+catCls+'">'+esc(o.cat||'')+'</div>'
       +'<div class="oc-pessoa"><b>'+esc(o.pessoa||'')+'</b></div>'
-      +'<button class="mel-del" style="float:right" onclick="excluirOcorrencia(\''+o.id+'\')">excluir</button>'
-      +'<div class="oc-obs">'+esc(o.obs||'')+'</div></div>';
+      +'<button class="mel-del so-hide" style="margin-left:auto" onclick="excluirOcorrencia(\''+o.id+'\')">excluir</button>'
+    +'</div>'
+    +'<div class="oc-obs">'+esc(o.obs||'')+'</div>'
+    +(ehElogio?'':ocBloco(o,'tratativa','feito','O que foi feito','Registrar o que foi feito'))
+    +ocBloco(o,'devolutiva','dev','Devolutiva da gestão','Escrever devolutiva')
+    +ocCiencia(o)
+  +'</div>';
+}
+function ocBloco(o, campo, cls, titulo, vazio){
+  const v=o[campo]||{};
+  const editando=_ocEdit && _ocEdit.id===o.id && _ocEdit.campo===campo;
+  if(editando){
+    return '<div class="oc-bloco '+cls+'">'
+      + '<div class="oc-b-lbl"><b>'+titulo+'</b></div>'
+      + '<textarea class="oc-b-ed" id="oc-ed-'+o.id+'">'+esc(v.texto||'')+'</textarea>'
+      + '<div class="oc-b-acts">'
+        + '<button class="bt" onclick="ocCancelar()">Cancelar</button>'
+        + '<button class="bt ouro" onclick="ocSalvarCampo(\''+o.id+'\',\''+campo+'\')">Salvar</button>'
+      + '</div></div>';
+  }
+  const tem=(v.texto||'').trim();
+  return '<div class="oc-bloco '+cls+'">'
+    + '<div class="oc-b-lbl"><b>'+titulo+'</b>'
+      + (tem&&v.por?'<small>'+esc(v.por)+(v.em?' · '+fmtData(String(v.em).slice(0,10)):'')+'</small>':'')
+    + '</div>'
+    + (tem
+        ? '<div class="oc-b-txt">'+esc(v.texto)+'</div>'
+          + (SO_LEITURA?'':'<div class="oc-b-acts"><button class="oc-b-btn" onclick="ocEditar(\''+o.id+'\',\''+campo+'\')">Editar</button></div>')
+        : (SO_LEITURA
+            ? '<div class="oc-b-txt" style="color:var(--cr3);font-style:italic;">— ainda não registrado</div>'
+            : '<button class="oc-b-btn" onclick="ocEditar(\''+o.id+'\',\''+campo+'\')">'+vazio+'</button>'))
+  + '</div>';
+}
+function ocCiencia(o){
+  const c=o.ciencia||{}, eu=window._usuario||'';
+  const quem=ocQuemDaCiencia();
+  const chips=quem.map(function(n){
+    const em=c[n];
+    return '<span class="oc-c-p'+(em?' ok':'')+'">'+esc(n)+(em?' · '+fmtData(String(em).slice(0,10)):'')+'</span>';
   }).join('');
+  const falta=quem.filter(function(n){ return !c[n]; }).length;
+  const podeDar = !SO_LEITURA && eu && quem.indexOf(eu)>=0 && !c[eu];
+  return '<div class="oc-ciencia"><span class="oc-c-lbl">Ciência</span>'+chips
+    + (falta?'<span class="oc-c-lbl oc-falta">falta '+falta+'</span>':'')
+    + (podeDar?'<button class="oc-c-btn" onclick="ocDarCiencia(\''+o.id+'\')">Dar ciência</button>':'')
+  + '</div>';
+}
+
+function ocEditar(id, campo){ if(semPermissao()) return; _ocEdit={id:id,campo:campo}; renderOcorrencias();
+  const t=document.getElementById('oc-ed-'+id); if(t){ t.focus(); t.setSelectionRange(t.value.length,t.value.length); } }
+function ocCancelar(){ _ocEdit=null; renderOcorrencias(); }
+
+async function ocGravar(id, campos){
+  const o=(window._ocorrencias||[]).filter(function(x){ return x.id===id; })[0];
+  if(o) Object.assign(o, campos);
+  _ocEdit=null; renderOcorrencias();
+  if(!DB) return;
+  try{ await DB.collection('ls_ocorrencias').doc(id).set(campos,{merge:true}); }
+  catch(e){ console.warn('ocGravar',e); alert('Não consegui salvar agora.'); }
+}
+async function ocSalvarCampo(id, campo){
+  if(semPermissao()) return;
+  const t=document.getElementById('oc-ed-'+id);
+  const texto=((t&&t.value)||'').trim();
+  const c={}; c[campo]= texto
+    ? {texto:texto, por:(window._usuario||''), em:new Date().toISOString()}
+    : null;                                     // apagou o texto: o bloco volta a ficar em aberto
+  await ocGravar(id, c);
+}
+async function ocDarCiencia(id){
+  if(semPermissao()) return;
+  const eu=window._usuario||''; if(!eu) return;
+  const o=(window._ocorrencias||[]).filter(function(x){ return x.id===id; })[0];
+  const c=Object.assign({}, (o&&o.ciencia)||{});
+  c[eu]=new Date().toISOString();
+  await ocGravar(id, {ciencia:c});
 }
 async function excluirOcorrencia(id){
   if(semPermissao()) return;
